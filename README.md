@@ -1,4 +1,5 @@
 # Planning modules:
-## Sequential Planner
-## Concurrent Planner
+
+##  Sequential Planner
+##  Concurrent Planner
 
