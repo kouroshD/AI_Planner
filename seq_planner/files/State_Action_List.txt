@@ -1,0 +1,17 @@
+screwedPlate_finalPos UnGraspRight HandOverLeftPoint7 HandOverLeftPoint8 UnGraspLeft HandOver2InitialPos
+driver_finalPos  PutDown StopRobot
+plate_screw_driver_screwPos PickUp Screwing
+plate_screw_screwPos1 PickUp PutDown
+plate_screwPos UnGrasp HandOverRightPoint1 HandOverRightPoint2 GraspRight HandOverRightPoint3 HandOverPoint4 HandOverLeftPoint5 GraspLeft BimanKeepPlate
+plate_screw_initialPos PickUp ScrewingInitial PutDown
+plate_initialPos
+screw_initialPos HoldOn
+driver_initialPos
+plate_screw_screwPos2 UnGrasp HandOver2InitialPos HandOverRightPoint1 HandOverRightPoint2 GraspRight HandOverRightPoint3 HandOverPoint4 HandOverLeftPoint5 GraspLeft
+h1
+h2
+h3
+h4
+h5
+h6
+h8

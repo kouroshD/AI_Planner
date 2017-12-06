@@ -1,0 +1,26 @@
+PickUp simple single 1 Human 
+Screwing simple single 1 Human 
+PutDown simple single 1 Human
+ScrewingInitial simple single 1 Human
+Stop simple all 2 LeftArm RightArm
+StopLeft simple single 1 LeftArm
+StopRight simple single 1 RightArm
+Grasp simple all 2 LeftArm RightArm
+GraspLeft simple single 1 LeftArm
+GraspRight simple single 1 RightArm
+UnGraspLeft simple single 1 LeftArm
+UnGraspRight simple single 1 RightArm
+UnGrasp simple all 2 LeftArm RightArm
+HoldOn simple all 2 LeftArm RightArm
+Go_point1 simple single 1 RightArm
+Go_point2 simple single 1 RightArm
+Go_point3 simple single 1 RightArm
+Go_point4 simple single 1 LeftArm
+Go_point5 simple single 1 RightArm
+Go_point6 simple single 1 LeftArm
+Go_point7 simple single 1 RightArm
+Go_point8 simple single 1 LeftArm
+Go_point9 simple single 1 RightArm
+Go_point10 simple single 1 LeftArm
+Go_point11 simple biman 2 LeftArm RightArm
+ObstacleAvoidanceTask simple all 2 LeftArm LeftArm

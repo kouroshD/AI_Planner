@@ -21,6 +21,7 @@
 #include <andor_msgs/Hyperarc.h>
 #include <andor_msgs/Node.h>
 #include <boost/shared_ptr.hpp>
+#include "seq_planner_class.hpp"
 
 #define RST  "\x1B[0m"
 #define KBLU  "\x1B[34m"
@@ -38,11 +39,23 @@ int main(int argc, char **argv)
 	// ROS parameters definitions:
 	ros::init(argc, argv, "seq_planner");
 	ros::NodeHandle nh;
-	ros::spin();
+
 	int hri_ros_freq=80;//hz
 	ros::Rate loop_rate(hri_ros_freq);
 
-	// AND/OR graph service definition:
+	// planner class initialization:
+	const char* home=getenv("HOME");
+	string action_def_path(home);
+	action_def_path=action_def_path+"/catkin_ws/src/AI_PLANNER/seq_planner/files/Action_Definition_List.txt";
+//	cout<<action_def_path<<endl;
+	string state_action_path(home);
+	state_action_path=state_action_path+"/catkin_ws/src/AI_PLANNER/seq_planner/files/State_Action_List.txt";
+
+	seq_planner_class plan_obj(action_def_path, state_action_path);
+	vector<vector<string>> gen_Feasible_state_list;
+	vector<int> gen_Feasible_stateCost_list;
+
+	// ANDOR graph service definition:
 
 	ros::ServiceClient andorSRV_client = nh.serviceClient<andor_msgs::andorSRV>("andorService");
 	andor_msgs::andorSRV andor_srv;
@@ -51,12 +64,75 @@ int main(int argc, char **argv)
 	int responsibleAgent=0; //! it defines which agent is responsible at each moment, 0: human, 1: robot (in this example we have two agents)
 	int ack_agent=0;		//! it shows which agent returns an acknowledgment at this time:( 0: human, 1: robot )
 
+	/*! ANDOR graph update flags and parameters*/
+	bool isGraphSolved=false; // if it is true the hri task is done
 
 	int count=0;
 	while (ros::ok())
 	{
 
+		if (plan_obj.updateAndor==true)
+		{
+			andor_srv.request.graphName="screwing_task";
+			if(plan_obj.nodeSolved==true)
+			{
+				for(int i=0; i<plan_obj.Solved_node_list.size(); i++)
+				{
+					andor_srv.request.solvedNodes.push_back(plan_obj.Solved_node_list[i]);
+				}
+				plan_obj.Solved_node_list.clear();
+				plan_obj.nodeSolved=false;
+			}
 
+			if(plan_obj.haSolved==true)
+			{
+				for(int i=0; i<plan_obj.Solved_hyperarc_list.size(); i++)
+				{
+					andor_srv.request.solvedHyperarc.push_back(plan_obj.Solved_hyperarc_list[i]);
+				}
+				plan_obj.Solved_hyperarc_list.clear();
+				plan_obj.haSolved=false;
+			}
+
+			if (andorSRV_client.call(andor_srv))
+			{
+				isGraphSolved=andor_srv.response.graphSolved;
+				if(isGraphSolved==true)
+				{
+					cout<<	FGRN("The Graph is Done")<<endl;
+					return 1;
+				}
+				else
+				{
+
+					for (int i=0;i<andor_srv.response.feasibleNodes.size();i++)
+					{
+						vector<string>Feasible_state;
+						string feasbible_state_name=andor_srv.response.feasibleNodes[i].nodeName;
+						Feasible_state.push_back(feasbible_state_name);
+						Feasible_state.push_back("Node");
+						int cost=andor_srv.response.feasibleNodes[i].nodeCost;
+						gen_Feasible_stateCost_list.push_back(cost);
+						gen_Feasible_state_list.push_back(Feasible_state);
+					}
+					for (int i=0;i<andor_srv.response.feasibleHyperarcs.size();i++)
+					{
+						vector<string>Feasible_state;
+						string feasbible_state_name=andor_srv.response.feasibleHyperarcs[i].hyperarcName;
+						Feasible_state.push_back(feasbible_state_name);
+						Feasible_state.push_back("Hyperarc");
+						int cost=andor_srv.response.feasibleHyperarcs[i].hyperarcCost;
+						gen_Feasible_stateCost_list.push_back(cost);
+						gen_Feasible_state_list.push_back(Feasible_state);
+					}
+
+					plan_obj.GenerateStateActionTable(gen_Feasible_state_list,gen_Feasible_stateCost_list);
+
+				}
+
+			}
+			plan_obj.updateAndor=false;
+		}
 
 
 

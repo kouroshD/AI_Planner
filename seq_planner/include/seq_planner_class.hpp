@@ -1,6 +1,16 @@
 #include <iostream>
 #include <stdio.h>
 #include <ros/ros.h>
+#include <boost/algorithm/string.hpp>
+//#include <std_msgs/Char.h>
+//#include <std_msgs/String.h>
+#include <string>
+//#include <iterator>
+//#include <sstream>
+#include <fstream>
+#include <andor_msgs/andorSRV.h>
+#include <andor_msgs/Hyperarc.h>
+#include <andor_msgs/Node.h>
 
 #define RST  "\x1B[0m"
 #define KBLU  "\x1B[34m"
@@ -13,25 +23,59 @@
 
 using namespace std;
 
+class action{
+public:
+	string name;
+	vector<string> agents; // the agents who "can" perform the action
+	string actionType; // if it is simple, or complex (an andor graph)
+	string actionMode; // if the action should be performed by single agent, all the agents, or bimanually by the robots
+	action(void)
+	{
+		name="";
+		actionType="";
+		actionMode="";
+	};
+	~action(){};
+};
+//****************************
+
+
 class seq_planner_class{
 public:
 
 	void SetFeasibleStates(void);
-
+	seq_planner_class(string actionDefinitionPath, string stateactionPath);
+	~seq_planner_class();
+	void GenerateStateActionTable(vector<vector<string>> gen_Feasible_state_list, vector<int> gen_Feasible_stateCost_list);
+	bool updateAndor; // it is true if we want to update the andor in here, or in andor graph module.
+	bool nodeSolved;// it is true if we have a solved node, so we should update the andor graph.
+	bool haSolved;// it is true if we have a solved hyperarc, so we should update the andor graph.
+    vector<string> Solved_node_list; // the list of all the solved node at the current moment
+    vector<string> Solved_hyperarc_list;// the list of all the solved hyperarc at the current moment
 
 
 private:
 
 	//! the length of the vector is equal to number of agents, if the agent[i] is responsible is true, otherwise it is false;
 	vector<bool> responsible_agent;
+	vector<action> action_Definition_List;    // list of definition of the actions
+    vector<vector<string>> Full_State_action_list; // list of all the actions for all the states
 
+    vector<vector<string>> Feasible_states_actions_table;     // table of the feasible state-actions names
+    vector<vector<bool>> Feasible_states_actions_progress;     // table of the feasible state-actions done(true)/not done (false)actions
+    vector<vector<string>> Feasible_states_Names; // the name of the feasible states , type of it :nodes / hyperacs
+    vector<int> Feasible_States_cost; // weight for each feasible state
+    vector<int> Feasible_states_isFeasible;// if still the Feasible given by the and/or graph is feasible (true) or not (false) ?
 	int optimal_state;
 
 	void CallBackHumanAck(void);
 	void CallBackRobotAck(void);
 	void UpdateActionStateTable(void);
+	void SetActionDefinitionList(string actionDefinitionPath);
+	void SetStateActionList(string stateActionPath);
 
-
-
+	void UpdateStateActionTable(void);
+	void CheckStateActionTable(void);
+	void FindNextAction(void);
 
 };
