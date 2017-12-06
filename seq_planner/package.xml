@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<package>
+  <name>seq_planner</name> 
+  <version>0.0.1</version>
+  <description> andor Package  </description> 
+  <maintainer email="kourosh.darvish@gmail.com">Kourosh Darvish </maintainer>
+  <license>BSD</license>
+  <url type="repository">
+  https://github.com/kouroshD
+  </url>
+  <author>KouroshDarvish</author>
+  <!-- The *_depend tags are used to specify dependencies -->
+  <!-- Dependencies can be catkin packages or system dependencies -->
+  <buildtool_depend>catkin</buildtool_depend>  
+  
+  <build_depend>rospy</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>baxter_core_msgs</build_depend>
+  <build_depend>message_generation</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>andor_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+
+<!--  <build_depend>message_runtime</build_depend> -->
+  <!--<build_depend>geometry_msgs</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>actionlib</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>control_msgs</build_depend>
+  <build_depend>trajectory_msgs</build_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+  <build_depend>baxter_interface</build_depend>-->
+
+  <run_depend>rospy</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>baxter_core_msgs</run_depend>
+  <run_depend>message_generation</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>andor_msgs</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+<!--  <run_depend>message_runtime</run_depend> -->
+
+  <!--<run_depend>actionlib</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>control_msgs</run_depend>
+  <run_depend>trajectory_msgs</run_depend>
+  <run_depend>cv_bridge</run_depend>
+  <run_depend>dynamic_reconfigure</run_depend>
+  <run_depend>baxter_core_msgs</run_depend>
+  <run_depend>baxter_interface</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>std_msgs</run_depend>-->
+
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+
+  </export>
+</package>

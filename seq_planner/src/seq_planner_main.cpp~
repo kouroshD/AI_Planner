@@ -1,0 +1,38 @@
+//===============================================================================//
+// Name			   : andor_main.cpp
+// Author(s)	 :  Kourosh.darvish@edu.unige.it
+// Affiliation : University of Genova, Italy - dept. DIBRIS
+// Version		 : 1.0
+// Description : Main program using the AND-OR graph library
+//===============================================================================//
+
+#include <iostream>
+#include <ros/ros.h>
+#include "std_msgs/String.h"
+#include <andor_msgs/andorSRV.h>
+#include <andor_msgs/Hyperarc.h>
+#include <andor_msgs/Node.h>
+#include <boost/shared_ptr.hpp>
+
+#define RST  "\x1B[0m"
+#define KBLU  "\x1B[34m"
+#define KRED  "\x1B[31m"
+#define KGRN  "\x1B[32m"
+#define FBLU(x) KBLU x RST
+#define FRED(x) KRED x RST
+#define FGRN(x) KGRN x RST
+#define BOLD(x) "\x1B[1m" x RST
+
+using namespace std;
+
+int main(int argc, char **argv)
+{
+
+	ros::init(argc, argv, "seq_planner");
+	ros::NodeHandle nh;
+
+	ros::spin();
+	return 1;
+
+}   
+
