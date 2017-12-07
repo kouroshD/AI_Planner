@@ -22,5 +22,5 @@ Go_point7 simple single 1 RightArm
 Go_point8 simple single 1 LeftArm
 Go_point9 simple single 1 RightArm
 Go_point10 simple single 1 LeftArm
-Go_point11 simple biman 2 LeftArm RightArm
+Go_point11 simple joint 2 LeftArm RightArm
 ObstacleAvoidanceTask simple all 2 LeftArm LeftArm

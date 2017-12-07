@@ -40,8 +40,8 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "seq_planner");
 	ros::NodeHandle nh;
 
-	int hri_ros_freq=80;//hz
-	ros::Rate loop_rate(hri_ros_freq);
+
+	ros::Rate loop_rate(80);
 
 	// planner class initialization:
 	const char* home=getenv("HOME");
@@ -71,11 +71,15 @@ int main(int argc, char **argv)
 	while (ros::ok())
 	{
 
+//		cout<<100<<endl;
+		cout<<100<<" "<<plan_obj.updateAndor<<" "<<plan_obj.nodeSolved <<" "<<plan_obj.haSolved <<endl;
 		if (plan_obj.updateAndor==true)
 		{
+			cout<<101<<endl;
 			andor_srv.request.graphName="screwing_task";
 			if(plan_obj.nodeSolved==true)
 			{
+				cout<<102<<endl;
 				for(int i=0; i<plan_obj.Solved_node_list.size(); i++)
 				{
 					andor_srv.request.solvedNodes.push_back(plan_obj.Solved_node_list[i]);
@@ -96,6 +100,7 @@ int main(int argc, char **argv)
 
 			if (andorSRV_client.call(andor_srv))
 			{
+				cout<<103<<endl;
 				isGraphSolved=andor_srv.response.graphSolved;
 				if(isGraphSolved==true)
 				{
@@ -104,9 +109,11 @@ int main(int argc, char **argv)
 				}
 				else
 				{
+					cout<<104<<endl;
 
 					for (int i=0;i<andor_srv.response.feasibleNodes.size();i++)
 					{
+						cout<<105<<endl;
 						vector<string>Feasible_state;
 						string feasbible_state_name=andor_srv.response.feasibleNodes[i].nodeName;
 						Feasible_state.push_back(feasbible_state_name);
@@ -117,6 +124,7 @@ int main(int argc, char **argv)
 					}
 					for (int i=0;i<andor_srv.response.feasibleHyperarcs.size();i++)
 					{
+						cout<<106<<endl;
 						vector<string>Feasible_state;
 						string feasbible_state_name=andor_srv.response.feasibleHyperarcs[i].hyperarcName;
 						Feasible_state.push_back(feasbible_state_name);
@@ -125,13 +133,16 @@ int main(int argc, char **argv)
 						gen_Feasible_stateCost_list.push_back(cost);
 						gen_Feasible_state_list.push_back(Feasible_state);
 					}
-
+					plan_obj.updateAndor=false;
 					plan_obj.GenerateStateActionTable(gen_Feasible_state_list,gen_Feasible_stateCost_list);
+					gen_Feasible_state_list.clear();
+					gen_Feasible_stateCost_list.clear();
+
 
 				}
 
 			}
-			plan_obj.updateAndor=false;
+
 		}
 
 

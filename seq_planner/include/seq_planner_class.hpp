@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <ros/ros.h>
 #include <boost/algorithm/string.hpp>
-//#include <std_msgs/Char.h>
-//#include <std_msgs/String.h>
+#include <std_msgs/Char.h>
+#include <std_msgs/String.h>
 #include <string>
 //#include <iterator>
 //#include <sstream>
@@ -28,7 +28,7 @@ public:
 	string name;
 	vector<string> agents; // the agents who "can" perform the action
 	string actionType; // if it is simple, or complex (an andor graph)
-	string actionMode; // if the action should be performed by single agent, all the agents, or bimanually by the robots
+	string actionMode; // if the action should be performed by single agent, all the agents, or jointly between agents
 	action(void)
 	{
 		name="";
@@ -36,6 +36,45 @@ public:
 		actionMode="";
 	};
 	~action(){};
+	void Print(void){
+		cout<<"******** actions info *********"<<endl;
+		cout<<"name: "<<name<<endl;
+		cout<<"actionType: "<<actionType<<endl;
+		cout<<"actionMode: "<<actionMode<<endl;
+		for (int i=0;i<agents.size();i++)
+			cout<<agents[i]<<" ";
+		cout<<endl;
+
+	};
+};
+//****************************
+class agent{
+public:
+	string name;
+	string lastAssignedAction;
+	string lastActionAck;
+	bool allowToChangePath;
+	bool isBusy;
+	bool isSuccessfullyDone;
+
+	agent(void)
+	{
+		name="";
+		lastAssignedAction="";
+		lastActionAck="";
+		allowToChangePath=false;
+		isBusy=false;
+		isSuccessfullyDone=false;
+	};
+	~agent(){};
+	void Print(void){
+		cout<<"******** agent info *********"<<endl;
+		cout<<name<<name<<endl;
+		cout<<"lastAssignedAction: "<<lastAssignedAction<<endl;
+		cout<<"lastActionAck: "<<lastActionAck<<endl;
+		cout<<"allowToChangePath: "<<allowToChangePath<<endl;
+		cout<<"isBusy: "<<isBusy<<endl;
+	};
 };
 //****************************
 
@@ -43,7 +82,6 @@ public:
 class seq_planner_class{
 public:
 
-	void SetFeasibleStates(void);
 	seq_planner_class(string actionDefinitionPath, string stateactionPath);
 	~seq_planner_class();
 	void GenerateStateActionTable(vector<vector<string>> gen_Feasible_state_list, vector<int> gen_Feasible_stateCost_list);
@@ -57,7 +95,7 @@ public:
 private:
 
 	//! the length of the vector is equal to number of agents, if the agent[i] is responsible is true, otherwise it is false;
-	vector<bool> responsible_agent;
+	vector<agent> agents;
 	vector<action> action_Definition_List;    // list of definition of the actions
     vector<vector<string>> Full_State_action_list; // list of all the actions for all the states
 
@@ -67,15 +105,39 @@ private:
     vector<int> Feasible_States_cost; // weight for each feasible state
     vector<int> Feasible_states_isFeasible;// if still the Feasible given by the and/or graph is feasible (true) or not (false) ?
 	int optimal_state;
+	int next_action_index;
+	int agent_update;// the agent number who arrives the latest ack.
 
-	void CallBackHumanAck(void);
-	void CallBackRobotAck(void);
-	void UpdateActionStateTable(void);
+	ros::NodeHandle nh;
+	ros::Subscriber subHumanActionAck;
+	ros::Subscriber subRobotActionAck;
+	ros::Publisher pubRobotCommand = nh.advertise<std_msgs::String>("hri_robot_command",80);
+
+
+	void CallBackHumanAck(const std_msgs::String::ConstPtr& msg);
+	void CallBackRobotAck(const std_msgs::String::ConstPtr& msg);
+	void PublishHumanAction(void);
+	void PublishRobotActionLeftArm(void);
+	void PublishRobotActionRightArm(void);
+	void PublishRobotActionJointly(void);
+
 	void SetActionDefinitionList(string actionDefinitionPath);
 	void SetStateActionList(string stateActionPath);
+	void SetAgentsList(void);
 
 	void UpdateStateActionTable(void);
-	void CheckStateActionTable(void);
 	void FindNextAction(void);
+	void FindResponisibleAgent(void);
+	void CheckStateExecution(void);
+};
 
+//****************************************
+void Print2dVec(vector<vector<string>> vec ){
+	cout<<"*** print Vector ***"<<endl;
+	for(int i=0;i<vec.size();i++)
+	{
+		for(int j=0;j<vec[i].size();j++)
+			cout<<vec[i][j]<<" ";
+		cout<<endl;
+	}
 };
