@@ -239,8 +239,11 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 		}
 	}
 	Print2dVec(Feasible_states_Names);
-//	Print2dVec(Feasible_states_actions_progress);
+	Print2dVec(Feasible_States_cost);
+	Print2dVec(Feasible_states_actions_progress);
 	Print2dVec(Feasible_states_actions_table);
+
+
 
 	CheckStateExecution();
 
@@ -256,6 +259,7 @@ void seq_planner_class::CheckStateExecution(){
 		cout<<FRED("The solve nodes or hyperarc lists are not empty!" )<<endl;
 	}
 
+	cout<<Feasible_states_actions_progress.size()<<endl;
 	for(int i=0;i<Feasible_states_actions_progress.size();i++)
 	{
 		cout<<303<<endl;
@@ -324,7 +328,7 @@ void seq_planner_class::SetActionDefinitionList(string actionDefinitionPath){
 	std::vector<std::string> line_list;
 	string line;
 	action actionDef;
-	//    cout<<file_path_ifStr.is_open()<<endl;
+	    cout<<file_path_ifStr.is_open()<<endl;
 	if (file_path_ifStr.is_open()){
 		while(getline(file_path_ifStr,line)){
 			boost::split(line_list, line, boost::is_any_of(delim_type));
@@ -371,11 +375,14 @@ void seq_planner_class::SetAgentsList(void){
 
 void seq_planner_class::SetStateActionList(string stateActionPath){
 	cout<<"seq_planner_class::SetStateActionList"<<endl;
+//	cout<<stateActionPath<<endl;
+
 	cout<<"SetStateActionList"<<endl;
 	ifstream file_path_ifStr(stateActionPath.c_str());
 	std::vector<std::string> line_list;
 	string line;
 	string delim_type=" ";
+	cout<<"file_path_ifStr.is_open(): "<<file_path_ifStr.is_open()<<endl;
 	if (file_path_ifStr.is_open()){
 		while(getline(file_path_ifStr,line)){
 			boost::split(line_list, line, boost::is_any_of(delim_type));

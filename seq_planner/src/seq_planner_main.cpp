@@ -47,10 +47,9 @@ int main(int argc, char **argv)
 	const char* home=getenv("HOME");
 	string action_def_path(home);
 	action_def_path=action_def_path+"/catkin_ws/src/AI_PLANNER/seq_planner/files/Action_Definition_List.txt";
-//	cout<<action_def_path<<endl;
 	string state_action_path(home);
 	state_action_path=state_action_path+"/catkin_ws/src/AI_PLANNER/seq_planner/files/State_Action_List.txt";
-
+//	state_action_path="/home/kourosh/catkin_ws/src/AI_Planner/seq_planner/files/State_Action_List.txt";
 	seq_planner_class plan_obj(action_def_path, state_action_path);
 	vector<vector<string>> gen_Feasible_state_list;
 	vector<int> gen_Feasible_stateCost_list;
@@ -72,7 +71,7 @@ int main(int argc, char **argv)
 	{
 
 //		cout<<100<<endl;
-		cout<<100<<" "<<plan_obj.updateAndor<<" "<<plan_obj.nodeSolved <<" "<<plan_obj.haSolved <<endl;
+//		cout<<100<<" "<<plan_obj.updateAndor<<" "<<plan_obj.nodeSolved <<" "<<plan_obj.haSolved <<endl;
 		if (plan_obj.updateAndor==true)
 		{
 			cout<<101<<endl;
@@ -147,7 +146,7 @@ int main(int argc, char **argv)
 
 
 
-		if (count==0){	usleep(0.5e6); }
+//		if (count==0){	usleep(0.5e6); }
 		loop_rate.sleep();
 		count++;
 		ros::spinOnce();

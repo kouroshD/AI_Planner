@@ -133,11 +133,31 @@ private:
 
 //****************************************
 void Print2dVec(vector<vector<string>> vec ){
-	cout<<"*** print Vector ***"<<endl;
+	cout<<"*** print Vector ::string ***"<<endl;
 	for(int i=0;i<vec.size();i++)
 	{
 		for(int j=0;j<vec[i].size();j++)
 			cout<<vec[i][j]<<" ";
+		cout<<endl;
+	}
+};
+
+void Print2dVec(vector<vector<bool>> vec ){
+	cout<<"*** print Vector ::bool ***"<<endl;
+	for(int i=0;i<vec.size();i++)
+	{
+		for(int j=0;j<vec[i].size();j++)
+			cout<<vec[i][j]<<" ";
+		cout<<endl;
+	}
+};
+
+void Print2dVec(vector<int> vec ){
+	cout<<"*** print Vector ::int ***"<<endl;
+	for(int i=0;i<vec.size();i++)
+	{
+//		for(int j=0;j<vec[i].size();j++)
+		cout<<vec[i]<<" ";
 		cout<<endl;
 	}
 };
