@@ -8,6 +8,11 @@ seq_planner_class::seq_planner_class(string actionDefinitionPath,string stateAct
 
 	SetActionDefinitionList(actionDefinitionPath);
 	SetStateActionList( stateActionPath);
+	SetAgentsList();
+	cout<<"*******************************************"<<endl;
+	for(int i=0;i<Full_State_action_list.size();i++)
+		Full_State_action_list[i].Print();
+
 	updateAndor=true;
 	nodeSolved=false;
 	haSolved=false;
@@ -19,7 +24,7 @@ seq_planner_class::~seq_planner_class(){
 	cout<<"seq_planner_class::~seq_planner_class"<<endl;
 }
 
-void seq_planner_class::UpdateStateActionTable(void){
+void seq_planner_class::UpdateStateActionTable(int agent_update){
 	cout<<"seq_planner_class::UpdateStateActionTable"<<endl;
 	/*! when an acknowledgment arrive from agents:
 		 1- Search for action in state-action table
@@ -150,12 +155,14 @@ void seq_planner_class::FindNextAction(){
 
 void seq_planner_class::FindResponisibleAgent(void){
 	cout<<"seq_planner_class::FindResponisibleAgent"<<endl;
+
 	for(int i=0;i<action_Definition_List.size();i++)
 	{
 		if(Feasible_states_actions_table[optimal_state][next_action_index]==action_Definition_List[i].name)
 		{
 			if(action_Definition_List[i].actionMode=="single")
 			{
+				cout<<404<<endl;
 //				for(int j=0;j<action_Definition_List[i].agents.size();j++)
 //				{
 //				// here	should call another function to check the cost of performing the action by each agent.
@@ -196,22 +203,28 @@ void seq_planner_class::FindResponisibleAgent(void){
 				agents[2].isBusy=true;
 				PublishRobotActionLeftArm();
 				PublishRobotActionRightArm();
-
-
 			}
 		}
 	}
-
 }
 
 void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feasible_state_list, vector<int> gen_Feasible_stateCost_list){
 	cout<<"seq_planner_class::GenerateStateActionTable"<<endl;
+	if(Feasible_State_Action_Table.size()>0)
+		Feasible_State_Action_Table.clear();
+	offline_state_action temp_obj;
+
 	Feasible_states_Names.clear();
 	Feasible_States_cost.clear();
 	Feasible_states_actions_table.clear();
 	Feasible_states_actions_progress.clear();
 	Feasible_states_isFeasible.clear();
 
+	for(int m=0; m<Feasible_States_cost.size();m++)
+	{
+		temp_obj.state_name=gen_Feasible_state_list[m][0];
+
+	}
 	Feasible_states_Names=gen_Feasible_state_list;
 	Feasible_States_cost=gen_Feasible_stateCost_list;
 
@@ -222,14 +235,14 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 		for (int j=0;j<Full_State_action_list.size();j++)
 		{
 
-			if (Feasible_states_Names[i][0]==Full_State_action_list[j][0])
+			if (Feasible_states_Names[i][0]==Full_State_action_list[j].state_name)
 			{
 				vector<string> Feasible_State_action_row;
 				vector<bool> Feasible_states_actions_progress_row;
 
-				for (int k=1;k<Full_State_action_list[j].size();k++) // check if k should start from 0 or 1 ?
+				for (int k=0;k<Full_State_action_list[j].actionsList.size();k++) // check if k should start from 0 or 1 ?
 				{
-					Feasible_State_action_row.push_back(Full_State_action_list[j][k]);
+					Feasible_State_action_row.push_back(Full_State_action_list[j].actionsList[k]);
 					Feasible_states_actions_progress_row.push_back(false);
 
 				}
@@ -252,71 +265,83 @@ void seq_planner_class::CheckStateExecution(){
 	// check for all the actions in all rows of state-action table:
 	// if a row is empty OR if all the actions row is done (true flag):
 	//that state is solved, Delete all the vector, u
+	// if there is not update for the andor graph, find the next action for the human or robot to be solved
 	cout<<"seq_planner_class::CheckStateExecution"<<endl;
-	cout<<301<<endl;
+//	cout<<301<<endl;
 	if(!Solved_node_list.empty() || !Solved_hyperarc_list.empty()){
-		cout<<302<<endl;
+//		cout<<302<<endl;
 		cout<<FRED("The solve nodes or hyperarc lists are not empty!" )<<endl;
 	}
+	if(Feasible_states_actions_progress.size()==0){
+		cout<<FRED("There is no feasible state to be checked" )<<endl;
+		exit(1);
+	}
+
 
 	cout<<Feasible_states_actions_progress.size()<<endl;
 	for(int i=0;i<Feasible_states_actions_progress.size();i++)
 	{
-		cout<<303<<endl;
+//		cout<<303<<endl;
 		if (Feasible_states_actions_progress[i].size()==0)
 		{
-			cout<<304<<endl;
+//			cout<<304<<endl;
 			updateAndor=true;
 			if (Feasible_states_Names[i][1]=="Node")
 			{
-				cout<<305<<endl;
+//				cout<<305<<endl;
 				Solved_node_list.push_back(Feasible_states_Names[i][0]);
 				nodeSolved=true;
-				cout<<3052<<endl;
+//				cout<<3052<<endl;
 			}
 			if (Feasible_states_Names[i][1]=="Hyperarc")
 			{
-				cout<<306<<endl;
+//				cout<<306<<endl;
 				Solved_hyperarc_list.push_back(Feasible_states_Names[i][0]);
 				haSolved=true;
 			}
 		}
 		else
 		{
-			cout<<307<<endl;
+//			cout<<307<<endl;
 			int counter=0;
 			for(int j=0;j<Feasible_states_actions_progress[i].size();j++)
 			{
-				cout<<308<<endl;
+//				cout<<308<<endl;
 
 				if (Feasible_states_actions_progress[i][j]==true)
 				{
-					cout<<309<<endl;
+//					cout<<309<<endl;
 					counter++;
 				}
 			}
 			if (Feasible_states_actions_progress[i].size()==counter)
 			{
-				cout<<310<<endl;
+//				cout<<310<<endl;
 				updateAndor=true;
 				if (Feasible_states_Names[i][1]=="Node")
 				{
-					cout<<311<<endl;
+//					cout<<311<<endl;
 					Solved_node_list.push_back(Feasible_states_Names[i][0]);
 					nodeSolved=true;
 				}
 				if (Feasible_states_Names[i][1]=="Hyperarc")
 				{
-					cout<<312<<endl;
+//					cout<<312<<endl;
 					Solved_hyperarc_list.push_back(Feasible_states_Names[i][0]);
 					haSolved=true;
 				}
 			}
 		}
 	}
-	cout<<updateAndor<<endl;
-	cout<<nodeSolved<<endl;
-	cout<<haSolved<<endl;
+	if(updateAndor==false)
+	{
+		FindNextAction();
+	}
+
+
+//	cout<<updateAndor<<endl;
+//	cout<<nodeSolved<<endl;
+//	cout<<haSolved<<endl;
 }
 
 void seq_planner_class::SetActionDefinitionList(string actionDefinitionPath){
@@ -352,25 +377,26 @@ void seq_planner_class::SetActionDefinitionList(string actionDefinitionPath){
 	//    }
 }
 void seq_planner_class::SetAgentsList(void){
-	cout<<"seq_planner_class::SetAgentsList"<<endl;
+	cout<<FRED("seq_planner_class::SetAgentsList")<<endl;
 	//agent[0]: human
 	agent tempAgent0;
 	tempAgent0.allowToChangePath=true;
 	tempAgent0.name="Human";
 	agents.push_back(tempAgent0);
-	tempAgent0.~agent();
 
 	//agent[1]: LeftArm
 	agent tempAgent1;
 	tempAgent1.name="LeftArm";
 	agents.push_back(tempAgent1);
-	tempAgent1.~agent();
 
 	//agent[2]: RightArm
 	agent tempAgent2;
 	tempAgent2.name="RightArm";
 	agents.push_back(tempAgent2);
-	tempAgent2.~agent();
+
+	for(int k=0;k<agents.size();k++)
+		agents[k].Print();
+
 }
 
 void seq_planner_class::SetStateActionList(string stateActionPath){
@@ -379,14 +405,36 @@ void seq_planner_class::SetStateActionList(string stateActionPath){
 
 	cout<<"SetStateActionList"<<endl;
 	ifstream file_path_ifStr(stateActionPath.c_str());
-	std::vector<std::string> line_list;
+	vector<string> line_list;
+	vector<string> action_responsible;
 	string line;
 	string delim_type=" ";
+	string responsible_delim_type="_";
+	offline_state_action temp_obj;
+
 	cout<<"file_path_ifStr.is_open(): "<<file_path_ifStr.is_open()<<endl;
-	if (file_path_ifStr.is_open()){
-		while(getline(file_path_ifStr,line)){
+	if (file_path_ifStr.is_open())
+	{
+		while(getline(file_path_ifStr,line))
+		{
 			boost::split(line_list, line, boost::is_any_of(delim_type));
-			Full_State_action_list.push_back(line_list);
+//			Full_State_action_list.push_back(line_list);
+			temp_obj.state_name=line_list[0];
+			for(int i=1;i<line_list.size();i++)
+			{
+				boost::split(action_responsible, line_list[i], boost::is_any_of(responsible_delim_type));
+
+				temp_obj.actionsList.push_back(action_responsible[0]);
+				if(action_responsible.size()==2)
+					temp_obj.actionsResponsible.push_back(action_responsible[1]);
+				else if(action_responsible.size()==1)
+				{
+					temp_obj.actionsResponsible.push_back("Unknown");
+				}
+				else
+				{cout<<"Error in state_action text file"<<endl;}
+			}
+			Full_State_action_list.push_back(temp_obj);
 		}
 		file_path_ifStr.close();
 	}
@@ -396,7 +444,7 @@ void seq_planner_class::SetStateActionList(string stateActionPath){
 //			cout<<Full_State_action_list[m][n]<<" ";
 //		cout<<endl;
 //	}
-	Print2dVec(Full_State_action_list);
+//	Print2dVec(Full_State_action_list);
 }
 
 void seq_planner_class::CallBackHumanAck(const std_msgs::String::ConstPtr& msg){
@@ -406,7 +454,8 @@ void seq_planner_class::CallBackHumanAck(const std_msgs::String::ConstPtr& msg){
 	agents[0].isBusy=false;
 	agents[0].lastActionAck=recognized_human_action;
 	agents[0].isSuccessfullyDone=true;
-	agent_update=0;
+	int agent_update=0;
+	UpdateStateActionTable(agent_update);
 }
 
 void seq_planner_class::CallBackRobotAck(const std_msgs::String::ConstPtr& msg){
@@ -415,39 +464,89 @@ void seq_planner_class::CallBackRobotAck(const std_msgs::String::ConstPtr& msg){
 	ROS_INFO("I heard Robot Ack: [%s]", msg->data.c_str());
 	string robot_action_ack;
 	robot_action_ack=msg->data.c_str();
+	int agent_update;
 
 	if (robot_action_ack=="GoalReachedLeft")
 	{
 		agents[1].isBusy=false;
 		agents[1].lastActionAck=agents[1].lastAssignedAction;
-		agents[0].isSuccessfullyDone=true;
+		agents[1].isSuccessfullyDone=true;
 		agent_update=1;
+		UpdateStateActionTable(agent_update);
+	}
+	else if (robot_action_ack=="GoalNotReachedLeft")
+	{
+		agents[1].isBusy=false;
+		agents[1].lastActionAck=agents[1].lastAssignedAction;
+		agents[1].isSuccessfullyDone=false;
+		agent_update=1;
+		UpdateStateActionTable(agent_update);
 	}
 	else if (robot_action_ack=="GoalReachedRight")
 	{
 		agents[2].isBusy=false;
 		agents[2].lastActionAck=agents[2].lastAssignedAction;
-		agents[0].isSuccessfullyDone=true;
+		agents[2].isSuccessfullyDone=true;
 		agent_update=2;
+		UpdateStateActionTable(agent_update);
+	}
+	else if (robot_action_ack=="GoalNotReachedRight")
+	{
+		agents[2].isBusy=false;
+		agents[2].lastActionAck=agents[2].lastAssignedAction;
+		agents[2].isSuccessfullyDone=false;
+		agent_update=2;
+		UpdateStateActionTable(agent_update);
 	}
 	else if (robot_action_ack=="GoalReachedBiManual")
 	{
 		agents[1].isBusy=false;
 		agents[1].lastActionAck=agents[1].lastAssignedAction;
+		agents[1].isSuccessfullyDone=true;
 		agents[2].isBusy=false;
 		agents[2].lastActionAck=agents[2].lastAssignedAction;
-		agents[0].isSuccessfullyDone=true;
+		agents[2].isSuccessfullyDone=true;
 		agent_update=1; // in this case we will update both representation later
+		UpdateStateActionTable(agent_update);
+	}
+	else if (robot_action_ack=="GoalNotReachedBiManual")
+	{
+		agents[1].isBusy=false;
+		agents[1].lastActionAck=agents[1].lastAssignedAction;
+		agents[1].isSuccessfullyDone=false;
+		agents[2].isBusy=false;
+		agents[2].lastActionAck=agents[2].lastAssignedAction;
+		agents[2].isSuccessfullyDone=false;
+		agent_update=1; // in this case we will update both representation later
+		UpdateStateActionTable(agent_update);
 	}
 	else if (robot_action_ack=="RobotTaskReached")
 	{// maybe can be commented!
 
 		agents[1].isBusy=false;
 		agents[1].lastActionAck=agents[1].lastAssignedAction;
+		agents[1].isSuccessfullyDone=true;
 		agents[2].isBusy=false;
 		agents[2].lastActionAck=agents[2].lastAssignedAction;
-		agents[0].isSuccessfullyDone=true;
+		agents[2].isSuccessfullyDone=true;
 		agent_update=1;
+		UpdateStateActionTable(agent_update);
+	}
+	else if (robot_action_ack=="RobotTaskNotReached")
+	{// maybe can be commented!
+
+		agents[1].isBusy=false;
+		agents[1].lastActionAck=agents[1].lastAssignedAction;
+		agents[1].isSuccessfullyDone=false;
+		agents[2].isBusy=false;
+		agents[2].lastActionAck=agents[2].lastAssignedAction;
+		agents[2].isSuccessfullyDone=false;
+		agent_update=1;
+		UpdateStateActionTable(agent_update);
+	}
+	else
+	{
+		cout<<FRED("The arrived msg from robot is not defined here")<<endl;
 	}
 }
 
@@ -462,7 +561,7 @@ void seq_planner_class::PublishRobotActionLeftArm(void){
 	std_msgs::String robotMsg;
 	robotMsg.data =agents[1].lastAssignedAction+"_left";
 	pubRobotCommand.publish(robotMsg);
-
+	ROS_INFO("publish robot command left Arm: %s",robotMsg.data.c_str());
 }
 
 void seq_planner_class::PublishRobotActionRightArm(void){
@@ -471,6 +570,7 @@ void seq_planner_class::PublishRobotActionRightArm(void){
 	std_msgs::String robotMsg;
 	robotMsg.data =agents[1].lastAssignedAction+"_right";
 	pubRobotCommand.publish(robotMsg);
+	ROS_INFO("publish robot command right Arm: %s",robotMsg.data.c_str());
 
 }
 
@@ -480,6 +580,6 @@ void seq_planner_class::PublishRobotActionJointly(void){
 	std_msgs::String robotMsg;
 	robotMsg.data =agents[1].lastAssignedAction+"_joint";
 	pubRobotCommand.publish(robotMsg);
-
+	ROS_INFO("publish robot command joint action: %s",robotMsg.data.c_str());
 }
 

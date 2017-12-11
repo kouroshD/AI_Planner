@@ -10,17 +10,17 @@ GraspLeft simple single 1 LeftArm
 GraspRight simple single 1 RightArm
 UnGraspLeft simple single 1 LeftArm
 UnGraspRight simple single 1 RightArm
-UnGrasp simple all 2 LeftArm RightArm
-HoldOn simple all 2 LeftArm RightArm
-Go_point1 simple single 1 RightArm
-Go_point2 simple single 1 RightArm
-Go_point3 simple single 1 RightArm
-Go_point4 simple single 1 LeftArm
-Go_point5 simple single 1 RightArm
-Go_point6 simple single 1 LeftArm
-Go_point7 simple single 1 RightArm
-Go_point8 simple single 1 LeftArm
-Go_point9 simple single 1 RightArm
-Go_point10 simple single 1 LeftArm
-Go_point11 simple joint 2 LeftArm RightArm
+UnGrasp simple single 2 LeftArm RightArm
+HoldOn simple single 2 LeftArm RightArm
+GoPoint1 simple single 1 RightArm
+GoPoint2 simple single 1 RightArm
+GoPoint3 simple single 1 RightArm
+GoPoint4 simple single 1 LeftArm
+GoPoint5 simple single 1 RightArm
+GoPoint6 simple single 1 LeftArm
+GoPoint7 simple single 1 RightArm
+GoPoint8 simple single 1 LeftArm
+GoPoint9 simple single 1 RightArm
+GoPoint10 simple single 1 LeftArm
+GoPoint11 simple joint 2 LeftArm RightArm
 ObstacleAvoidanceTask simple all 2 LeftArm LeftArm

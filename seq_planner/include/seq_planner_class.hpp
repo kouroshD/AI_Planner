@@ -27,7 +27,7 @@ class action{
 public:
 	string name;
 	vector<string> agents; // the agents who "can" perform the action
-	string actionType; // if it is simple, or complex (an andor graph)
+	string actionType; // if it is simple, or complex (a complex action is another andor graph)
 	string actionMode; // if the action should be performed by single agent, all the agents, or jointly between agents
 	action(void)
 	{
@@ -69,11 +69,82 @@ public:
 	~agent(){};
 	void Print(void){
 		cout<<"******** agent info *********"<<endl;
-		cout<<name<<name<<endl;
+		cout<<"name: "<<name<<endl;
 		cout<<"lastAssignedAction: "<<lastAssignedAction<<endl;
 		cout<<"lastActionAck: "<<lastActionAck<<endl;
 		cout<<"allowToChangePath: "<<allowToChangePath<<endl;
 		cout<<"isBusy: "<<isBusy<<endl;
+	};
+};
+
+//****************************
+class offline_state_action{
+public:
+	string state_name;
+	vector<string> actionsList;
+	vector<string> actionsResponsible;
+
+
+	offline_state_action(void)
+	{
+		state_name="";
+	};
+	~offline_state_action(){};
+	void Print(void){
+		cout<<"******** offline_state_action info *********"<<endl;
+		cout<<"state_name: "<<state_name<<endl;
+		cout<<"actionsList: ";
+		for(int i=0;i<actionsList.size();i++)
+			cout<<actionsList[i]<<" ";
+		cout<<endl;
+		cout<<"actionsResponsible: ";
+		for(int i=0;i<actionsResponsible.size();i++)
+			cout<<actionsResponsible[i]<<" ";
+		cout<<endl;
+	};
+};
+
+//****************************
+class feasible_state_action{
+public:
+	string state_name;
+	string state_type;
+	int state_cost;
+	bool isFeasible;
+	vector<string> actionsList;
+	vector<string> actionsResponsible;
+	vector<bool> actionsProgress;
+
+	feasible_state_action(void)
+	{
+		state_name="";
+		state_type="";
+		state_cost=0;
+		isFeasible=true;
+	};
+	~feasible_state_action(){};
+	void Print(void){
+		cout<<"******** feasible state-action table info *********"<<endl;
+		cout<<"state_name: "<<state_name<<endl;
+		cout<<"state_type: "<<state_type<<endl;
+		cout<<"state_cost: "<<state_cost<<endl;
+		cout<<"isFeasible: "<<isFeasible<<endl;
+
+		cout<<"actionsList: ";
+		for(int i=0;i<actionsList.size();i++)
+			cout<<actionsList[i]<<" ";
+		cout<<endl;
+
+		cout<<"actionsListResponsible: ";
+		for(int i=0;i<actionsResponsible.size();i++)
+			cout<<actionsResponsible[i]<<" ";
+		cout<<endl;
+
+		cout<<"actionsProgress: ";
+		for(int i=0;i<actionsProgress.size();i++)
+			cout<<actionsProgress[i]<<" ";
+		cout<<endl;
+
 	};
 };
 //****************************
@@ -97,8 +168,10 @@ private:
 	//! the length of the vector is equal to number of agents, if the agent[i] is responsible is true, otherwise it is false;
 	vector<agent> agents;
 	vector<action> action_Definition_List;    // list of definition of the actions
-    vector<vector<string>> Full_State_action_list; // list of all the actions for all the states
+//    vector<vector<string>> Full_State_action_list;
+    vector<offline_state_action> Full_State_action_list;// list of all the actions for all the states, this list should be found offline by a planner
 
+    vector<feasible_state_action> Feasible_State_Action_Table;
     vector<vector<string>> Feasible_states_actions_table;     // table of the feasible state-actions names
     vector<vector<bool>> Feasible_states_actions_progress;     // table of the feasible state-actions done(true)/not done (false)actions
     vector<vector<string>> Feasible_states_Names; // the name of the feasible states , type of it :nodes / hyperacs
@@ -106,7 +179,7 @@ private:
     vector<int> Feasible_states_isFeasible;// if still the Feasible given by the and/or graph is feasible (true) or not (false) ?
 	int optimal_state;
 	int next_action_index;
-	int agent_update;// the agent number who arrives the latest ack.
+//	int agent_update;// the agent number who arrives the latest ack.
 
 	ros::NodeHandle nh;
 	ros::Subscriber subHumanActionAck;
@@ -125,7 +198,8 @@ private:
 	void SetStateActionList(string stateActionPath);
 	void SetAgentsList(void);
 
-	void UpdateStateActionTable(void);
+	void UpdateStateActionTable(int update_agent);
+//	agent_update --> the agent number who arrives the latest ack.
 	void FindNextAction(void);
 	void FindResponisibleAgent(void);
 	void CheckStateExecution(void);
