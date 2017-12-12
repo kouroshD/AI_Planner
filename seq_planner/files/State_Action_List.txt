@@ -7,11 +7,11 @@ plate_screw_initialPos
 plate_initialPos
 screw_initialPos
 driver_initialPos
-h1 UnGrasp_RightArm HandOverLeftPoint7 HandOverLeftPoint8 UnGrasp_LeftArm HandOver2InitialPos
-h2 PutDown StopRobot
+h1 UnGrasp_RightArm GoPoint-7_LeftArm HandOverPoint-8_LeftArm UnGrasp_LeftArm GoPoint-0_All
+h2 PutDown StopRobot_All
 h3 PickUp Screwing
 h4 PickUp Screwing
 h5 PickUp PutDown
-h6 UnGrasp_All HandOverRightPoint1 HandOverRightPoint2 Grasp_RightArm HandOverRightPoint3 HandOverPoint4 HandOverLeftPoint5 Grasp_LeftArm BimanKeepPlate
+h6 UnGrasp_All GoPoint-1_RightArm GoPoint-2_RightArm Grasp_RightArm GoPoint-3_RightArm GoPoint-4_RightArm GoPoint-5_LeftArm GoPoint-6_LeftArm Grasp_LeftArm GoPoint-11_Joint
 h7 PickUp ScrewingInitial PutDown
-h8 UnGrasp_All HandOverRightPoint1 HandOverRightPoint2 Grasp_RightArm HandOverRightPoint3 HandOverPoint4 HandOverLeftPoint5 Grasp_LeftArm BimanKeepPlate
+h8 UnGrasp_RightArm UnGrasp_LeftArm GoPoint-0_RightArm GoPoint-1_RightArm GoPoint-2_RightArm Grasp_RightArm GoPoint-3_LeftArm GoPoint-4_RightArm GoPoint-5_LeftArm Grasp_LeftArm GoPoint-11_Joint

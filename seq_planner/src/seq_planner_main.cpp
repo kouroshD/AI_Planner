@@ -65,14 +65,13 @@ int main(int argc, char **argv)
 
 	/*! ANDOR graph update flags and parameters*/
 	bool isGraphSolved=false; // if it is true the hri task is done
-
 	int count=0;
 	while (ros::ok())
 	{
 
 //		cout<<100<<endl;
 //		cout<<100<<" "<<plan_obj.updateAndor<<" "<<plan_obj.nodeSolved <<" "<<plan_obj.haSolved <<endl;
-		if (plan_obj.updateAndor==true)
+		if (plan_obj.updateAndor==true && count>0)
 		{
 			cout<<101<<endl;
 			andor_srv.request.graphName="screwing_task";
@@ -145,8 +144,9 @@ int main(int argc, char **argv)
 		}
 
 
-
-//		if (count==0){	usleep(0.5e6); }
+		// if you do not put at the beginning, it does not start publishing immidiately
+		if (count==0){	usleep(0.5e6); }
+//		cout<<count<<endl;
 		loop_rate.sleep();
 		count++;
 		ros::spinOnce();

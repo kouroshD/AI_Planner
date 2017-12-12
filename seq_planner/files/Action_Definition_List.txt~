@@ -17,4 +17,4 @@ GoPoint8 simple LeftArm
 GoPoint9 simple RightArm
 GoPoint10 simple LeftArm
 GoPoint11 simple LeftArm+RightArm
-ObstacleAvoidanceTask simple LeftArm/LeftArm
+ObstacleAvoidanceTask simple LeftArm/RighttArm

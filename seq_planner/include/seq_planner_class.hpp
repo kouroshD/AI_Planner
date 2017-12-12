@@ -179,12 +179,12 @@ private:
 //    vector<vector<string>> Full_State_action_list;
     vector<offline_state_action> Full_State_action_list;// list of all the actions for all the states, this list should be found offline by a planner
 
-    vector<feasible_state_action> Feasible_State_Action_Table;
-    vector<vector<string>> Feasible_states_actions_table;     // table of the feasible state-actions names
-    vector<vector<bool>> Feasible_states_actions_progress;     // table of the feasible state-actions done(true)/not done (false)actions
-    vector<vector<string>> Feasible_states_Names; // the name of the feasible states , type of it :nodes / hyperacs
-    vector<int> Feasible_States_cost; // weight for each feasible state
-    vector<int> Feasible_states_isFeasible;// if still the Feasible given by the and/or graph is feasible (true) or not (false) ?
+    vector<feasible_state_action> state_action_table;
+//    vector<vector<string>> Feasible_states_actions_table;     // table of the feasible state-actions names
+//    vector<vector<bool>> Feasible_states_actions_progress;     // table of the feasible state-actions done(true)/not done (false)actions
+//    vector<vector<string>> Feasible_states_Names; // the name of the feasible states , type of it :nodes / hyperacs
+//    vector<int> Feasible_States_cost; // weight for each feasible state
+//    vector<int> Feasible_states_isFeasible;// if still the Feasible given by the and/or graph is feasible (true) or not (false) ?
 	int optimal_state;
 	int next_action_index;
 //	int agent_update;// the agent number who arrives the latest ack.
@@ -192,15 +192,13 @@ private:
 	ros::NodeHandle nh;
 	ros::Subscriber subHumanActionAck;
 	ros::Subscriber subRobotActionAck;
-	ros::Publisher pubRobotCommand = nh.advertise<std_msgs::String>("hri_robot_command",80);
+	ros::Publisher pubRobotCommand;
 
 
 	void CallBackHumanAck(const std_msgs::String::ConstPtr& msg);
 	void CallBackRobotAck(const std_msgs::String::ConstPtr& msg);
-	void PublishHumanAction(void);
-	void PublishRobotActionLeftArm(void);
-	void PublishRobotActionRightArm(void);
-	void PublishRobotActionJointly(void);
+	void PublishHumanAction(string humanAction, string responsibeAgentName);
+	void PublishRobotAction(string robotAction, string responsibeAgentName);
 
 	void SetActionDefinitionList(string actionDefinitionPath);
 	void SetStateActionList(string stateActionPath);
