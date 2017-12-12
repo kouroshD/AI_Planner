@@ -9,9 +9,15 @@ seq_planner_class::seq_planner_class(string actionDefinitionPath,string stateAct
 	SetActionDefinitionList(actionDefinitionPath);
 	SetStateActionList( stateActionPath);
 	SetAgentsList();
-	cout<<"*******************************************"<<endl;
-	for(int i=0;i<Full_State_action_list.size();i++)
-		Full_State_action_list[i].Print();
+	cout<<"****************** Action Definition List *************************"<<endl;
+		for(int i=0;i<action_Definition_List.size();i++)
+			action_Definition_List[i].Print();
+	cout<<"******************* Full State-Action List ************************"<<endl;
+		for(int i=0;i<Full_State_action_list.size();i++)
+			Full_State_action_list[i].Print();
+	cout<<"********************** Agents List*********************"<<endl;
+	for(int i=0;i<agents.size();i++)
+		agents[i].Print();
 
 	updateAndor=true;
 	nodeSolved=false;
@@ -34,23 +40,23 @@ void seq_planner_class::UpdateStateActionTable(int agent_update){
 
 	bool is_a_state_solved=false;
 	bool is_a_state_feasible=false;
-	if(Feasible_states_actions_table.size()>0)
+	if(Feasible_State_Action_Table.size()>0)
 	{
-		for(int i=0;i<Feasible_states_actions_table.size();i++)
+		for(int i=0;i<Feasible_State_Action_Table.size();i++)
 		{
-			if (Feasible_states_isFeasible[i]==true)
+			if (Feasible_State_Action_Table[i].isFeasible==true)
 			{
 				bool temp_is_the_state_i_still_feasible=false;
-				for (int j=0;j<Feasible_states_actions_table[i].size();j++)
+				for (int j=0;j<Feasible_State_Action_Table[i].actionsList.size();j++)
 				{
 					if(j==0)
 					{
-						if(Feasible_states_actions_table[i][j]==agents[agent_update].lastActionAck
-								&& Feasible_states_actions_progress[i][j]==false)
+						if(Feasible_State_Action_Table[i].actionsList[j]==agents[agent_update].lastActionAck
+								&& Feasible_State_Action_Table[i].actionsProgress[j]==false)
 						{
 							if(agents[agent_update].isSuccessfullyDone==true)
 							{
-								Feasible_states_actions_progress[i][j]=true;
+								Feasible_State_Action_Table[i].actionsProgress[j]=true;
 								temp_is_the_state_i_still_feasible=true;
 							}
 						}
@@ -59,34 +65,31 @@ void seq_planner_class::UpdateStateActionTable(int agent_update){
 					else
 					{
 						// j>0: check for prev is solved and current is not solved:
-						if(Feasible_states_actions_table[i][j]==agents[agent_update].lastActionAck
-								&& Feasible_states_actions_progress[i][j]==false
-								&& Feasible_states_actions_progress[i][j-1]==true)
+						if(Feasible_State_Action_Table[i].actionsList[j]==agents[agent_update].lastActionAck
+								&& Feasible_State_Action_Table[i].actionsProgress[j]==false
+								&& Feasible_State_Action_Table[i].actionsProgress[j-1]==true)
 						{
 							if(agents[agent_update].isSuccessfullyDone==true)
 							{
-								Feasible_states_actions_progress[i][j]=true;
+								Feasible_State_Action_Table[i].actionsProgress[j]=true;
 								temp_is_the_state_i_still_feasible=true;
 							}
 						}
-
-
 					}
-
 				}
 				if(temp_is_the_state_i_still_feasible==true)
 				{
-					Feasible_states_isFeasible[i]=true;
+					Feasible_State_Action_Table[i].isFeasible=true;
 					is_a_state_feasible=true;
 				}
 				else
 				{
-					Feasible_states_isFeasible[i]=false;
+					Feasible_State_Action_Table[i].isFeasible=false;
 				}
 
 			}
-			if(Feasible_states_isFeasible[i]==true
-					&& Feasible_states_actions_progress[i][Feasible_states_actions_table[i].size()-1]==true)
+			if(Feasible_State_Action_Table[i].isFeasible==true
+					&& Feasible_State_Action_Table[i].actionsProgress[Feasible_State_Action_Table[i].actionsProgress.size()-1]==true)
 			{
 				CheckStateExecution();
 				is_a_state_solved=true;
@@ -123,27 +126,28 @@ void seq_planner_class::FindNextAction(){
 
 	int state_min_cost=10000; // a high value
 	int number_feasible_state=0;
-	for(int i=0;i<Feasible_states_isFeasible.size();i++)
+	for(int i=0;i<Feasible_State_Action_Table.size();i++)
 	{
-		if(Feasible_states_isFeasible[i]==true)
+		if(Feasible_State_Action_Table[i].isFeasible==true)
 		{
 			number_feasible_state++;
-			if (Feasible_States_cost[i]<state_min_cost){
-				state_min_cost=Feasible_States_cost[i];
+			if (Feasible_State_Action_Table[i].state_cost<state_min_cost){
+				state_min_cost=Feasible_State_Action_Table[i].state_cost;
 				optimal_state=i;
 			}
 		}
 	}
 	if (number_feasible_state>0)
 	{
-		for(int i=0;i<Feasible_states_actions_table[optimal_state].size();i++)
+		for(int i=0;i<Feasible_State_Action_Table[optimal_state].actionsList.size();i++)
 		{
-			if(Feasible_states_actions_progress[optimal_state][i]==false)
+			if(Feasible_State_Action_Table[optimal_state].actionsProgress[i]==false)
 			{
 				next_action_index=i;
 				break;
 			}
 		}
+		cout<<"Optimal State: "<<Feasible_State_Action_Table[optimal_state].state_name<<", Next Action: "<<Feasible_State_Action_Table[optimal_state].actionsList[next_action_index]<<endl;
 		FindResponisibleAgent();
 	}
 	else
@@ -156,105 +160,180 @@ void seq_planner_class::FindNextAction(){
 void seq_planner_class::FindResponisibleAgent(void){
 	cout<<"seq_planner_class::FindResponisibleAgent"<<endl;
 
+	bool isResponsibleAgentAcceptable=false;
+	int action_number=0;
 	for(int i=0;i<action_Definition_List.size();i++)
-	{
-		if(Feasible_states_actions_table[optimal_state][next_action_index]==action_Definition_List[i].name)
+		if(Feasible_State_Action_Table[optimal_state].actionsList[next_action_index]==action_Definition_List[i].name)
 		{
-			if(action_Definition_List[i].actionMode=="single")
+			action_number=i;
+			break;
+		}
+
+	if(Feasible_State_Action_Table[optimal_state].actionsResponsible[next_action_index]=="Unknown")
+	{
+		isResponsibleAgentAcceptable=true;
+		if(action_Definition_List[action_number].agents.size()==1)
+		{
+			Feasible_State_Action_Table[optimal_state].actionsResponsible[next_action_index]=action_Definition_List[action_number].agents[0][0];
+		}
+		else
+		{
+			//					for (int j=0;j<action_Definition_List[i].agents.size();j++)
+			//					{
+			Feasible_State_Action_Table[optimal_state].actionsResponsible[next_action_index]=action_Definition_List[action_number].agents[0][0];
+			//					}
+		}
+	}
+	else
+	{
+		//				for (int j=0;j<action_Definition_List[action_number].agents.size();j++)
+		//					if (Feasible_State_Action_Table[optimal_state].actionsResponsible[next_action_index]==action_Definition_List[action_number].agents[j])
+		isResponsibleAgentAcceptable=true;
+	}
+
+	if(isResponsibleAgentAcceptable==true)
+	{
+		if(Feasible_State_Action_Table[optimal_state].actionsResponsible[next_action_index]=="Human")
+		{
+			agents[0].lastAssignedAction=Feasible_State_Action_Table[optimal_state].actionsList[next_action_index];
+			PublishHumanAction();
+			agents[0].isBusy=true;
+		}
+		else if(Feasible_State_Action_Table[optimal_state].actionsResponsible[next_action_index]=="LeftArm")
+		{
+			agents[1].lastAssignedAction=Feasible_State_Action_Table[optimal_state].actionsList[next_action_index];
+			agents[1].isBusy=true;
+			PublishRobotActionLeftArm();
+
+		}
+		else if(Feasible_State_Action_Table[optimal_state].actionsResponsible[next_action_index]=="RightArm")
+		{
+			agents[2].lastAssignedAction=Feasible_State_Action_Table[optimal_state].actionsList[next_action_index];
+			agents[2].isBusy=true;
+			PublishRobotActionRightArm();
+		}
+		else if(Feasible_State_Action_Table[optimal_state].actionsResponsible[next_action_index]=="joint")
+		{
+			agents[1].lastAssignedAction=Feasible_State_Action_Table[optimal_state].actionsList[next_action_index];
+			agents[1].isBusy=true;
+			agents[2].lastAssignedAction=Feasible_State_Action_Table[optimal_state].actionsList[next_action_index];
+			agents[2].isBusy=true;
+			PublishRobotActionJointly();
+
+		}
+		else if(Feasible_State_Action_Table[optimal_state].actionsResponsible[next_action_index]=="All")
+		{
+			for(int i=0;i<action_Definition_List[action_number].agents.size();i++)
 			{
-				cout<<404<<endl;
+				// check better later, it should check for the agents name
+				agents[i].lastAssignedAction=Feasible_State_Action_Table[optimal_state].actionsList[next_action_index];
+				agents[i].isBusy=true;
+			}
+			PublishRobotActionLeftArm();
+			PublishRobotActionRightArm();
+		}
+	}
+	else
+	{
+		cout<<FRED("No Responsible Agent")<<endl;
+	}
 //				for(int j=0;j<action_Definition_List[i].agents.size();j++)
 //				{
 //				// here	should call another function to check the cost of performing the action by each agent.
 //				}
-				if(action_Definition_List[i].agents[0]=="Human")
-				{
-					agents[0].lastAssignedAction=action_Definition_List[i].name;
-					PublishHumanAction();
-					agents[0].isBusy=true;
-				}
-				if(action_Definition_List[i].agents[0]=="LeftArm")
-				{
-					agents[1].lastAssignedAction=action_Definition_List[i].name;
-					agents[1].isBusy=true;
-					PublishRobotActionLeftArm();
-				}
-				if(action_Definition_List[i].agents[0]=="RightArm")
-				{
-					agents[2].lastAssignedAction=action_Definition_List[i].name;
-					agents[2].isBusy=true;
-					PublishRobotActionRightArm();
-				}
-			}
-			if(action_Definition_List[i].actionMode=="joint")
-			{
-				agents[1].lastAssignedAction=action_Definition_List[i].name;
-				agents[1].isBusy=true;
-				agents[2].lastAssignedAction=action_Definition_List[i].name;
-				agents[2].isBusy=true;
-				PublishRobotActionJointly();
-
-			}
-			if(action_Definition_List[i].actionMode=="all")
-			{
-				agents[1].lastAssignedAction=action_Definition_List[i].name;
-				agents[1].isBusy=true;
-				agents[2].lastAssignedAction=action_Definition_List[i].name;
-				agents[2].isBusy=true;
-				PublishRobotActionLeftArm();
-				PublishRobotActionRightArm();
-			}
-		}
-	}
+//				if(action_Definition_List[i].agents[0]=="Human")
+//				{
+//					agents[0].lastAssignedAction=action_Definition_List[i].name;
+//					PublishHumanAction();
+//					agents[0].isBusy=true;
+//				}
+//				if(action_Definition_List[i].agents[0]=="LeftArm")
+//				{
+//					agents[1].lastAssignedAction=action_Definition_List[i].name;
+//					agents[1].isBusy=true;
+//					PublishRobotActionLeftArm();
+//				}
+//				if(action_Definition_List[i].agents[0]=="RightArm")
+//				{
+//					agents[2].lastAssignedAction=action_Definition_List[i].name;
+//					agents[2].isBusy=true;
+//					PublishRobotActionRightArm();
+//				}
+//				if(action_Definition_List[i].actionMode=="joint")
+//				{
+//					agents[1].lastAssignedAction=action_Definition_List[i].name;
+//					agents[1].isBusy=true;
+//					agents[2].lastAssignedAction=action_Definition_List[i].name;
+//					agents[2].isBusy=true;
+//					PublishRobotActionJointly();
+//
+//				}
+//			}
+//			if(action_Definition_List[i].actionMode=="joint")
+//			{
+//				agents[1].lastAssignedAction=action_Definition_List[i].name;
+//				agents[1].isBusy=true;
+//				agents[2].lastAssignedAction=action_Definition_List[i].name;
+//				agents[2].isBusy=true;
+//				PublishRobotActionJointly();
+//
+//			}
+//			if(action_Definition_List[i].actionMode=="all")
+//			{
+//				agents[1].lastAssignedAction=action_Definition_List[i].name;
+//				agents[1].isBusy=true;
+//				agents[2].lastAssignedAction=action_Definition_List[i].name;
+//				agents[2].isBusy=true;
+//				PublishRobotActionLeftArm();
+//				PublishRobotActionRightArm();
+//			}
+//		}
+//	}
 }
 
 void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feasible_state_list, vector<int> gen_Feasible_stateCost_list){
 	cout<<"seq_planner_class::GenerateStateActionTable"<<endl;
 	if(Feasible_State_Action_Table.size()>0)
 		Feasible_State_Action_Table.clear();
-	offline_state_action temp_obj;
 
-	Feasible_states_Names.clear();
-	Feasible_States_cost.clear();
-	Feasible_states_actions_table.clear();
-	Feasible_states_actions_progress.clear();
-	Feasible_states_isFeasible.clear();
 
-	for(int m=0; m<Feasible_States_cost.size();m++)
+//	Feasible_states_Names.clear();
+//	Feasible_States_cost.clear();
+//	Feasible_states_actions_table.clear();
+//	Feasible_states_actions_progress.clear();
+//	Feasible_states_isFeasible.clear();
+	cout<<"100: "<<gen_Feasible_stateCost_list.size()<<endl;
+	for(int i=0; i<gen_Feasible_stateCost_list.size();i++)
 	{
-		temp_obj.state_name=gen_Feasible_state_list[m][0];
-
-	}
-	Feasible_states_Names=gen_Feasible_state_list;
-	Feasible_States_cost=gen_Feasible_stateCost_list;
-
-
-	for (int i=0;i<Feasible_States_cost.size();i++)
-	{
-		Feasible_states_isFeasible.push_back(true);
-		for (int j=0;j<Full_State_action_list.size();j++)
-		{
-
-			if (Feasible_states_Names[i][0]==Full_State_action_list[j].state_name)
+		feasible_state_action temp_obj;
+		temp_obj.state_name=gen_Feasible_state_list[i][0];
+		temp_obj.state_type=gen_Feasible_state_list[i][1];
+		temp_obj.state_cost=gen_Feasible_stateCost_list[i];
+		temp_obj.isFeasible=true;
+		//		temp_obj.actionsList=
+			for (int j=0;j<Full_State_action_list.size();j++)
 			{
-				vector<string> Feasible_State_action_row;
-				vector<bool> Feasible_states_actions_progress_row;
 
-				for (int k=0;k<Full_State_action_list[j].actionsList.size();k++) // check if k should start from 0 or 1 ?
+				if (temp_obj.state_name==Full_State_action_list[j].state_name)
 				{
-					Feasible_State_action_row.push_back(Full_State_action_list[j].actionsList[k]);
-					Feasible_states_actions_progress_row.push_back(false);
+					temp_obj.actionsList=Full_State_action_list[j].actionsList;
+					temp_obj.actionsResponsible=Full_State_action_list[j].actionsResponsible;
+					for (int k=0;k<Full_State_action_list[j].actionsList.size();k++) // check if k should start from 0 or 1 ?
+						temp_obj.actionsProgress.push_back(false);
 
 				}
-				Feasible_states_actions_table.push_back(Feasible_State_action_row);
-				Feasible_states_actions_progress.push_back(Feasible_states_actions_progress_row);
 			}
-		}
+			Feasible_State_Action_Table.push_back(temp_obj);
 	}
-	Print2dVec(Feasible_states_Names);
-	Print2dVec(Feasible_States_cost);
-	Print2dVec(Feasible_states_actions_progress);
-	Print2dVec(Feasible_states_actions_table);
+
+	cout<<"101: "<<Feasible_State_Action_Table.size()<<endl;
+for (int i=0;i<Feasible_State_Action_Table.size();i++)
+	Feasible_State_Action_Table[i].Print();
+//exit(0);
+//	Print2dVec(Feasible_states_Names);
+//	Print2dVec(Feasible_States_cost);
+//	Print2dVec(Feasible_states_actions_progress);
+//	Print2dVec(Feasible_states_actions_table);
 
 
 
@@ -267,67 +346,46 @@ void seq_planner_class::CheckStateExecution(){
 	//that state is solved, Delete all the vector, u
 	// if there is not update for the andor graph, find the next action for the human or robot to be solved
 	cout<<"seq_planner_class::CheckStateExecution"<<endl;
-//	cout<<301<<endl;
+
 	if(!Solved_node_list.empty() || !Solved_hyperarc_list.empty()){
-//		cout<<302<<endl;
 		cout<<FRED("The solve nodes or hyperarc lists are not empty!" )<<endl;
 	}
-	if(Feasible_states_actions_progress.size()==0){
+	if(Feasible_State_Action_Table.size()==0){
 		cout<<FRED("There is no feasible state to be checked" )<<endl;
 		exit(1);
 	}
 
 
-	cout<<Feasible_states_actions_progress.size()<<endl;
-	for(int i=0;i<Feasible_states_actions_progress.size();i++)
+	for(int i=0;i<Feasible_State_Action_Table.size();i++)
 	{
-//		cout<<303<<endl;
-		if (Feasible_states_actions_progress[i].size()==0)
+		if (Feasible_State_Action_Table[i].actionsProgress.size()==0)
 		{
-//			cout<<304<<endl;
 			updateAndor=true;
-			if (Feasible_states_Names[i][1]=="Node")
+			if (Feasible_State_Action_Table[i].state_type=="Node")
 			{
-//				cout<<305<<endl;
-				Solved_node_list.push_back(Feasible_states_Names[i][0]);
+				Solved_node_list.push_back(Feasible_State_Action_Table[i].state_name);
 				nodeSolved=true;
-//				cout<<3052<<endl;
 			}
-			if (Feasible_states_Names[i][1]=="Hyperarc")
+			if (Feasible_State_Action_Table[i].state_type=="Hyperarc")
 			{
-//				cout<<306<<endl;
-				Solved_hyperarc_list.push_back(Feasible_states_Names[i][0]);
+				Solved_hyperarc_list.push_back(Feasible_State_Action_Table[i].state_name);
 				haSolved=true;
 			}
 		}
 		else
 		{
-//			cout<<307<<endl;
-			int counter=0;
-			for(int j=0;j<Feasible_states_actions_progress[i].size();j++)
+			int actions_size=Feasible_State_Action_Table[i].actionsProgress.size();
+			if (Feasible_State_Action_Table[i].actionsProgress[actions_size-1]==true)
 			{
-//				cout<<308<<endl;
-
-				if (Feasible_states_actions_progress[i][j]==true)
-				{
-//					cout<<309<<endl;
-					counter++;
-				}
-			}
-			if (Feasible_states_actions_progress[i].size()==counter)
-			{
-//				cout<<310<<endl;
 				updateAndor=true;
-				if (Feasible_states_Names[i][1]=="Node")
+				if (Feasible_State_Action_Table[i].state_type=="Node")
 				{
-//					cout<<311<<endl;
-					Solved_node_list.push_back(Feasible_states_Names[i][0]);
+					Solved_node_list.push_back(Feasible_State_Action_Table[i].state_name);
 					nodeSolved=true;
 				}
-				if (Feasible_states_Names[i][1]=="Hyperarc")
+				if (Feasible_State_Action_Table[i].state_type=="Hyperarc")
 				{
-//					cout<<312<<endl;
-					Solved_hyperarc_list.push_back(Feasible_states_Names[i][0]);
+					Solved_hyperarc_list.push_back(Feasible_State_Action_Table[i].state_name);
 					haSolved=true;
 				}
 			}
@@ -338,10 +396,6 @@ void seq_planner_class::CheckStateExecution(){
 		FindNextAction();
 	}
 
-
-//	cout<<updateAndor<<endl;
-//	cout<<nodeSolved<<endl;
-//	cout<<haSolved<<endl;
 }
 
 void seq_planner_class::SetActionDefinitionList(string actionDefinitionPath){
@@ -350,21 +404,29 @@ void seq_planner_class::SetActionDefinitionList(string actionDefinitionPath){
 	//	ROS_INFO("%s",actionDefinitionPath.c_str());
 	ifstream file_path_ifStr(actionDefinitionPath.c_str());
 	string delim_type=" ";
+	string delim_agent="/";
+	string delim_joint="+";
 	std::vector<std::string> line_list;
 	string line;
-	action actionDef;
+
 	    cout<<file_path_ifStr.is_open()<<endl;
 	if (file_path_ifStr.is_open()){
-		while(getline(file_path_ifStr,line)){
+		while(getline(file_path_ifStr,line))
+		{
+			action actionDef;
 			boost::split(line_list, line, boost::is_any_of(delim_type));
 			actionDef.name=line_list[0];
 			actionDef.actionType=line_list[1];
-			actionDef.actionMode=line_list[2];
+//			actionDef.actionMode=line_list[2];
 			int counter=0;
-			int Num_agents=stoi(line_list[3]);
-			for (int i=0;i < Num_agents;i++)
+//			int Num_agents=stoi(line_list[3]);
+			vector<string> AGENTS, joint_agents;
+			boost::split(AGENTS, line_list[2], boost::is_any_of(delim_agent));
+			for (int i=0;i < AGENTS.size();i++)
 			{
-				actionDef.agents.push_back(line_list[4+i]);
+				boost::split(joint_agents, AGENTS[i], boost::is_any_of(delim_joint));
+//				for (int j=0;j < joint_agents.size();j++)
+				actionDef.agents.push_back(joint_agents);
 				counter++;
 			}
 			action_Definition_List.push_back(actionDef);
@@ -382,16 +444,20 @@ void seq_planner_class::SetAgentsList(void){
 	agent tempAgent0;
 	tempAgent0.allowToChangePath=true;
 	tempAgent0.name="Human";
+	tempAgent0.type="Human";
+
 	agents.push_back(tempAgent0);
 
 	//agent[1]: LeftArm
 	agent tempAgent1;
 	tempAgent1.name="LeftArm";
+	tempAgent1.type="Robot";
 	agents.push_back(tempAgent1);
 
 	//agent[2]: RightArm
 	agent tempAgent2;
 	tempAgent2.name="RightArm";
+	tempAgent2.type="Robot";
 	agents.push_back(tempAgent2);
 
 	for(int k=0;k<agents.size();k++)
@@ -410,13 +476,14 @@ void seq_planner_class::SetStateActionList(string stateActionPath){
 	string line;
 	string delim_type=" ";
 	string responsible_delim_type="_";
-	offline_state_action temp_obj;
+
 
 	cout<<"file_path_ifStr.is_open(): "<<file_path_ifStr.is_open()<<endl;
 	if (file_path_ifStr.is_open())
 	{
 		while(getline(file_path_ifStr,line))
 		{
+			offline_state_action temp_obj;
 			boost::split(line_list, line, boost::is_any_of(delim_type));
 //			Full_State_action_list.push_back(line_list);
 			temp_obj.state_name=line_list[0];

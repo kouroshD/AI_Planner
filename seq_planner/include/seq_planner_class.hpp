@@ -26,14 +26,14 @@ using namespace std;
 class action{
 public:
 	string name;
-	vector<string> agents; // the agents who "can" perform the action
+	vector<vector<string>> agents; // the agents who "can" perform the action// each raw if the size is one single action, otherwise it is joint action
 	string actionType; // if it is simple, or complex (a complex action is another andor graph)
-	string actionMode; // if the action should be performed by single agent, all the agents, or jointly between agents
+	string actionMode; // if the action should be performed by single agent or jointly between agents
 	action(void)
 	{
 		name="";
 		actionType="";
-		actionMode="";
+		actionMode="single";
 	};
 	~action(){};
 	void Print(void){
@@ -41,8 +41,13 @@ public:
 		cout<<"name: "<<name<<endl;
 		cout<<"actionType: "<<actionType<<endl;
 		cout<<"actionMode: "<<actionMode<<endl;
+		cout<<"possible Agents: ";
 		for (int i=0;i<agents.size();i++)
-			cout<<agents[i]<<" ";
+		{
+			for (int j=0; j<agents[i].size();j++)
+				cout<<agents[i][j]<<" ";
+			cout<<" | ";
+		}
 		cout<<endl;
 
 	};
@@ -51,6 +56,7 @@ public:
 class agent{
 public:
 	string name;
+	string type;// Robot or Human
 	string lastAssignedAction;
 	string lastActionAck;
 	bool allowToChangePath;
@@ -60,6 +66,7 @@ public:
 	agent(void)
 	{
 		name="";
+		type="";
 		lastAssignedAction="";
 		lastActionAck="";
 		allowToChangePath=false;
@@ -70,6 +77,7 @@ public:
 	void Print(void){
 		cout<<"******** agent info *********"<<endl;
 		cout<<"name: "<<name<<endl;
+		cout<<"type: "<<type<<endl;
 		cout<<"lastAssignedAction: "<<lastAssignedAction<<endl;
 		cout<<"lastActionAck: "<<lastActionAck<<endl;
 		cout<<"allowToChangePath: "<<allowToChangePath<<endl;

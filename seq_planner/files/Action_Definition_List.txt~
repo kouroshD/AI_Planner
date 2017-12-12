@@ -1,26 +1,20 @@
-PickUp simple single 1 Human 
-Screwing simple single 1 Human 
-PutDown simple single 1 Human
-ScrewingInitial simple single 1 Human
-Stop simple all 2 LeftArm RightArm
-StopLeft simple single 1 LeftArm
-StopRight simple single 1 RightArm
-Grasp simple all 2 LeftArm RightArm
-GraspLeft simple single 1 LeftArm
-GraspRight simple single 1 RightArm
-UnGraspLeft simple single 1 LeftArm
-UnGraspRight simple single 1 RightArm
-UnGrasp simple single 2 LeftArm RightArm
-HoldOn simple single 2 LeftArm RightArm
-GoPoint1 simple single 1 RightArm
-GoPoint2 simple single 1 RightArm
-GoPoint3 simple single 1 RightArm
-GoPoint4 simple single 1 LeftArm
-GoPoint5 simple single 1 RightArm
-GoPoint6 simple single 1 LeftArm
-GoPoint7 simple single 1 RightArm
-GoPoint8 simple single 1 LeftArm
-GoPoint9 simple single 1 RightArm
-GoPoint10 simple single 1 LeftArm
-GoPoint11 simple joint 2 LeftArm RightArm
-ObstacleAvoidanceTask simple all 2 LeftArm LeftArm
+PickUp simple Human 
+Screwing simple Human 
+PutDown simple Human
+ScrewingInitial simple Human
+Stop simple LeftArm/RightArm
+Grasp simple LeftArm/RightArm
+UnGrasp simple LeftArm/RightArm
+HoldOn simple LeftArm/RightArm
+GoPoint1 simple RightArm
+GoPoint2 simple RightArm
+GoPoint3 simple RightArm
+GoPoint4 simple LeftArm
+GoPoint5 simple RightArm
+GoPoint6 simple LeftArm
+GoPoint7 simple RightArm
+GoPoint8 simple LeftArm
+GoPoint9 simple RightArm
+GoPoint10 simple LeftArm
+GoPoint11 simple LeftArm+RightArm
+ObstacleAvoidanceTask simple LeftArm/LeftArm
