@@ -36,10 +36,10 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
+
 	// ROS parameters definitions:
 	ros::init(argc, argv, "seq_planner");
 	ros::NodeHandle nh;
-
 
 	ros::Rate loop_rate(80);
 

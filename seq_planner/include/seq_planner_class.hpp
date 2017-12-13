@@ -199,6 +199,7 @@ private:
 	void CallBackRobotAck(const std_msgs::String::ConstPtr& msg);
 	void PublishHumanAction(string humanAction, string responsibeAgentName);
 	void PublishRobotAction(string robotAction, string responsibeAgentName);
+	bool CanAgentPerformAction(string agent_name,string agent_type, string action_name);
 
 	void SetActionDefinitionList(string actionDefinitionPath);
 	void SetStateActionList(string stateActionPath);
