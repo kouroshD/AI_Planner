@@ -173,12 +173,19 @@ void seq_planner_class::FindResponisibleAgent(void){
 
 	bool isResponsibleAgentAcceptable=false;
 	int action_number=0;
+	bool action_is_defined=false;
 	for(int i=0;i<action_Definition_List.size();i++)
 		if(state_action_table[optimal_state].actionsList[next_action_index]==action_Definition_List[i].name)
 		{
 			action_number=i;
+			action_is_defined=true;
 			break;
 		}
+	if(action_is_defined==false)
+	{
+		cout<<BOLD(FRED("This Action is not defined in Actions Definition List"))<<state_action_table[optimal_state].actionsList[next_action_index] <<endl;
+		exit(1);
+	}
 
 	if(state_action_table[optimal_state].actionsResponsible[next_action_index]=="Unknown")
 	{
@@ -655,7 +662,7 @@ void seq_planner_class::CallBackRobotAck(const std_msgs::String::ConstPtr& msg){
 		agent_update=2;
 		UpdateStateActionTable(agent_update);
 	}
-	else if (robot_action_ack=="GoalReachedBiManual")
+	else if (robot_action_ack=="GoalReachedJoint")
 	{
 		agents[1].isBusy=false;
 		agents[1].lastActionAck=agents[1].lastAssignedAction;
