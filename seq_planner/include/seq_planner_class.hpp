@@ -62,6 +62,9 @@ public:
 	bool allowToChangePath;
 	bool isBusy;
 	bool isSuccessfullyDone;
+	int optimal_state;
+	int next_action_index;
+	int responsibility_number;
 
 	agent(void)
 	{
@@ -72,6 +75,9 @@ public:
 		allowToChangePath=false;
 		isBusy=false;
 		isSuccessfullyDone=false;
+		responsibility_number=0;
+		optimal_state=0;
+		next_action_index=0;
 	};
 	~agent(){};
 	void Print(void){
@@ -90,7 +96,7 @@ class offline_state_action{
 public:
 	string state_name;
 	vector<string> actionsList;
-	vector<string> actionsResponsible;
+	vector<vector<string>> actionsResponsible;
 
 
 	offline_state_action(void)
@@ -107,7 +113,15 @@ public:
 		cout<<endl;
 		cout<<"actionsResponsible: ";
 		for(int i=0;i<actionsResponsible.size();i++)
-			cout<<actionsResponsible[i]<<" ";
+		{
+			for(int j=0;j<actionsResponsible[i].size();j++)
+			{
+				cout<<actionsResponsible[i][j];
+				if(actionsResponsible[i].size()>0)
+					cout<<" ";
+			}
+			cout<<" | ";
+		}
 		cout<<endl;
 	};
 };
@@ -120,8 +134,8 @@ public:
 	int state_cost;
 	bool isFeasible;
 	vector<string> actionsList;
-	vector<string> actionsResponsible;
-	vector<bool> actionsProgress;
+	vector<vector<string>> actionsResponsible;
+	vector<vector<bool>> actionsProgress;
 
 	feasible_state_action(void)
 	{
@@ -143,14 +157,30 @@ public:
 			cout<<actionsList[i]<<" ";
 		cout<<endl;
 
-		cout<<"actionsListResponsible: ";
+		cout<<"actionsResponsible: ";
 		for(int i=0;i<actionsResponsible.size();i++)
-			cout<<actionsResponsible[i]<<" ";
+		{
+			for(int j=0;j<actionsResponsible[i].size();j++)
+			{
+				cout<<actionsResponsible[i][j];
+				if(actionsResponsible[i].size()>0)
+					cout<<" ";
+			}
+			cout<<" | ";
+		}
 		cout<<endl;
 
 		cout<<"actionsProgress: ";
 		for(int i=0;i<actionsProgress.size();i++)
-			cout<<actionsProgress[i]<<" ";
+		{
+			for(int j=0;j<actionsProgress[i].size();j++)
+			{
+				cout<<actionsProgress[i][j];
+				if(actionsProgress[i].size()>0)
+					cout<<" ";
+			}
+			cout<<" | ";
+		}
 		cout<<endl;
 
 	};
@@ -197,9 +227,9 @@ private:
 
 	void CallBackHumanAck(const std_msgs::String::ConstPtr& msg);
 	void CallBackRobotAck(const std_msgs::String::ConstPtr& msg);
-	void PublishHumanAction(string humanAction, string responsibeAgentName);
-	void PublishRobotAction(string robotAction, string responsibeAgentName);
-	bool CanAgentPerformAction(string agent_name,string agent_type, string action_name);
+	void PublishHumanAction(string ActionName, string AgentName, vector<string> ColleaguesName);
+	void PublishRobotAction(string ActionName, string AgentName, vector<string> ColleaguesName);
+	bool CanAgentPerformAction(vector<string> agent_name,string agent_type, string action_name);
 
 	void SetActionDefinitionList(string actionDefinitionPath);
 	void SetStateActionList(string stateActionPath);
@@ -222,43 +252,3 @@ void Print2dVec(vector<vector<string>> vec ){
 		cout<<endl;
 	}
 };
-
-void Print2dVec(vector<vector<bool>> vec ){
-	cout<<"*** print Vector ::bool ***"<<endl;
-	for(int i=0;i<vec.size();i++)
-	{
-		for(int j=0;j<vec[i].size();j++)
-			cout<<vec[i][j]<<" ";
-		cout<<endl;
-	}
-};
-
-void Print2dVec(vector<int> vec ){
-	cout<<"*** print Vector ::int ***"<<endl;
-	for(int i=0;i<vec.size();i++)
-	{
-//		for(int j=0;j<vec[i].size();j++)
-		cout<<vec[i]<<" ";
-		cout<<endl;
-	}
-};
-
-//void PRINT(string str, string color,bool bold ){
-//	if(bold)
-//	{
-//		if (color=="red")
-//			cout<<FRED(str)<<endl;
-//	}
-//	else
-//	{
-//
-//const std::string red("\033[0;31m");
-//const std::string green("\033[1;32m");
-//const std::string yellow("\033[1;33m");
-//const std::string cyan("\033[0;36m");
-//const std::string magenta("\033[0;35m");
-//const std::string reset("\033[0m");
-//std::cout << "Measured runtime: " << yellow << timer.count() << reset << std::endl;
-//	}
-//
-//};

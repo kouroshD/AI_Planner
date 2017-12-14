@@ -14,4 +14,4 @@ h4 PickUp Screwing
 h5 PickUp PutDown
 h6 UnGrasp_RightArm UnGrasp_LeftArm GoPoint-0_RightArm GoPoint-1_RightArm GoPoint-2_RightArm Grasp_RightArm GoPoint-3_LeftArm GoPoint-4_RightArm GoPoint-5_LeftArm Grasp_LeftArm GoPoint-11_Joint
 h7 PickUp ScrewingInitial PutDown
-h8 UnGrasp_RightArm UnGrasp_LeftArm GoPoint-0_RightArm GoPoint-1_RightArm GoPoint-2_RightArm Grasp_RightArm GoPoint-3_LeftArm GoPoint-4_RightArm GoPoint-5_LeftArm Grasp_LeftArm GoPoint-11_Joint
+h8 UnGrasp_RightArm UnGrasp_LeftArm GoPoint-0_RightArm GoPoint-1_RightArm GoPoint-2_RightArm Grasp_RightArm GoPoint-3_LeftArm GoPoint-4_RightArm GoPoint-5_LeftArm Grasp_LeftArm GoPoint-11_LeftArm+RightArm

@@ -44,75 +44,115 @@ void seq_planner_class::UpdateStateActionTable(int agent_update){
 
 	bool is_a_state_solved=false;
 	bool is_a_state_feasible=false;
+	int action_number, state_number;
 	if(state_action_table.size()>0)
 	{
 		for(int i=0;i<state_action_table.size();i++)
 		{
+			bool temp_is_the_state_i_still_feasible=false;
 			if (state_action_table[i].isFeasible==true)
 			{
-				bool temp_is_the_state_i_still_feasible=false;
+
+				bool break_flag=false;
 				for (int j=0;j<state_action_table[i].actionsList.size();j++)
 				{
-//					if(j==0)
-//					{
-					if(state_action_table[i].actionsProgress[j]==false)
+					//					if(j==0)
+					//					{
+					for(int k=0;k<state_action_table[i].actionsProgress[j].size();k++)
 					{
-						if(state_action_table[i].actionsList[j]==agents[agent_update].lastActionAck)
-						{
-							if(agents[agent_update].isSuccessfullyDone==true)
+
+						if(state_action_table[i].actionsProgress[j][k]==false)
+						{// here we know where is the first action not have been done:
+							action_number=j;
+							if(state_action_table[i].actionsList[j]==agents[agent_update].lastActionAck)
 							{
-								state_action_table[i].actionsProgress[j]=true;
-								temp_is_the_state_i_still_feasible=true;
+								//&&
+								//state_action_table[i].actionsResponsible[j][k]==agents[agent_update].name
+								for (int m=0;m<state_action_table[i].actionsResponsible[action_number].size();m++)
+								{
+									if(state_action_table[i].actionsResponsible[action_number][m]==agents[agent_update].name)
+										if(agents[agent_update].isSuccessfullyDone==true)
+										{
+											cout<<501<<" "<<temp_is_the_state_i_still_feasible<<endl;
+											state_action_table[i].actionsProgress[j][m]=true;
+											temp_is_the_state_i_still_feasible=true;
+											cout<<502<<" "<<temp_is_the_state_i_still_feasible<<endl;
+											break;
+										}
+								}
+
+								//							else
+								//							{
+								//								// if an action performed not successfully by an agent that state will become infeasible
+								//								break;
+								//							}
+
 							}
-//							else
-//							{
-//								// if an action performed not successfully by an agent that state will become infeasible
-//								break;
-//							}
+							else
+							{
+								vector<string> emptyStr;
+								temp_is_the_state_i_still_feasible=CanAgentPerformAction(emptyStr,"Human",state_action_table[i].actionsList[j]);
+								cout<<503<<" "<<temp_is_the_state_i_still_feasible<<endl;
+							}
+							cout<<503001<<": "<<temp_is_the_state_i_still_feasible<<endl;
+							break_flag=true;
+							break; //2 breaks i need
 
 						}
-						else
-						{
-							temp_is_the_state_i_still_feasible=CanAgentPerformAction("","Human",state_action_table[i].actionsList[j]);
-						}
-						break;
+						cout<<5030012<<": "<<temp_is_the_state_i_still_feasible<<endl;
 					}
 
-//					}
-//					else
-//					{
-						// j>0: check for prev is solved and current is not solved:
-//						if(state_action_table[i].actionsList[j]==agents[agent_update].lastActionAck
-//								&& state_action_table[i].actionsProgress[j]==false
-//								&& state_action_table[i].actionsProgress[j-1]==true)
-//						{
-//							if(agents[agent_update].isSuccessfullyDone==true)
-//							{
-//								state_action_table[i].actionsProgress[j]=true;
-//								temp_is_the_state_i_still_feasible=true;
-//							}
-//							break;
-//						}
-//					}
+					//					}
+					//					else
+					//					{
+					// j>0: check for prev is solved and current is not solved:
+					//						if(state_action_table[i].actionsList[j]==agents[agent_update].lastActionAck
+					//								&& state_action_table[i].actionsProgress[j]==false
+					//								&& state_action_table[i].actionsProgress[j-1]==true)
+					//						{
+					//							if(agents[agent_update].isSuccessfullyDone==true)
+					//							{
+					//								state_action_table[i].actionsProgress[j]=true;
+					//								temp_is_the_state_i_still_feasible=true;
+					//							}
+					//							break;
+					//						}
+					//					}
+					if(break_flag==true){
+						cout<<503002<<": "<<temp_is_the_state_i_still_feasible<<endl;
+						break;
+					}
+					cout<<503003<<": "<<temp_is_the_state_i_still_feasible<<endl;
 
 				}
+				cout<<503004<<": "<<temp_is_the_state_i_still_feasible<< state_action_table[i].isFeasible<< " "<< state_action_table[i].state_name<<endl;
 				if(temp_is_the_state_i_still_feasible==true)
 				{
+					cout<<504<<" "<<temp_is_the_state_i_still_feasible<<endl;
 					state_action_table[i].isFeasible=true;
 					is_a_state_feasible=true;
 				}
 				else
 				{
+					cout<<505<<" "<<temp_is_the_state_i_still_feasible<<endl;
 					state_action_table[i].isFeasible=false;
 				}
 
 			}
-			if(state_action_table[i].isFeasible==true
-					&& state_action_table[i].actionsProgress[state_action_table[i].actionsProgress.size()-1]==true)
+
+			if(state_action_table[i].isFeasible==true)
 			{
-				CheckStateExecution();
-				is_a_state_solved=true;
-				break;
+				cout<<506<<" "<<state_action_table[i].isFeasible<<endl;
+				bool executionFlag=true;
+				for(int n=0;n <state_action_table[i].actionsProgress[state_action_table[i].actionsProgress.size()-1].size(); n++)
+					if(state_action_table[i].actionsProgress[state_action_table[i].actionsProgress.size()-1][n]==false)
+						executionFlag=false;
+				if(executionFlag==true)
+				{
+					CheckStateExecution();
+					is_a_state_solved=true;
+					break;
+				}
 			}
 		}
 
@@ -144,8 +184,8 @@ void seq_planner_class::FindNextAction(){
 	cout<<"seq_planner_class::FindNextAction"<<endl;
 	/*!
 	 * 	1- Find next action to perform
- 	 *	2- Assign an agent to perform the action
- 	 */
+	 *	2- Assign an agent to perform the action
+	 */
 
 	int state_min_cost=10000; // a high value
 	int number_feasible_state=0;
@@ -162,16 +202,29 @@ void seq_planner_class::FindNextAction(){
 	}
 	if (number_feasible_state>0)
 	{
+		bool next_action_progress;
 		for(int i=0;i<state_action_table[optimal_state].actionsList.size();i++)
 		{
-			if(state_action_table[optimal_state].actionsProgress[i]==false)
+			next_action_progress=false;
+			for (int j=0;j<state_action_table[optimal_state].actionsProgress[i].size();j++)
+				if (state_action_table[optimal_state].actionsProgress[i][j]==true)
+					next_action_progress=true;
+
+			if(next_action_progress==false)
 			{
 				next_action_index=i;
 				break;
 			}
 		}
-		cout<<"Optimal State: "<<state_action_table[optimal_state].state_name<<", Next Action: "<<state_action_table[optimal_state].actionsList[next_action_index]<<endl;
-		FindResponisibleAgent();
+		if(next_action_progress==true){
+			cout<<"In the optimal state there is no action that all the progress flag is false "<<endl;
+			cout<<"You should check later the function"<<endl;
+		}
+		else
+		{
+			cout<<"Optimal State: "<<state_action_table[optimal_state].state_name<<", Next Action: "<<state_action_table[optimal_state].actionsList[next_action_index]<<endl;
+			FindResponisibleAgent();
+		}
 	}
 	else
 	{
@@ -199,15 +252,16 @@ void seq_planner_class::FindResponisibleAgent(void){
 		exit(1);
 	}
 
-	if(state_action_table[optimal_state].actionsResponsible[next_action_index]=="Unknown")
+	if(state_action_table[optimal_state].actionsResponsible[next_action_index][0]=="Unknown")
 	{
 		isResponsibleAgentAcceptable=true;
 //		if(action_Definition_List[action_number].agents.size()==1)
 //		{
-		if(action_Definition_List[action_number].agents[0].size()==1)
-			state_action_table[optimal_state].actionsResponsible[next_action_index]=action_Definition_List[action_number].agents[0][0];
-		else
-			state_action_table[optimal_state].actionsResponsible[next_action_index]="Joint";
+//		if(action_Definition_List[action_number].agents[0].size()==1)
+		state_action_table[optimal_state].actionsResponsible[next_action_index].clear();
+			state_action_table[optimal_state].actionsResponsible[next_action_index]=action_Definition_List[action_number].agents[0];
+//		else
+//			state_action_table[optimal_state].actionsResponsible[next_action_index]="Joint";
 		//		}
 //		else
 //		{
@@ -227,88 +281,105 @@ void seq_planner_class::FindResponisibleAgent(void){
 
 
 // give the command for the find found agent:
+//	if(isResponsibleAgentAcceptable==true)
+//	{
+//		if(state_action_table[optimal_state].actionsResponsible[next_action_index]=="All")
+//		{
+//			for(int i=0;i<action_Definition_List[action_number].agents.size();i++)
+//			{
+//				if (action_Definition_List[action_number].agents[i].size()==1)
+//				{
+//					for(int j=0;j<agents.size();j++)
+//					{
+//						if(action_Definition_List[action_number].agents[i][0]==agents[j].name)
+//						{
+//							agents[j].lastAssignedAction=state_action_table[optimal_state].actionsList[next_action_index];
+//							agents[j].isBusy=true;
+//							if(agents[j].type=="Human")
+//							{
+//								PublishHumanAction( agents[j].lastAssignedAction , agents[j].name);
+//							}
+//							else if(agents[j].type=="Robot")
+//							{
+//								PublishRobotAction( agents[j].lastAssignedAction , agents[j].name);
+//							}
+//							else
+//							{
+//								cout<<FRED("agent type is wrong")<<endl;
+//							}
+//							break;
+//						}
+//					}
+//
+//
+//				}
+//				else
+//				{
+//					//					action_Definition_List[action_number].agents[i].size()>1
+//					cout<<FRED("This action can not be type 'ALL' : ")<<action_Definition_List[action_number].name<<endl;
+//				}
+//			}
+//		}
+//		else if(state_action_table[optimal_state].actionsResponsible[next_action_index]=="Joint")
+//		{
+//			for(int i=0;i<action_Definition_List[action_number].agents[0].size();i++)
+//			{
+//				for(int j=0;j<agents.size();j++)
+//				{
+//					if(action_Definition_List[action_number].agents[0][i]==agents[j].name)
+//					{
+//						agents[j].lastAssignedAction=state_action_table[optimal_state].actionsList[next_action_index];
+//						agents[j].isBusy=true;
+//						break;
+//					}
+//				}
+//			}
+//			for (int k=0;k<state_action_table[optimal_state].actionsResponsible[next_action_index].size();k++)
+//			PublishRobotAction(state_action_table[optimal_state].actionsList[next_action_index],
+//					state_action_table[optimal_state].actionsResponsible[next_action_index][k]);
+//		}
+//		else
+//		{
+	//give the command to the related agent
 	if(isResponsibleAgentAcceptable==true)
 	{
-		if(state_action_table[optimal_state].actionsResponsible[next_action_index]=="All")
+		bool robotcommandSent=false;
+		for(int i=0;i<state_action_table[optimal_state].actionsResponsible[next_action_index].size();i++)
 		{
-			for(int i=0;i<action_Definition_List[action_number].agents.size();i++)
+			for(int j=0;j<agents.size();j++)
 			{
-				if (action_Definition_List[action_number].agents[i].size()==1)
+				if(state_action_table[optimal_state].actionsResponsible[next_action_index][i]==agents[j].name)
 				{
-					for(int j=0;j<agents.size();j++)
+					vector<string> colleaguesAgents;
+					for(int k=0;k<state_action_table[optimal_state].actionsResponsible[next_action_index].size();k++)
+						if(k!=i)
+							colleaguesAgents.push_back(state_action_table[optimal_state].actionsResponsible[next_action_index][k]);
+
+					agents[j].lastAssignedAction=state_action_table[optimal_state].actionsList[next_action_index];
+					agents[j].isBusy=true;
+					agents[j].responsibility_number=i;
+					if(agents[j].type=="Human")
 					{
-						if(action_Definition_List[action_number].agents[i][0]==agents[j].name)
-						{
-							agents[j].lastAssignedAction=state_action_table[optimal_state].actionsList[next_action_index];
-							agents[j].isBusy=true;
-							if(agents[j].type=="Human")
-							{
-								PublishHumanAction( agents[j].lastAssignedAction , agents[j].name);
-							}
-							else if(agents[j].type=="Robot")
-							{
-								PublishRobotAction( agents[j].lastAssignedAction , agents[j].name);
-							}
-							else
-							{
-								cout<<FRED("agent type is wrong")<<endl;
-							}
-							break;
+						PublishHumanAction( agents[j].lastAssignedAction , agents[j].name,colleaguesAgents);
+					}
+					else if(agents[j].type=="Robot")
+					{
+						if(robotcommandSent==false){
+						PublishRobotAction( agents[j].lastAssignedAction , agents[j].name,colleaguesAgents);
+						robotcommandSent=true;
 						}
-					}
-
-
-				}
-				else
-				{
-					//					action_Definition_List[action_number].agents[i].size()>1
-					cout<<FRED("This action can not be type 'ALL' : ")<<action_Definition_List[action_number].name<<endl;
-				}
-			}
-		}
-		else if(state_action_table[optimal_state].actionsResponsible[next_action_index]=="Joint")
-		{
-			for(int i=0;i<action_Definition_List[action_number].agents[0].size();i++)
-			{
-				for(int j=0;j<agents.size();j++)
-				{
-					if(action_Definition_List[action_number].agents[0][i]==agents[j].name)
-					{
-						agents[j].lastAssignedAction=state_action_table[optimal_state].actionsList[next_action_index];
-						agents[j].isBusy=true;
-						break;
-					}
-				}
-			}
-			PublishRobotAction(state_action_table[optimal_state].actionsList[next_action_index],
-					state_action_table[optimal_state].actionsResponsible[next_action_index]);
-		}
-		else
-		{
-			for(int i=0;i<agents.size();i++)
-			{
-				if(state_action_table[optimal_state].actionsResponsible[next_action_index]==agents[i].name)
-				{
-					agents[i].lastAssignedAction=state_action_table[optimal_state].actionsList[next_action_index];
-					agents[i].isBusy=true;
-					if(agents[i].type=="Human")
-					{
-						PublishHumanAction( agents[i].lastAssignedAction , agents[i].name);
-					}
-					else if(agents[i].type=="Robot")
-					{
-						PublishRobotAction( agents[i].lastAssignedAction , agents[i].name);
 					}
 					else
 					{
 						cout<<FRED("agent type is wrong")<<endl;
 					}
+					break;
 				}
-
 			}
 		}
-
 	}
+
+//	}
 
 //		if(state_action_table[optimal_state].actionsResponsible[next_action_index]=="Human")
 //		{
@@ -351,7 +422,7 @@ void seq_planner_class::FindResponisibleAgent(void){
 //		}
 	else
 	{
-		cout<<FRED("No Responsible Agent")<<endl;
+		cout<<FRED("The responsible agent is not acceptable")<<endl;
 	}
 //				for(int j=0;j<action_Definition_List[i].agents.size();j++)
 //				{
@@ -433,8 +504,13 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 				{
 					temp_obj.actionsList=Full_State_action_list[j].actionsList;
 					temp_obj.actionsResponsible=Full_State_action_list[j].actionsResponsible;
-					for (int k=0;k<Full_State_action_list[j].actionsList.size();k++) // check if k should start from 0 or 1 ?
-						temp_obj.actionsProgress.push_back(false);
+					for (int k=0;k<temp_obj.actionsResponsible.size();k++)
+					{
+						vector<bool> temp_actionProgress;
+						for(int l=0;l<temp_obj.actionsResponsible[k].size();l++)
+							temp_actionProgress.push_back(false);
+						temp_obj.actionsProgress.push_back(temp_actionProgress);
+					}
 				}
 			}
 			state_action_table.push_back(temp_obj);
@@ -489,7 +565,13 @@ void seq_planner_class::CheckStateExecution(){
 		else
 		{
 			int actions_size=state_action_table[i].actionsProgress.size();
-			if (state_action_table[i].actionsProgress[actions_size-1]==true)
+			bool last_action_progress=true;
+
+			for (int j=0;j<state_action_table[i].actionsProgress[actions_size-1].size();j++)
+				if (state_action_table[i].actionsProgress[actions_size-1][j]==false)
+					last_action_progress=false;
+
+			if (last_action_progress==true)
 			{
 				updateAndor=true;
 				if (state_action_table[i].state_type=="Node")
@@ -585,10 +667,12 @@ void seq_planner_class::SetStateActionList(string stateActionPath){
 	cout<<"SetStateActionList"<<endl;
 	ifstream file_path_ifStr(stateActionPath.c_str());
 	vector<string> line_list;
-	vector<string> action_responsible;
+	vector<string> action_and_responsibles;
+
 	string line;
 	string delim_type=" ";
 	string responsible_delim_type="_";
+	string joint_delim_type="+";
 
 
 	cout<<"file_path_ifStr.is_open(): "<<file_path_ifStr.is_open()<<endl;
@@ -602,19 +686,25 @@ void seq_planner_class::SetStateActionList(string stateActionPath){
 			temp_obj.state_name=line_list[0];
 			for(int i=1;i<line_list.size();i++)
 			{
-				boost::split(action_responsible, line_list[i], boost::is_any_of(responsible_delim_type));
+				vector<string> responsibles;
+				boost::split(action_and_responsibles, line_list[i], boost::is_any_of(responsible_delim_type));
 
-				temp_obj.actionsList.push_back(action_responsible[0]);
-				if(action_responsible.size()==2)
-					temp_obj.actionsResponsible.push_back(action_responsible[1]);
-				else if(action_responsible.size()==1)
+				temp_obj.actionsList.push_back(action_and_responsibles[0]);
+				if(action_and_responsibles.size()==2)
 				{
-					temp_obj.actionsResponsible.push_back("Unknown");
+					boost::split(responsibles, action_and_responsibles[1], boost::is_any_of(joint_delim_type));
+					temp_obj.actionsResponsible.push_back(responsibles);
+				}
+				else if(action_and_responsibles.size()==1)
+				{
+					responsibles.push_back("Unknown");
+					temp_obj.actionsResponsible.push_back(responsibles);
 				}
 				else
-				{cout<<"Error in state_action text file"<<endl;}
+				{cout<<"Error in state_action text file, please check state: "<<temp_obj.state_name<<", action: "<<action_and_responsibles[0]<<endl;}
 			}
 			Full_State_action_list.push_back(temp_obj);
+
 		}
 		file_path_ifStr.close();
 	}
@@ -629,58 +719,82 @@ void seq_planner_class::SetStateActionList(string stateActionPath){
 
 
 
-bool seq_planner_class::CanAgentPerformAction(string agent_name, string agent_type, string action_name){
+bool seq_planner_class::CanAgentPerformAction(vector<string> agent_name, string agent_type, string action_name){
 	bool temp=false;
 
 	if(agent_type=="")// if a specific agent (by name) can perform an action
 	{
+		cout<<600<<endl;
 		for (int i=0;i<action_Definition_List.size();i++)
 		{
+			cout<<601<<endl;
 			if(action_Definition_List[i].name==action_name)
 			{
+				cout<<602<<endl;
 				for(int j=0;j<action_Definition_List[i].agents.size();j++)
 				{
-
-					if(action_Definition_List[i].agents[j][0]==agent_name)
+					cout<<603<<endl;
+					int count=0;
+					for(int l=0;l<action_Definition_List[i].agents[j].size();l++)
 					{
-						temp=true;
-						break;
-						if(action_Definition_List[i].agents[j].size()>0)
-							cout<<"this action is a joint action and a single agent can not perform it"<<endl;
-					}
-				}
-				break;
-			}
-		}
-	}
-	else if(agent_name=="")// if an agent type can perform an action
-	{
-		for (int i=0;i<action_Definition_List.size();i++)
-		{
-			if(action_Definition_List[i].name==action_name)
-			{
-				for(int j=0;j<action_Definition_List[i].agents.size();j++)
-				{
-					for(int k=0; k<agents.size(); k++)
-					{
-						if(action_Definition_List[i].agents[j][0]==agents[k].name)
+						cout<<604<<endl;
+						for(int k=0;k<agent_name.size();k++)
 						{
-							if(agents[k].type==agent_type)
+							cout<<605<<endl;
+							if(action_Definition_List[i].agents[j][l]==agent_name[k])
 							{
-								temp=true;
-								break;
+								count++;
+								cout<<"606: "<<count<<endl;
 							}
 						}
 					}
+					if(count==agent_name.size())
+					{
+						temp=true;
+						break;
+					}
+//					if(action_Definition_List[i].agents[j].size()>0)
+//						cout<<"this action is a joint action and a single agent can not perform it"<<endl;
 				}
 				break;
 			}
 		}
-
+	}
+	else if(agent_name.empty()==true)// if an agent type can perform an action
+	{
+		cout<<610<<endl;
+		for (int i=0;i<action_Definition_List.size();i++)
+		{
+			if(action_Definition_List[i].name==action_name)
+			{
+				for(int j=0;j<action_Definition_List[i].agents.size();j++)
+				{
+					for(int l=0; l< action_Definition_List[i].agents[j].size();l++)
+					{
+						for(int k=0; k<agents.size(); k++)
+						{
+							if(action_Definition_List[i].agents[j][l]==agents[k].name)
+							{
+								if(agents[k].type==agent_type)
+								{
+									temp=true;
+									break;
+								}
+							}
+						}
+						if(temp==true)
+							break;
+					}
+					if(temp==true)
+						break;
+				}
+				break;
+			}
+		}
 	}
 	else
 	{
-		cout<<FRED("Error, agent_name or agent_type one of them should be empty: ")<<"agent_name: "<<agent_name<<"agent_type: "<<agent_type<<endl;
+		cout<<FRED("Error, agent_name or agent_type one of them should be empty: ")<<endl;
 	}
 
 	return temp;
@@ -789,17 +903,20 @@ void seq_planner_class::CallBackRobotAck(const std_msgs::String::ConstPtr& msg){
 	}
 }
 
-void seq_planner_class::PublishHumanAction(string humanAction, string responsibeAgentName){
+void seq_planner_class::PublishHumanAction(string ActionName, string AgentName, vector<string> ColleaguesName){
 	cout<<"seq_planner_class::PublishHumanAction"<<endl;
-	cout<<responsibeAgentName<<FBLU(" Please perform Action: ")<<humanAction<<endl;
+	cout<<AgentName<<FBLU(": Please perform Action '")<<ActionName<<"'"<<endl;
 //	agents[0].isBusy=true;
 }
-void seq_planner_class::PublishRobotAction(string robotAction, string responsibeAgentName){
+void seq_planner_class::PublishRobotAction(string ActionName, string AgentName, vector<string> ColleaguesName){
 	cout<<"seq_planner_class::PublishRobotAction"<<endl;
 	// publish which agent to perform an action
 	std_msgs::String robotMsg;
-	robotMsg.data =robotAction+"_"+responsibeAgentName;
+	robotMsg.data =ActionName+"_"+AgentName;
 	pubRobotCommand.publish(robotMsg);
 
 	ROS_INFO("publish robot command : %s ",robotMsg.data.c_str() );
+	for(int i=0;i<ColleaguesName.size();i++)
+		cout<<ColleaguesName[i]<<" ";
+	cout<<endl;
 }
