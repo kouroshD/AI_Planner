@@ -227,15 +227,16 @@ private:
 
 	void CallBackHumanAck(const std_msgs::String::ConstPtr& msg);
 	void CallBackRobotAck(const std_msgs::String::ConstPtr& msg);
-	void PublishHumanAction(string ActionName, string AgentName, vector<string> ColleaguesName);
-	void PublishRobotAction(string ActionName, string AgentName, vector<string> ColleaguesName);
-	bool CanAgentPerformAction(vector<string> agent_name,string agent_type, string action_name);
+	void PublishHumanAction(string ActionName, string AgentsName, vector<string> ColleaguesName);
+	void PublishRobotAction(string ActionName, vector<string> AgentName, vector<string> ColleaguesName);
+	bool CanAgentPerformAction(vector<string> agent_name,string agent_type, string action_name, bool sufficiency);
+	bool IsAgentsSufficientForAction(vector<string> agent_name,string agent_type, string action_name);
 
 	void SetActionDefinitionList(string actionDefinitionPath);
 	void SetStateActionList(string stateActionPath);
 	void SetAgentsList(void);
 
-	void UpdateStateActionTable(int update_agent);
+	void UpdateStateActionTable(string ActionName, vector<string>AgentsName, bool success);
 //	agent_update --> the agent number who arrives the latest ack.
 	void FindNextAction(void);
 	void FindResponisibleAgent(void);
