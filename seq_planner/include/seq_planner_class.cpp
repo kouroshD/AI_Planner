@@ -45,15 +45,18 @@ void seq_planner_class::UpdateStateActionTable(string ActionName, vector<string>
 
 	bool is_a_state_solved=false;
 	bool is_a_state_feasible=false;
-	bool is_an_action_done=true;
-	int action_number, state_number;
+	bool is_an_action_done=false;
+	vector<bool> actions_done;
+
 	if(state_action_table.size()>0)
 	{
 		for(int i=0;i<state_action_table.size();i++)
 		{
+			actions_done.push_back(false);
 			bool temp_is_the_state_i_still_feasible=false;
 			if (state_action_table[i].isFeasible==true)
 			{
+
 
 				bool break_flag=false;
 				for (int j=0;j<state_action_table[i].actionsList.size();j++)
@@ -64,8 +67,7 @@ void seq_planner_class::UpdateStateActionTable(string ActionName, vector<string>
 					{
 
 						if(state_action_table[i].actionsProgress[j][k]==false)
-						{// here we know where is the first action not have been done:
-							action_number=j;
+						{// here we know where is the first action not have been done in a state:
 							for(int n=0;n<AgentsName.size();n++)
 							{
 								cout<<"500-0: "<<state_action_table[i].actionsList[j]<<ActionName<<endl;
@@ -97,7 +99,7 @@ void seq_planner_class::UpdateStateActionTable(string ActionName, vector<string>
 											cout<<"500-4: "<<state_action_table[i].actionsResponsible[j][m]<<AgentsName[n] <<success<<endl;
 											vector<string> agentNameStr;
 											agentNameStr.push_back(AgentsName[n]);
-											bool agent_can_perfrom_the_action=CanAgentPerformAction(agentNameStr,"",state_action_table[i].actionsList[action_number],false);
+											bool agent_can_perfrom_the_action=CanAgentPerformAction(agentNameStr,"",state_action_table[i].actionsList[j],false);
 											// if the action an agent performed is a joint action, we should inform other agents to perfrom the action also!
 											if(agent_can_perfrom_the_action==true)
 											{
@@ -105,6 +107,7 @@ void seq_planner_class::UpdateStateActionTable(string ActionName, vector<string>
 												{
 													cout<<5010<<" "<<temp_is_the_state_i_still_feasible<<endl;
 													state_action_table[i].actionsProgress[j][m]=true;
+													state_action_table[i].actionsResponsible[j][m]=AgentsName[n];
 													temp_is_the_state_i_still_feasible=true;
 													cout<<5020<<" "<<temp_is_the_state_i_still_feasible<<endl;
 													break;
@@ -117,7 +120,14 @@ void seq_planner_class::UpdateStateActionTable(string ActionName, vector<string>
 											}
 										}
 										else
-										{ }
+										{
+											if(state_action_table[i].actionsResponsible[j].size()==1)
+											{
+												cout<<"The agent: "<<AgentsName[n]<<" performed the action:"<<state_action_table[i].actionsList[j] <<endl;
+												cout<<", but the assigned agent to that is: "<< state_action_table[i].actionsResponsible[j][k]<<endl;
+												exit(1);
+											}
+										}
 									}
 
 									//							else
@@ -132,24 +142,30 @@ void seq_planner_class::UpdateStateActionTable(string ActionName, vector<string>
 								else
 								{
 									vector<string> emptyStr;
-									temp_is_the_state_i_still_feasible=CanAgentPerformAction(emptyStr,"Human",state_action_table[i].actionsList[j], false);
+									if(AgentsName[n]!="Human") // later for multiple humans with different names, here should be agent_type instead of agent name
+										temp_is_the_state_i_still_feasible=CanAgentPerformAction(emptyStr,"Human",state_action_table[i].actionsList[j], false);
+
 									cout<<503<<" "<<temp_is_the_state_i_still_feasible<<endl;
+
+									break;
 								}
 
 								cout<<5030011<<": "<<temp_is_the_state_i_still_feasible<<endl;
 
 							}
-							cout<<5030012<<": "<<is_an_action_done<<endl;
+							actions_done[i]=true;
+							cout<<5030012<<": "<<actions_done[i]<<endl;
+
 							for(int q=0;q<state_action_table[i].actionsProgress[j].size();q++)
 							{
 								cout<<50300070<<"****: "<<state_action_table[i].actionsList[j]<<state_action_table[i].actionsProgress[j][q]	<<endl;
 								if(state_action_table[i].actionsProgress[j][q]==false)
 								{
-									is_an_action_done=false;
+									actions_done[i]=false;
 								}
 
 							}
-							cout<<5030013<<": "<<is_an_action_done<<endl;
+							cout<<5030013<<": "<<actions_done[i]<<endl;
 
 							cout<<5030014<<": "<<temp_is_the_state_i_still_feasible<<endl;
 							break_flag=true;
@@ -214,16 +230,24 @@ void seq_planner_class::UpdateStateActionTable(string ActionName, vector<string>
 
 
 		cout<<"550: "<<is_a_state_solved<<endl;
+
+		for(int h=0;h<actions_done.size();h++)
+			if(actions_done[h]==true)
+				is_an_action_done=true;
+
 		if(is_a_state_solved==false)
 		{
 			cout<<"551: "<<is_a_state_solved<<is_a_state_feasible<<is_an_action_done<<endl;
-			if(is_a_state_feasible==true && is_an_action_done==true)
+			if(is_a_state_feasible==true)
 			{
+
 				cout<<FBLU("after update: ")<<endl;
 				for (int i=0;i<state_action_table.size();i++)
 					state_action_table[i].Print();
-
-				FindNextAction();
+				if(is_an_action_done==true)
+				{
+					FindNextAction();
+				}
 			}
 			else
 			{
@@ -499,7 +523,8 @@ void seq_planner_class::FindResponisibleAgent(void){
 	//		}
 	else
 	{
-		cout<<FRED("The agent you defined in the 'State-Action-List' file can not perform the given action: state:")<<state_action_table[optimal_state].state_name<<", action:"<<state_action_table[optimal_state].actionsList[next_action_index]<<endl;
+		cout<<FRED("The agent you defined in the 'State-Action-List' file can not perform the given action: state:")<<
+				state_action_table[optimal_state].state_name<<", action:"<<state_action_table[optimal_state].actionsList[next_action_index]<<endl;
 		cout<<"Do you want to assign a new agent to it? ";
 		bool input;
 		vector<string> agent_list;
@@ -836,7 +861,7 @@ bool seq_planner_class::CanAgentPerformAction(vector<string> agent_name, string 
 	cout<<endl;
 
 	bool temp=false;
-	int action_number;
+	int action_number=1000;
 	if(agent_name.empty()!=true && agent_type=="")// if a specific agent (by name) can perform an action
 	{
 		cout<<600<<endl;
@@ -848,6 +873,11 @@ bool seq_planner_class::CanAgentPerformAction(vector<string> agent_name, string 
 				cout<<601<<": "<<action_number<<endl;
 				break;
 			}
+		}
+		if(action_number==1000)
+		{
+			cout<<"The acition not found in action's list"<<endl;
+			exit(1);
 		}
 
 		int count;
@@ -1034,29 +1064,43 @@ void seq_planner_class::CallBackRobotAck(const std_msgs::String::ConstPtr& msg){
 	bool success;
 	string delim_type="_", agents_delim_type="+";
 	string robot_ack, actionName;
+	bool arrived_msg=true;
 
 	ROS_INFO("I heard Robot Ack: [%s]", msg->data.c_str());
 
 	robot_ack=msg->data.c_str();
 
 	boost::split(robot_ack_list, robot_ack, boost::is_any_of(delim_type));
-	boost::split(agentsName,robot_ack_list[1], boost::is_any_of(agents_delim_type));
 
 	if(robot_ack_list.size()!=3)
-		cout<<"Error In receiving msg from robot ack "<<endl;
+	{
+		cout<<"Error In receiving msg from robot ack , msg size error"<<endl;
+		arrived_msg=false;
+	}
 	actionName=robot_ack_list[0];
 
+
+	boost::split(agentsName,robot_ack_list[1], boost::is_any_of(agents_delim_type));
+
 	if(agentsName.size()==0)
-		cout<<"Error In receiving msg from robot ack"<<endl;
+	{
+		cout<<"Error In receiving msg from robot ack, agent name size is zero"<<endl;
+		arrived_msg=false;
+	}
+
 
 	if(robot_ack_list[2]=="true")
 		success=1;
 	else if(robot_ack_list[2]=="false")
 		success=0;
 	else
+	{
 		cout<<"Error In receiving msg from robot"<<robot_ack_list[2]<<endl;
+		arrived_msg=false;
+	}
 
-	if(CanAgentPerformAction(agentsName,"",actionName,false))
+
+	if(CanAgentPerformAction(agentsName,"",actionName,false)==true && arrived_msg==true)
 		UpdateStateActionTable(actionName,agentsName,success);
 	else
 		cout<<"Error In receiving msg from robot ack, the agents can not perform given action"<<endl;
