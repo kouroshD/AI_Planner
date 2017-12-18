@@ -4,7 +4,7 @@ plate_screw_driver_screwPos
 plate_screw_screwPos
 plate_screwPos
 plate_screw_initialPos
-plate_initialPos
+plate_initialPos UnGrasp_RightArm UnGrasp_LeftArm
 screw_initialPos
 driver_initialPos
 h1 UnGrasp_RightArm ApproachPoint-7_LeftArm ApproachPoint-8_LeftArm UnGrasp_LeftArm ApproachPoint-9_RightArm ApproachPoint-10_LeftArm
@@ -14,4 +14,4 @@ h4 PickUp Screwing
 h5 PickUp PutDown
 h6 UnGrasp_RightArm UnGrasp_LeftArm ApproachPoint-0_RightArm ApproachPoint-1_RightArm ApproachPoint-2_RightArm Grasp_RightArm ApproachPoint-3_LeftArm ApproachPoint-4_RightArm ApproachPoint-5_LeftArm Grasp_LeftArm ApproachPoint-11_LeftArm+RightArm
 h7 PickUp ScrewingInitial PutDown
-h8 ApproachPoint-11_LeftArm+RightArm Handover_LeftArm+Human UnGrasp_RightArm UnGrasp_LeftArm ApproachPoint-0_RightArm ApproachPoint-1_RightArm ApproachPoint-2_RightArm Grasp_RightArm ApproachPoint-3_LeftArm ApproachPoint-4_RightArm ApproachPoint-5_LeftArm Grasp_LeftArm ApproachPoint-11_LeftArm+RightArm
+h8 ApproachPoint-11_LeftArm+RightArm Handover_LeftArm+Human ApproachPoint-0_RightArm ApproachPoint-1_RightArm ApproachPoint-2_RightArm Grasp_RightArm ApproachPoint-3_LeftArm ApproachPoint-4_RightArm ApproachPoint-5_LeftArm Grasp_LeftArm ApproachPoint-11_LeftArm+RightArm

@@ -230,7 +230,6 @@ private:
 	void PublishHumanAction(string ActionName, string AgentsName, vector<string> ColleaguesName);
 	void PublishRobotAction(string ActionName, vector<string> AgentName, vector<string> ColleaguesName);
 	bool CanAgentPerformAction(vector<string> agent_name,string agent_type, string action_name, bool sufficiency);
-	bool IsAgentsSufficientForAction(vector<string> agent_name,string agent_type, string action_name);
 
 	void SetActionDefinitionList(string actionDefinitionPath);
 	void SetStateActionList(string stateActionPath);
