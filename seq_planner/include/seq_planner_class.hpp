@@ -210,6 +210,7 @@ private:
     vector<offline_state_action> Full_State_action_list;// list of all the actions for all the states, this list should be found offline by a planner
 
     vector<feasible_state_action> state_action_table;
+    bool emergencyFlag;
 //    vector<vector<string>> Feasible_states_actions_table;     // table of the feasible state-actions names
 //    vector<vector<bool>> Feasible_states_actions_progress;     // table of the feasible state-actions done(true)/not done (false)actions
 //    vector<vector<string>> Feasible_states_Names; // the name of the feasible states , type of it :nodes / hyperacs
@@ -240,6 +241,8 @@ private:
 	void FindNextAction(void);
 	void FindResponisibleAgent(void);
 	void CheckStateExecution(void);
+	void EmergencyRobotStop(void);
+	void UpdateRobotEmergencyFlag(string ActionName, vector<string>AgentsName, bool success);
 };
 
 //****************************************

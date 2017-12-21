@@ -25,6 +25,7 @@ seq_planner_class::seq_planner_class(string actionDefinitionPath,string stateAct
 	subHumanActionAck=nh.subscribe("HRecAction",100, &seq_planner_class::CallBackHumanAck, this);
 	subRobotActionAck=nh.subscribe("robot_ack",100, &seq_planner_class::CallBackRobotAck, this);
 	pubRobotCommand = nh.advertise<std_msgs::String>("robot_command",10);
+	emergencyFlag=false;
 
 }
 seq_planner_class::~seq_planner_class(){
@@ -622,6 +623,7 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 	//	Feasible_states_actions_progress.clear();
 	//	Feasible_states_isFeasible.clear();
 	cout<<"100: "<<gen_Feasible_stateCost_list.size()<<endl;
+	bool nameFlag=false;
 	for(int i=0; i<gen_Feasible_stateCost_list.size();i++)
 	{
 		feasible_state_action temp_obj;
@@ -630,10 +632,12 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 		temp_obj.state_cost=gen_Feasible_stateCost_list[i];
 		temp_obj.isFeasible=true;
 		//		temp_obj.actionsList=
+
 		for (int j=0;j<Full_State_action_list.size();j++)
 		{
 			if (temp_obj.state_name==Full_State_action_list[j].state_name)
 			{
+				nameFlag=true;
 				temp_obj.actionsList=Full_State_action_list[j].actionsList;
 				temp_obj.actionsResponsible=Full_State_action_list[j].actionsResponsible;
 				for (int k=0;k<temp_obj.actionsResponsible.size();k++)
@@ -647,6 +651,8 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 		}
 		state_action_table.push_back(temp_obj);
 	}
+	if(nameFlag==false)
+		cout<<"There is not any defined state with the name coming from AND/OR graph"<<endl;
 
 	cout<<"101: "<<state_action_table.size()<<endl;
 	for (int i=0;i<state_action_table.size();i++)
@@ -967,11 +973,68 @@ bool seq_planner_class::CanAgentPerformAction(vector<string> agent_name, string 
 	return temp;
 };
 
+void seq_planner_class::EmergencyRobotStop(void){
+	cout<<"seq_planner_class::EmergencyRobotStop"<<endl;
+	emergencyFlag=true;
+
+	for(int i=0;i<agents.size();i++)
+	{
+		if(agents[i].type=="Robot")
+		{
+			agents[i].isBusy=true;
+			agents[i].lastActionAck="Stop";
+			vector<string> agentName, coleaguesName; agentName.push_back(agents[i].name);
+
+			PublishRobotAction("Stop", agentName, coleaguesName);
+			agents[i].isBusy=true;
+			agents[i].lastActionAck="HoldOn";
+			PublishRobotAction("HoldOn", agentName, coleaguesName);
+
+		}
+	}
+};
+
+void seq_planner_class::UpdateRobotEmergencyFlag(string ActionName, vector<string>AgentsName, bool success){
+	cout<<"seq_planner_class::UpdateRobotEmergencyFlag"<<endl;
+
+	for(int i=0;i<agents.size();i++)
+	{
+		if(agents[i].name==AgentsName[0])
+		{
+			agents[i].isBusy=false;
+			agents[i].isSuccessfullyDone=success;
+		}
+	}
+	bool temp_emergencyFlag=true;
+	for(int i=0;i<agents.size();i++)
+	{
+		if(agents[i].type=="Robot")
+		{
+			if(agents[i].isBusy==true || agents[i].isSuccessfullyDone==false || agents[i].lastAssignedAction!="HoldOn")
+			{
+				temp_emergencyFlag=false;
+			}
+		}
+	}
+	emergencyFlag=temp_emergencyFlag;
+
+	cout<<"Updated Emergency Flag: "<<emergencyFlag<<endl;
+
+
+};
+
 
 void seq_planner_class::CallBackHumanAck(const std_msgs::String::ConstPtr& msg){
 	cout<<"seq_planner_class::CallBackHumanAck"<<endl;
 
 	string actionName=msg-> data.c_str();
+	if(agents[0].isBusy==false)
+	{
+		// it means that, beforehand no action is assigned to human action
+		EmergencyRobotStop();
+
+	}
+
 	agents[0].isBusy=false;
 	agents[0].lastActionAck=actionName;
 	agents[0].isSuccessfullyDone=true;
@@ -1030,9 +1093,16 @@ void seq_planner_class::CallBackRobotAck(const std_msgs::String::ConstPtr& msg){
 		arrived_msg=false;
 	}
 
-
+//	if
 	if(CanAgentPerformAction(agentsName,"",actionName,false)==true && arrived_msg==true)
-		UpdateStateActionTable(actionName,agentsName,success);
+		if(emergencyFlag==false)
+		{
+			UpdateStateActionTable(actionName,agentsName,success);
+		}
+		else
+		{
+			UpdateRobotEmergencyFlag(actionName,agentsName,success);
+		}
 	else
 		cout<<"Error In receiving msg from robot ack, the agents can not perform given action"<<endl;
 
@@ -1138,7 +1208,7 @@ void seq_planner_class::PublishHumanAction(string ActionName, string AgentName, 
 
 	//	agents[0].isBusy=true;
 }
-void seq_planner_class::PublishRobotAction(string ActionName,vector<string>   AgentsName, vector<string> ColleaguesName){
+void seq_planner_class::PublishRobotAction(string ActionName, vector<string> AgentsName, vector<string> ColleaguesName){
 	cout<<"seq_planner_class::PublishRobotAction"<<endl;
 	// publish which agent to perform an action
 
