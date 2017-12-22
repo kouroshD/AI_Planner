@@ -88,6 +88,7 @@ public:
 		cout<<"lastActionAck: "<<lastActionAck<<endl;
 		cout<<"allowToChangePath: "<<allowToChangePath<<endl;
 		cout<<"isBusy: "<<isBusy<<endl;
+		cout<<"isSuccessfullyDone? "<<isSuccessfullyDone<<endl;
 	};
 };
 

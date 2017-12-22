@@ -6,7 +6,7 @@ Stop simple LeftArm/RightArm
 Grasp simple LeftArm/RightArm
 UnGrasp simple LeftArm/RightArm
 HoldOn simple LeftArm/RightArm
-Approach-Point-0 simple LeftArm/RightArm
+Approach-Point-0 simple RightArm
 Approach-Point-1 simple RightArm
 Approach-Point-2 simple RightArm
 Approach-Point-3 simple RightArm

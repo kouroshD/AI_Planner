@@ -976,21 +976,31 @@ bool seq_planner_class::CanAgentPerformAction(vector<string> agent_name, string 
 void seq_planner_class::EmergencyRobotStop(void){
 	cout<<"seq_planner_class::EmergencyRobotStop"<<endl;
 	emergencyFlag=true;
+	vector<string> agentName, coleaguesName;
+
 
 	for(int i=0;i<agents.size();i++)
 	{
+		agentName.clear();
 		if(agents[i].type=="Robot")
 		{
 			agents[i].isBusy=true;
-			agents[i].lastActionAck="Stop";
-			vector<string> agentName, coleaguesName; agentName.push_back(agents[i].name);
+			agents[i].isSuccessfullyDone=false;
 
-			PublishRobotAction("Stop", agentName, coleaguesName);
-			agents[i].isBusy=true;
-			agents[i].lastActionAck="HoldOn";
-			PublishRobotAction("HoldOn", agentName, coleaguesName);
+			agentName.push_back(agents[i].name);
 
+			if(agents[i].lastAssignedAction=="Stop")
+			{
+				agents[i].lastAssignedAction="HoldOn";
+				PublishRobotAction("HoldOn", agentName, coleaguesName);
+			}
+			else
+			{
+				agents[i].lastAssignedAction="Stop";
+				PublishRobotAction("Stop", agentName, coleaguesName);
+			}
 		}
+
 	}
 };
 
@@ -1001,26 +1011,75 @@ void seq_planner_class::UpdateRobotEmergencyFlag(string ActionName, vector<strin
 	{
 		if(agents[i].name==AgentsName[0])
 		{
+			cout<<"800"<<endl;
 			agents[i].isBusy=false;
 			agents[i].isSuccessfullyDone=success;
+			agents[i].lastActionAck=ActionName;
+			agents[i].Print();
 		}
 	}
-	bool temp_emergencyFlag=true;
+
+	vector<bool> emergencyFlagVector, holdOnFlag;
+	cout<<"*****************800-1**************"<<endl;
+	int count=0;
 	for(int i=0;i<agents.size();i++)
 	{
 		if(agents[i].type=="Robot")
 		{
-			if(agents[i].isBusy==true || agents[i].isSuccessfullyDone==false || agents[i].lastAssignedAction!="HoldOn")
+			agents[i].Print();
+			emergencyFlagVector.push_back(false);
+			holdOnFlag.push_back(false);
+
+			if(agents[i].isBusy==false && agents[i].isSuccessfullyDone==true &&  agents[i].lastActionAck=="Stop" &&  agents[i].lastAssignedAction=="Stop" )
 			{
-				temp_emergencyFlag=false;
+				holdOnFlag[count]=true;
+				cout<<"803"<<endl;
 			}
+			else if(agents[i].isBusy==false && agents[i].isSuccessfullyDone==true &&  agents[i].lastActionAck=="HoldOn" && agents[i].lastAssignedAction=="HoldOn")
+			{
+				emergencyFlagVector[count]=true;
+				cout<<"804"<<endl;
+			}
+			else
+			{}
+			count++;
 		}
 	}
-	emergencyFlag=temp_emergencyFlag;
+	bool temp_EmergencyFlag=true, temp_HoldOnFlag=true;
+	count=0;
+	cout<<"*****************800-2**************"<<endl;
+	for(int i=0;i<agents.size();i++)
+	{
+		if(agents[i].type=="Robot")
+		{
+			agents[i].Print();
+			if(holdOnFlag[count]==false)
+			{
+				cout<<"*****"<<805<<endl;
+				temp_HoldOnFlag=false;
 
-	cout<<"Updated Emergency Flag: "<<emergencyFlag<<endl;
 
+			}
+			 if(emergencyFlagVector[count]==false)
+			{
+				cout<<"*****"<<806<<endl;
+				temp_EmergencyFlag=false;
+			}
+			count++;
+		}
+	}
 
+	cout<<"Updated hold on Flag: "<<temp_HoldOnFlag<<endl;
+	cout<<"Updated Emergency Flag: "<<temp_EmergencyFlag<<endl;
+
+	if(temp_HoldOnFlag==true)
+		EmergencyRobotStop();
+	else if(temp_EmergencyFlag==true)
+		emergencyFlag=!temp_EmergencyFlag;
+	else
+	{}
+
+	cout<<"emergency Flag: "<<emergencyFlag<<endl;
 };
 
 
@@ -1028,6 +1087,7 @@ void seq_planner_class::CallBackHumanAck(const std_msgs::String::ConstPtr& msg){
 	cout<<"seq_planner_class::CallBackHumanAck"<<endl;
 
 	string actionName=msg-> data.c_str();
+	cout<<agents[0].name<<" action: "<< actionName<<endl;
 	if(agents[0].isBusy==false)
 	{
 		// it means that, beforehand no action is assigned to human action
@@ -1093,7 +1153,7 @@ void seq_planner_class::CallBackRobotAck(const std_msgs::String::ConstPtr& msg){
 		arrived_msg=false;
 	}
 
-//	if
+	cout<<"emergency Flag: "<<emergencyFlag<<endl;
 	if(CanAgentPerformAction(agentsName,"",actionName,false)==true && arrived_msg==true)
 		if(emergencyFlag==false)
 		{
