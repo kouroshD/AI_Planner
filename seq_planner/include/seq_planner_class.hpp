@@ -137,6 +137,9 @@ public:
 	vector<string> actionsList;
 	vector<vector<string>> actionsResponsible;
 	vector<vector<bool>> actionsProgress;
+	vector<string> stateResponsible;
+	vector<bool> simulationProgress;
+
 
 	feasible_state_action(void)
 	{
