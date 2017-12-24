@@ -739,30 +739,42 @@ void seq_planner_class::SetActionDefinitionList(string actionDefinitionPath){
 	string delim_type=" ";
 	string delim_agent="/";
 	string delim_joint="+";
+	string delim_actionParameters="_";
+
 	std::vector<std::string> line_list;
 	string line;
 
 	cout<<file_path_ifStr.is_open()<<endl;
-	if (file_path_ifStr.is_open()){
+	if (file_path_ifStr.is_open())
+	{
 		while(getline(file_path_ifStr,line))
 		{
 			action actionDef;
 			boost::split(line_list, line, boost::is_any_of(delim_type));
-			actionDef.name=line_list[0];
-			actionDef.actionType=line_list[1];
-			//			actionDef.actionMode=line_list[2];
-			int counter=0;
-			//			int Num_agents=stoi(line_list[3]);
-			vector<string> AGENTS, joint_agents;
-			boost::split(AGENTS, line_list[2], boost::is_any_of(delim_agent));
-			for (int i=0;i < AGENTS.size();i++)
+			if(line_list[0]!="#")
 			{
-				boost::split(joint_agents, AGENTS[i], boost::is_any_of(delim_joint));
-				//				for (int j=0;j < joint_agents.size();j++)
-				actionDef.agents.push_back(joint_agents);
-				counter++;
+				vector<string> action_paramters;
+				boost::split(action_paramters, line_list[0], boost::is_any_of(delim_actionParameters));
+				actionDef.name=action_paramters[0];
+				if(action_paramters.size()>1)
+					for(int i=1;i<action_paramters.size();i++)
+						actionDef.argFeature.push_back(action_paramters[i]);
+
+				actionDef.actionType=line_list[1];
+				//			actionDef.actionMode=line_list[2];
+				int counter=0;
+				//			int Num_agents=stoi(line_list[3]);
+				vector<string> AGENTS, joint_agents;
+				boost::split(AGENTS, line_list[2], boost::is_any_of(delim_agent));
+				for (int i=0;i < AGENTS.size();i++)
+				{
+					boost::split(joint_agents, AGENTS[i], boost::is_any_of(delim_joint));
+					//				for (int j=0;j < joint_agents.size();j++)
+					actionDef.agents.push_back(joint_agents);
+					counter++;
+				}
+				action_Definition_List.push_back(actionDef);
 			}
-			action_Definition_List.push_back(actionDef);
 		}
 		file_path_ifStr.close();
 	}
@@ -1289,10 +1301,10 @@ void seq_planner_class::PublishRobotAction(string ActionName, vector<string> Age
 	}
 
 	std_msgs::String robotMsg;
-	robotMsg.data =ActionName+"_"+responsible_agents;
+	robotMsg.data =ActionName+" "+responsible_agents;
 
 	if(ColleaguesName.size()>0)
-		robotMsg.data +="_"+colleagues_agents;
+		robotMsg.data +=" "+colleagues_agents;
 
 	pubRobotCommand.publish(robotMsg);
 

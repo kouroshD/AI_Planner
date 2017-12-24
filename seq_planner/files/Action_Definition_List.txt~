@@ -20,3 +20,6 @@ Approach-Point-10 simple LeftArm
 Approach-Point-11 simple LeftArm+RightArm
 ObstacleAvoidanceTask simple LeftArm/RightArm
 Handover simple LeftArm+Human+RightArm
+Approach-Leg1 simple LeftArm/RightArm
+Transport-Leg1-Point12 simple LeftArm/RightArm
+

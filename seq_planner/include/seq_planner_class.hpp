@@ -29,6 +29,9 @@ public:
 	vector<vector<string>> agents; // the agents who "can" perform the action// each raw if the size is one single action, otherwise it is joint action
 	string actionType; // if it is simple, or complex (a complex action is another andor graph)
 	string actionMode; // if the action should be performed by single agent or jointly between agents
+	vector <string> argFeature; // what is the feature of an argument we should look for in the knowledge base,
+	// for example: if we say: approach plate, in fact we should look for the grasping pose of the plate.
+
 	action(void)
 	{
 		name="";
@@ -50,6 +53,12 @@ public:
 		}
 		cout<<endl;
 
+		cout<<"Action Argument Feature: ";
+		for (int i=0;i<argFeature.size();i++)
+		{
+				cout<<argFeature[i]<<" ";
+		}
+		cout<<endl;
 	};
 };
 //****************************
@@ -131,7 +140,7 @@ public:
 class feasible_state_action{
 public:
 	string state_name;
-	string state_type;
+	string state_type; // node or hyperarc
 	int state_cost;
 	bool isFeasible;
 	vector<string> actionsList;
@@ -189,8 +198,30 @@ public:
 
 	};
 };
+
 //****************************
 
+class optimal_state_simulation{
+public:
+	string state_name;
+
+	vector<string> actionsList;
+	vector<string> actions_parameters; // [object X/ point X] [object grasping pose] [object Frame (to control)] [goal Frame] [responsible agent]
+	// depending on the action, they use some of these parameters
+	optimal_state_simulation(void){
+		state_name="";
+	};
+
+	~optimal_state_simulation(){};
+	void Print(void){
+
+
+	};
+
+
+};
+
+//****************************
 
 class seq_planner_class{
 public:
