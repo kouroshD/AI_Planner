@@ -11,6 +11,7 @@
 #include <andor_msgs/andorSRV.h>
 #include <andor_msgs/Hyperarc.h>
 #include <andor_msgs/Node.h>
+#include "knowledge_msgs/knowledgeSRV.h"
 
 #define RST  "\x1B[0m"
 #define KBLU  "\x1B[34m"
@@ -29,7 +30,7 @@ public:
 	vector<vector<string>> possible_agents; // the agents who "can" perform the action// each raw if the size is one single action, otherwise it is joint action
 	string actionType; // if it is simple, or complex (a complex action is another andor graph)
 	string actionMode; // if the action should be performed by single agent or jointly between agents
-	vector <string> FeaturesName; // what is the feature of an argument we should look for in the knowledge base,
+	vector <string> parameterTypes; // what is the feature of an argument we should look for in the knowledge base,
 	// for example: if we say: approach plate, in fact we should look for the grasping pose of the plate.
 	// it should be given in order
 	actionDef(void)
@@ -54,9 +55,9 @@ public:
 		cout<<endl;
 
 		cout<<"Action Argument Feature: ";
-		for (int i=0;i<FeaturesName.size();i++)
+		for (int i=0;i<parameterTypes.size();i++)
 		{
-				cout<<FeaturesName[i]<<" ";
+				cout<<parameterTypes[i]<<" ";
 		}
 		cout<<endl;
 	};
@@ -67,17 +68,18 @@ public:
 	actionDef &refActionDef;
 	string name;
 	vector<string> assigned_agents;
-	vector<string> assignedFeastures;
+	vector<string> assignedParameters;
 	vector<bool> isDone; // it is a vector, because for some joint actions (juman+robot) it needs to fill all of them in order to say an action is done;
-
+	string actionAndFeatures;
 
 	action(actionDef actionDefObj):refActionDef(actionDefObj){
 		name=refActionDef.name;
+		actionAndFeatures="";
 	};
 	action(const action& new_action):refActionDef(new_action.refActionDef){
 		name=new_action.name;
 		assigned_agents=new_action.assigned_agents;
-		assignedFeastures=new_action.assignedFeastures;
+		assignedParameters=new_action.assignedParameters;
 		isDone=new_action.isDone;
 	};
 	action& operator=(const action& new_action){
@@ -85,7 +87,7 @@ public:
 		refActionDef=new_action.refActionDef;
 		name=new_action.name;
 		assigned_agents=new_action.assigned_agents;
-		assignedFeastures=new_action.assignedFeastures;
+		assignedParameters=new_action.assignedParameters;
 		isDone=new_action.isDone;
 
 		return *this;
@@ -192,10 +194,12 @@ public:
 	string state_type; // node or hyperarc
 	int state_cost;
 	bool isFeasible;
-	vector<action> actions_list;
+
 	vector<string> actionsList;
 	vector<vector<string>> actionsResponsible;
 	vector<vector<bool>> actionsProgress;
+
+	vector<action> actions_list;
 	vector<string> stateResponsible;
 	bool isSimulated;
 
@@ -255,38 +259,54 @@ public:
 };
 
 //****************************
-
+// check later if it need a copy constructor and '=' operation;
 class optimal_state_simulation{
 public:
+
 	string state_name;
 
-	vector<string> actionsList;
+	vector<action> actions_list;
+	vector<double> actionsTime;
+
 	vector<string> actions_parameters; // [object X/ point X] [object grasping pose] [object Frame (to control)] [goal Frame] [responsible agent]
 	// depending on the action, they use some of these parameters
+	vector<string> parameters_type;
+
+
+
 	vector<bool> canAgentsPerformAction;
-	vector<double> actionsTime;
+
+
 	vector<string> responsibleAgents;
+	feasible_state_action* optimalStatePtr;
 
 	double total_cost;
-	double simulation_q[2][7];
-	optimal_state_simulation(void){
+	double simulation_q[2][7];//LeftArm+RightArm;
+	optimal_state_simulation(){
 		state_name="";
 		total_cost=0.0;
 		for(int i=0;i<7;i++){
 		simulation_q[0][i]=0.0;
 		simulation_q[1][i]=0.0;
 		}
+		optimalStatePtr=NULL;
 	};
 
 	~optimal_state_simulation(){};
+	void SetAgentForAllTheAction(void){
+		for(int i=0;i<actions_list.size();i++)
+		{
+			actions_list[i].assigned_agents=responsibleAgents;
+		}
+	};
+
 	void Print(void){
 		cout<<"optimal_state_simulation::Print "<<endl;
 		cout<<"state name: "<<state_name<<endl;
 
 		cout<<"actions list: ";
-		for(int i=0;i<actionsList.size();i++)
-			cout<<state_name<<" ";
-		cout<<endl;
+		for(int i=0;i<actions_list.size();i++)
+			actions_list[i].Print();
 
 	};
 
@@ -333,7 +353,7 @@ private:
 	ros::Subscriber subHumanActionAck;
 	ros::Subscriber subRobotActionAck;
 	ros::Publisher pubRobotCommand;
-
+	ros::ServiceClient knowledgeBase_client;
 
 	void CallBackHumanAck(const std_msgs::String::ConstPtr& msg);
 	void CallBackRobotAck(const std_msgs::String::ConstPtr& msg);
@@ -355,7 +375,137 @@ private:
 	void EmergencyRobotStop(void);
 	void UpdateRobotEmergencyFlag(string ActionName, vector<string>AgentsName, bool success);
 
-	void SimulateOptimalState(void); // create all the simulation parameters and update it
+	void SimulateOptimalState(void) {
+		/*!
+		 *	1- Find the first action that is progressed yet, in the list:
+		 *	2- Find all the parameters of the action based on state-action table (if some parameters are not assigned, we assign base on all possible parameters for that)
+		 *	3- if an action could not be performed, the progress of it should be stopped for simulation.
+		 *	3- if all the actions are simulated, rank them in ranking function
+		 *
+		 * */
+		cout << "seq_planner_class::SimulateOptimalState" << endl;
+		simulation_vector.clear();
+		vector<optimal_state_simulation> temp_simulation_vector;
+		// check for a filled parameters in actions of a state given by user-> if yes, give it to all the actions.
+		optimal_state_simulation temp_sim;
+		temp_sim.actions_list = state_action_table[optimal_state].actions_list;
+		temp_sim.actionsTime.resize(temp_sim.actions_list.size(), 0.0);
+		temp_sim.optimalStatePtr = &state_action_table[optimal_state];
+		temp_sim.state_name = state_action_table[optimal_state].state_name;
+		// check agents of the actions:
+		// if all the agents have some assigned agents do nothing with the agents
+		int agent_counter = 0;
+		for (int i = 0; i < temp_sim.actions_list.size(); i++) {
+			if (temp_sim.actions_list[i].assigned_agents[0] != "Unknown") {
+				temp_sim.responsibleAgents =
+						temp_sim.actions_list[i].assigned_agents;
+				agent_counter++;
+			}
+		}
+		if (agent_counter == temp_sim.actions_list.size()) {
+			cout << "all the actions have assigned agents to it" << endl;
+		} else if (agent_counter == 1) {
+			temp_sim.SetAgentForAllTheAction();
+		} else if (agent_counter == 0) {
+			for (int i = 0;
+					i
+							< temp_sim.actions_list[0].refActionDef.possible_agents.size();
+					i++) {
+				optimal_state_simulation temp_sim2 = temp_sim;
+				temp_sim2.responsibleAgents =
+						temp_sim.actions_list[0].refActionDef.possible_agents[i];
+				temp_sim2.SetAgentForAllTheAction();
+				temp_simulation_vector.push_back(temp_sim2);
+			}
+		} else {
+			cout
+					<< "More than one action in the state is assigned agents, please check again the state-action list"
+					<< endl;
+			exit(1);
+		}
+
+		// check other parameters of the actions
+		for (int i = 0; temp_simulation_vector[0].actions_list.size(); i++) {
+			vector<string> parameter_type =
+					temp_simulation_vector[0].actions_list[i].refActionDef.parameterTypes;
+			bool the_parameter_is_found_before;
+			for (int j = 0; j < parameter_type.size(); j++) {
+				the_parameter_is_found_before = false;
+				for (int k = 0;
+						k < temp_simulation_vector[0].parameters_type.size();
+						k++) {
+					if (parameter_type[j]
+							== temp_simulation_vector[0].parameters_type[k]) {
+						the_parameter_is_found_before = true;
+					}
+				}
+				if (the_parameter_is_found_before == false) {
+					temp_simulation_vector[0].parameters_type.push_back(
+							parameter_type[j]);
+				}
+			}
+		}
+		for (int i = 1; i < temp_simulation_vector.size(); i++) {
+			temp_simulation_vector[i].parameters_type =
+					temp_simulation_vector[0].parameters_type;
+		}
+		// the simulation vector knows how many parameter type for the actions we need, like object grasping poses, object frame, ...
+		// check for first action now how many assigned parameters it can have for each type.
+		for (int i = 0;
+				i < state_action_table[optimal_state].actions_list.size();
+				i++) {
+			for (int j = 0;
+					j
+							< state_action_table[optimal_state].actions_list[i].refActionDef.parameterTypes.size();
+					j++) {
+				string msg1 =
+						state_action_table[optimal_state].actions_list[i].assignedParameters[j];
+				string msg2 =
+						state_action_table[optimal_state].actions_list[i].refActionDef.parameterTypes[j]
+								+ "Name";
+				int parameterNo;
+				for (int h = 0;
+						h < temp_simulation_vector[0].parameters_type.size();
+						h++) {
+					if (temp_simulation_vector[0].parameters_type[h]
+							== state_action_table[optimal_state].actions_list[i].refActionDef.parameterTypes[j]) {
+						parameterNo = h;
+						break;
+					}
+				}
+				vector<string> msg1Vector;
+				boost::split(msg1Vector, msg1, boost::is_any_of("-"));
+				string MSG = msg1 + "-" + msg2;
+				knowledge_msgs::knowledgeSRV knowledge_msg;
+				knowledge_msg.request.reqType = msg1Vector[0];
+				knowledge_msg.request.Name = msg1Vector[1];
+				knowledge_msg.request.requestInfo = msg2;
+				vector<string> responsVector;
+				if (knowledgeBase_client.call(knowledge_msg)) {
+					responsVector = knowledge_msg.response.names; // here I have all the names of different grasping poses.
+				}
+				if (responsVector.size() == 0) {
+					cout << "the knowledge base returned nothing!" << endl;
+				} else {
+					for (int m = 0; m < temp_simulation_vector.size(); m++) {
+						int NoAgents =
+								temp_simulation_vector[m].responsibleAgents.size();
+						vector<string> AssignedParametersCombinations;
+						PossibileCombinations(responsVector, NoAgents,
+								AssignedParametersCombinations);
+						for (int n = 0;
+								n < AssignedParametersCombinations.size();
+								n++) {
+							temp_simulation_vector[m].actions_parameters[parameterNo] =
+									AssignedParametersCombinations[n];
+							simulation_vector.push_back(
+									temp_simulation_vector[m]);
+						}
+					}
+				}
+			}
+		}
+	}
 	void rankOptimalStateSimulation(void); // if agent could not perform the actions that was simulated, we make that state infeasible.
 
 };
@@ -369,4 +519,30 @@ void Print2dVec(vector<vector<string>> vec ){
 			cout<<vec[i][j]<<" ";
 		cout<<endl;
 	}
+};
+
+void PossibileCombinations(vector<string> input, int combination_number, vector<string> & output){
+	cout<<"*** PossibileCombinations ***"<<endl;
+	// no repetition, orders are important
+	string connectionStr="+";
+	output.clear();
+	if(combination_number==1)
+	{
+		output=input;
+	}
+	else if(combination_number==2)
+	{
+		for(int i=0;i<input.size();i++){
+			for(int j=i+1;j<input.size();j++){
+				output.push_back(input[i]+"+"+input[j]);
+				output.push_back(input[j]+"+"+input[i]);
+			}
+		}
+
+	}
+	else{
+		cout<<"Not yet implemented"<<endl;
+	}
+
+
 };

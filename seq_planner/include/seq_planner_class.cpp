@@ -26,6 +26,7 @@ seq_planner_class::seq_planner_class(string actionDefinitionPath,string stateAct
 	subHumanActionAck=nh.subscribe("HRecAction",100, &seq_planner_class::CallBackHumanAck, this);
 	subRobotActionAck=nh.subscribe("robot_ack",100, &seq_planner_class::CallBackRobotAck, this);
 	pubRobotCommand = nh.advertise<std_msgs::String>("robot_command",10);
+	knowledgeBase_client=nh.serviceClient<knowledge_msgs::knowledgeSRV>("knowledgeService");
 	emergencyFlag=false;
 
 }
@@ -72,10 +73,10 @@ void seq_planner_class::UpdateStateActionTable(string ActionName, vector<string>
 						{// here we know where is the first action not have been done in a state:
 							for(int n=0;n<AgentsName.size();n++)
 							{
-								cout<<"500-0: "<<state_action_table[i].actions_list[j].name<<ActionName<<endl;
-								if(state_action_table[i].actions_list[j].name==ActionName)
+								cout<<"500-0: "<<state_action_table[i].actions_list[j].name<<state_action_table[i].actions_list[j].actionAndFeatures<<ActionName<<endl;
+								if(state_action_table[i].actions_list[j].actionAndFeatures==ActionName)
 								{
-									cout<<"500-1: "<<state_action_table[i].actions_list[j].name<<ActionName<<endl;
+									cout<<"500-1: "<<state_action_table[i].actions_list[j].actionAndFeatures<<ActionName<<endl;
 									//&&
 									//state_action_table[i].actionsResponsible[j][k]==agents[agent_update].name
 									for (int m=0;m<state_action_table[i].actions_list[j].assigned_agents.size();m++)
@@ -767,24 +768,6 @@ void seq_planner_class::CheckStateExecution(){
 	}
 }
 
-void seq_planner_class::SimulateOptimalState(void){
-	/*!
-	 *	1- Find the first action that is progressed yet, in the list:
-	 *	2- Find all the parameters of the action based on state-action table (if some parameters are not assigned, we assign base on all possible parameters for that)
-	 *	3- if an action could not be performed, the progress of it should be stopped for simulation.
-	 *	3- if all the actions are simulated, rank them in ranking function
-	 *
-	 * */
-	cout<<"seq_planner_class::SimulateOptimalState"<<endl;
-
-
-
-
-}
-
-
-
-
 void seq_planner_class::SetActionDefinitionList(string actionDefinitionPath){
 
 	cout<<"seq_planner_class::SetActionDefinitionList"<<endl;
@@ -812,7 +795,7 @@ void seq_planner_class::SetActionDefinitionList(string actionDefinitionPath){
 				actionDef.name=action_paramters[0];
 				if(action_paramters.size()>1)
 					for(int i=1;i<action_paramters.size();i++)
-						actionDef.FeaturesName.push_back(action_paramters[i]);
+						actionDef.parameterTypes.push_back(action_paramters[i]);
 
 				actionDef.actionType=line_list[1];
 				//			actionDef.actionMode=line_list[2];
@@ -909,10 +892,11 @@ void seq_planner_class::SetStateActionList(string stateActionPath){
 					exit(1);
 				}
 				action tempAction(tempActionDef);
+				tempAction.actionAndFeatures=action_and_responsibles[0];
 
 
 				for(int j=1;j<action_and_parameters.size();j++){
-					tempAction.assignedFeastures.push_back(action_and_parameters[j]);
+					tempAction.assignedParameters.push_back(action_and_parameters[j]);
 				}
 
 
@@ -959,6 +943,11 @@ void seq_planner_class::CheckStateActionList(){
 			if(Full_State_action_list[i].actions_list[j].assigned_agents[0]=="Unknown")
 			{
 				isResponsibleAgentAcceptable=true;
+				// if the action have one set of agents to perfrom assign it here:
+				if(Full_State_action_list[i].actions_list[j].refActionDef.possible_agents.size()==1)
+				{
+					Full_State_action_list[i].actions_list[j].assigned_agents=Full_State_action_list[i].actions_list[j].refActionDef.possible_agents[0];
+				}
 			}
 			else
 			{
