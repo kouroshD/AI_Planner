@@ -20,13 +20,22 @@ seq_planner_class::seq_planner_class(string actionDefinitionPath,string stateAct
 	for(int i=0;i<agents.size();i++)
 		agents[i].Print();
 
+	simulationVectorNumber=0;
+	SimulationActionNumber=0;
+
 	updateAndor=true;
 	nodeSolved=false;
 	haSolved=false;
+
 	subHumanActionAck=nh.subscribe("HRecAction",100, &seq_planner_class::CallBackHumanAck, this);
 	subRobotActionAck=nh.subscribe("robot_ack",100, &seq_planner_class::CallBackRobotAck, this);
+	subSimulationAck=nh.subscribe("simulation_response",100, &seq_planner_class::UpdateSimulation, this);
+
 	pubRobotCommand = nh.advertise<std_msgs::String>("robot_command",10);
+	pubSimulationCommand=nh.advertise<robot_interface_msgs::SimulationRequestMsg>("simulation_command",10);
+
 	knowledgeBase_client=nh.serviceClient<knowledge_msgs::knowledgeSRV>("knowledgeService");
+
 	emergencyFlag=false;
 
 }
@@ -295,7 +304,7 @@ void seq_planner_class::FindOptimalState(void){
 		}
 		else
 		{
-			SimulateOptimalState();
+			GenerateOptimalStateSimulation();
 		}
 	}
 	else
@@ -305,6 +314,7 @@ void seq_planner_class::FindOptimalState(void){
 	}
 
 }
+
 
 void seq_planner_class::FindNextAction(){
 	cout<<"seq_planner_class::FindNextAction"<<endl;
@@ -766,6 +776,365 @@ void seq_planner_class::CheckStateExecution(){
 	{
 		FindOptimalState();
 	}
+}
+
+void seq_planner_class::GenerateOptimalStateSimulation(void) {
+	/*!
+	 *	1- Find the first action that is progressed yet, in the list:
+	 *	2- Find all the parameters of the action based on state-action table (if some parameters are not assigned, we assign base on all possible parameters for that)
+	 *	3- if an action could not be performed, the progress of it should be stopped for simulation.
+	 *	3- if all the actions are simulated, rank them in ranking function
+	 *
+	 * */
+	cout << "seq_planner_class::SimulateOptimalState" << endl;
+	simulation_vector.clear();
+	vector<optimal_state_simulation> temp_simulation_vector;
+	// check for a filled parameters in actions of a state given by user-> if yes, give it to all the actions.
+	optimal_state_simulation temp_sim;
+	temp_sim.actions_list = state_action_table[optimal_state].actions_list;
+	temp_sim.actionsTime.resize(temp_sim.actions_list.size(), 0.0);
+	temp_sim.optimalStatePtr = &state_action_table[optimal_state];
+	temp_sim.state_name = state_action_table[optimal_state].state_name;
+	// check agents of the actions:
+	// if all the agents have some assigned agents do nothing with the agents
+	int agent_counter = 0;
+	for (int i = 0; i < temp_sim.actions_list.size(); i++) {
+		if (temp_sim.actions_list[i].assigned_agents[0] != "Unknown") {
+			temp_sim.responsibleAgents =temp_sim.actions_list[i].assigned_agents;
+			agent_counter++;
+		}
+	}
+	if (agent_counter == temp_sim.actions_list.size()) {
+		cout << "all the actions have assigned agents to it" << endl;
+	}
+	else if (agent_counter == 1)
+	{
+		temp_sim.SetAgentForAllTheAction();
+	}
+	else if (agent_counter == 0)
+	{
+		for (int i = 0;	i< temp_sim.actions_list[0].refActionDef.possible_agents.size();i++)
+		{
+			optimal_state_simulation temp_sim2 = temp_sim;
+			vector<string>possibleAgents=temp_sim.actions_list[0].refActionDef.possible_agents[i];
+			bool canAgentsPerformTheActions=true;
+			for(int j=0;j<temp_sim.actions_list.size();j++)
+			{
+				if(CanAgentPerformAction(possibleAgents,"",temp_sim.actions_list[j].name,true)==false)
+					canAgentsPerformTheActions=false;
+			}
+			if(canAgentsPerformTheActions==true)
+			{
+				temp_sim2.responsibleAgents =possibleAgents;
+				temp_sim2.SetAgentForAllTheAction();
+				temp_simulation_vector.push_back(temp_sim2);
+			}
+		}
+		if(temp_simulation_vector.size()==0)
+			cout<<"We did not found any set of agents which can perform all the actions in the optimal state"<<endl;
+	}
+	else
+	{
+		cout<< "More than one action in the state is assigned agents, please check again the state-action list"	<< endl;
+		exit(1);
+	}
+
+
+	// check other parameters of the actions
+	for (int i = 0; temp_simulation_vector[0].actions_list.size(); i++) {
+		vector<string> parameter_type =
+				temp_simulation_vector[0].actions_list[i].refActionDef.parameterTypes;
+		bool the_parameter_is_found_before;
+		for (int j = 0; j < parameter_type.size(); j++) {
+			the_parameter_is_found_before = false;
+			for (int k = 0;
+					k < temp_simulation_vector[0].parameters_type.size();
+					k++) {
+				if (parameter_type[j]
+						== temp_simulation_vector[0].parameters_type[k]) {
+					the_parameter_is_found_before = true;
+				}
+			}
+			if (the_parameter_is_found_before == false) {
+				temp_simulation_vector[0].parameters_type.push_back(
+						parameter_type[j]);
+			}
+		}
+	}
+	for (int i = 1; i < temp_simulation_vector.size(); i++) {
+		temp_simulation_vector[i].parameters_type =
+				temp_simulation_vector[0].parameters_type;
+	}
+	// the simulation vector knows how many parameter type for the actions we need, like object grasping poses, object frame, ...
+	// check for first action now how many assigned parameters it can have for each type.
+	for (int i = 0; i < state_action_table[optimal_state].actions_list.size(); 	i++)
+	{
+		for (int j = 0; j< state_action_table[optimal_state].actions_list[i].refActionDef.parameterTypes.size();j++)
+		{
+			string actionParameterName = state_action_table[optimal_state].actions_list[i].assignedParameters[j];
+			string actionParameterType =state_action_table[optimal_state].actions_list[i].refActionDef.parameterTypes[j] + "Name";
+//			int parameterNo;
+//			for (int h = 0; h < temp_simulation_vector[0].parameters_type.size();h++)
+//			{
+//				if (temp_simulation_vector[0].parameters_type[h]== state_action_table[optimal_state].actions_list[i].refActionDef.parameterTypes[j])
+//				{
+//					parameterNo = h;
+//					break;
+//				}
+//			}
+			vector<string> msg1Vector;
+			boost::split(msg1Vector, actionParameterName, boost::is_any_of("-"));
+			knowledge_msgs::knowledgeSRV knowledge_msg;
+			knowledge_msg.request.reqType = msg1Vector[0];// object, point
+			knowledge_msg.request.Name = msg1Vector[1]; // 1,2,3,....
+			// if msg1.size >2 ??
+			knowledge_msg.request.requestInfo = actionParameterType; // graspingPose, centerPose, ...
+			vector<string> responseVector;
+			if (knowledgeBase_client.call(knowledge_msg))
+			{
+				responseVector = knowledge_msg.response.names; // here I have all the names of different grasping poses.
+				// example: graspingPose1,graspingPose2
+			}
+
+			if (responseVector.size() == 0)
+			{
+				cout << "the knowledge base returned nothing!" << endl;
+			}
+			else
+			{
+				vector<optimal_state_simulation> temp2_simulation_vector;
+				for (int m = 0; m < temp_simulation_vector.size(); m++)
+				{
+					int NoAgents =temp_simulation_vector[m].responsibleAgents.size();
+					vector<string> AssignedParametersCombinations;
+					PossibileCombinations(responseVector, NoAgents,	AssignedParametersCombinations);
+					for (int n = 0; n < AssignedParametersCombinations.size(); 	n++)
+					{
+						temp_simulation_vector[m].actions_list[i].assignedParameters[j]= actionParameterName+"-"+AssignedParametersCombinations[n];
+						temp2_simulation_vector.push_back(temp_simulation_vector[m]);
+					}
+				}
+				temp_simulation_vector.clear();
+				temp_simulation_vector=temp2_simulation_vector;
+			}
+		}
+	}
+	simulation_vector=temp_simulation_vector;
+
+	if(simulation_vector.size()==0)
+	{
+		cout<<" Error: The Simulation Vector is Empty"<<endl;
+	}
+	else
+	{
+		GiveSimulationCommand();
+	}
+
+
+	// give simulation command to the robot interface:
+
+}
+
+void seq_planner_class::GiveSimulationCommand(void){
+	// 1- find the first command it should publish
+	// 2- Fill the msg for giving the command
+	// 3- publish the command
+
+	bool breakFlag=false;
+
+	for(int i=0;i< simulation_vector[0].actions_list.size();i++)
+	{
+		for(int j=0;j< simulation_vector.size();i++)
+		{
+			if(simulation_vector[j].actions_list[i].isDone[0]==false)
+			{
+				simulationVectorNumber=j;
+				SimulationActionNumber=i;
+				breakFlag=true;
+				break;
+			}
+		}
+		if(breakFlag==true)
+			break;
+	}
+	robot_interface_msgs::SimulationRequestMsg req_instance;
+	robot_interface_msgs::Joints joint_values;
+
+	for(int i=0; i<2;i++)
+		for(int j=0;j<7;j++)
+		{
+			joint_values.values[j]=simulation_vector[simulationVectorNumber].simulation_q[i][j];
+			req_instance.ArmsJoint.push_back(joint_values);
+		}
+
+	string simulationCommandStr;
+
+	// add actions name to the msg
+	req_instance.ActionName=simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].name;
+
+
+	// add actions parameter names +info to the msg
+	for (int i=0;i<simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].assignedParameters.size();i++)
+	{
+		req_instance.ActionParametersName.push_back(simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].assignedParameters[i]);
+		req_instance.ActionParameterInfo.push_back( simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].refActionDef.parameterTypes[i]);
+	}
+//	// add responsible agents to the msg
+	simulationCommandStr=simulationCommandStr+" ";
+	vector<string> temp_colleagues;
+	for (int i=0;i<simulation_vector[simulationVectorNumber].responsibleAgents.size();i++)
+	{
+		if( ResponsibleAgentType(simulation_vector[simulationVectorNumber].responsibleAgents[i])=="Human" )
+			req_instance.ColleagueAgents.push_back(simulation_vector[simulationVectorNumber].responsibleAgents[i]);
+		else
+			req_instance.ResponsibleAgents.push_back(simulation_vector[simulationVectorNumber].responsibleAgents[i]);
+	}
+
+	pubSimulationCommand.publish(req_instance);
+
+}
+
+void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationResponseMsg&  simulationResponse){
+
+	// 1- Fill the necessary data inside the simulation vector
+	// 2- if an action is done completely, fill also all the consequential action from other simulation vector
+	// 3- if all the actions in all the simulation vectors is done, go to the RankSimulation Functions, otherwise go to the GiveCommand Function
+
+	bool failure_Flag=false;
+	for(int i=0;i< simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].assigned_agents.size();i++)
+	{
+		for(int j=0; j< simulationResponse.ResponsibleAgents.size();j++)
+		{
+			if(simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].assigned_agents[i]==
+					simulationResponse.ResponsibleAgents[j])
+			{
+				if(simulationResponse.success==true)
+				{
+
+					simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].isDone[i]=true;
+					// fill the simulation timing:
+					if(simulationResponse.time>simulation_vector[simulationVectorNumber].actionsTime[SimulationActionNumber])
+						simulation_vector[simulationVectorNumber].actionsTime[SimulationActionNumber]=simulationResponse.time;
+
+					// Fill the simulation joint values:
+					if(simulationResponse.ResponsibleAgents[j]=="LeftArm")
+					{
+						for(int k=0;k<7;k++)
+						simulation_vector[simulationVectorNumber].simulation_q[0][k]=simulationResponse.ArmsJoint[0].values[k];
+					}
+					else if(simulationResponse.ResponsibleAgents[j]=="RightArm")
+					{
+						for(int k=0;k<7;k++)
+						simulation_vector[simulationVectorNumber].simulation_q[1][k]=simulationResponse.ArmsJoint[1].values[k];
+					}
+					else{}
+					failure_Flag=false;
+
+				}
+				else
+				{
+					// break all the for loops
+					// the action can not be performed, Delete that simulation and all the other similar ones from simulation vector
+					// give a new simulation command to the robot
+
+					failure_Flag=true;
+				}
+				break;
+			}
+		}
+		if(failure_Flag==true)
+			break;
+	}
+
+	// if the simulation shows failure:
+	// the action can not be performed, Delete that simulation and all the other similar ones from simulation vector
+	// give a new simulation command to the robot
+	if(failure_Flag==true)
+	{
+
+		for(vector<optimal_state_simulation>::iterator it =simulation_vector.begin(); it!= simulation_vector.end();)
+		{
+			if(isTwoActionsEqual(simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber],(*it).actions_list[SimulationActionNumber] ))
+			{
+				simulation_vector.erase(it);
+			}
+			else
+				it++;
+		}
+		//GiveSimulationCommand(); // should be given later not here
+
+	}
+	else // the simulation shows successful implementation:
+	{
+		bool actionCompletelydone=true;
+		for(int i=0; i<simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].isDone.size();i++)
+			if(simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].isDone[i]==false)
+				actionCompletelydone=false;
+
+		if(actionCompletelydone==true)
+		{
+			for(vector<optimal_state_simulation>::iterator it =simulation_vector.begin(); it!= simulation_vector.end();it++)
+				if(isTwoActionsEqual(simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber],(*it).actions_list[SimulationActionNumber] ))
+					for(int j=0;j< (*it).actions_list[SimulationActionNumber].isDone.size();j++)
+					{
+						(*it).actions_list[SimulationActionNumber].isDone[j]=true; // we are sure all of them is true
+						(*it).actionsTime[SimulationActionNumber]=simulation_vector[simulationVectorNumber].actionsTime[SimulationActionNumber];
+
+						if((*it).actions_list[SimulationActionNumber].assigned_agents[j]=="LeftArm")
+						{
+							for(int k=0;k<7;k++)
+								(*it).simulation_q[0][k]=simulation_vector[simulationVectorNumber].simulation_q[0][k];
+						}
+						else if((*it).actions_list[SimulationActionNumber].assigned_agents[j]=="RightArm")
+						{
+							for(int k=0;k<7;k++)
+								(*it).simulation_q[1][k]=simulation_vector[simulationVectorNumber].simulation_q[1][k];
+						}
+						else{}
+					}
+		}
+	}
+
+	bool OptimalStateCompletelySimulated=true;
+	int lastIndex=simulation_vector[0].actions_list.size()-1;
+	for(int i=0;i<simulation_vector.size();i++)
+	{
+		for(int j=0;j<simulation_vector[i].actions_list[lastIndex].isDone.size();j++)
+			if(simulation_vector[i].actions_list[lastIndex].isDone[j]==false)
+			{
+				OptimalStateCompletelySimulated=false;
+				break;
+			}
+		if(OptimalStateCompletelySimulated==false)
+			break;
+	}
+	if(OptimalStateCompletelySimulated==true)
+		RankSimulation();
+	else
+		GiveSimulationCommand();
+}
+
+void seq_planner_class::RankSimulation(void){
+
+
+
+}
+
+
+
+string seq_planner_class::ResponsibleAgentType(string agent_name){
+	string temp_agent_type;
+
+	for (int i=0;i<agents.size();i++)
+	{
+		if(agents[i].name==agent_name)
+		{
+			temp_agent_type=agents[i].type;
+			break;
+		}
+	}
+
+	return temp_agent_type;
 }
 
 void seq_planner_class::SetActionDefinitionList(string actionDefinitionPath){

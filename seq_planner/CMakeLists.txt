@@ -22,6 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   std_msgs
   andor_msgs
+	robot_interface_msgs
 
 )
 include_directories(
@@ -31,7 +32,7 @@ include_directories(
 
 #Is for add the .o files to devel/lib
 
-catkin_package(  CATKIN_DEPENDS baxter_core_msgs message_generation roscpp rospy std_msgs geometry_msgs  andor_msgs)
+catkin_package(  CATKIN_DEPENDS baxter_core_msgs message_generation roscpp rospy std_msgs geometry_msgs  andor_msgs robot_interface_msgs)
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
@@ -51,7 +52,7 @@ ADD_LIBRARY(seq_planner_class include/seq_planner_class.cpp)
 # name  name.cpp
 add_executable(seq_planner src/seq_planner_main.cpp )
 
-add_dependencies(andor baxter_core_msgs_generate_messages_cpp  geometry_msgs_generate_messages_cpp andor_msgs_generate_messages_cpp)
+add_dependencies(andor baxter_core_msgs_generate_messages_cpp geometry_msgs_generate_messages_cpp andor_msgs_generate_messages_cpp robot_interface_msgs_generate_messages_cpp)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(seq_planner
    ${catkin_LIBRARIES}

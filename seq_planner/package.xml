@@ -20,6 +20,8 @@
   <build_depend>std_msgs</build_depend>
   <build_depend>andor_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
+  <build_depend>knowledge_msgs</build_depend>
+  <build_depend>robot_interface_msgs</build_depend>
 
 <!--  <build_depend>message_runtime</build_depend> -->
   <!--<build_depend>geometry_msgs</build_depend>
@@ -39,6 +41,8 @@
   <run_depend>std_msgs</run_depend>
   <run_depend>andor_msgs</run_depend>
   <run_depend>geometry_msgs</run_depend>
+  <run_depend>knowledge_msgs</run_depend>
+  <run_depend>robot_interface_msgs</run_depend>
 <!--  <run_depend>message_runtime</run_depend> -->
 
   <!--<run_depend>actionlib</run_depend>

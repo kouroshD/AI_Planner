@@ -12,6 +12,11 @@
 #include <andor_msgs/Hyperarc.h>
 #include <andor_msgs/Node.h>
 #include "knowledge_msgs/knowledgeSRV.h"
+#include "robot_interface_msgs/Joints.h"
+#include "robot_interface_msgs/SimulationRequestMsg.h"
+#include "robot_interface_msgs/SimulationResponseMsg.h"
+
+
 
 #define RST  "\x1B[0m"
 #define KBLU  "\x1B[34m"
@@ -297,6 +302,8 @@ public:
 		for(int i=0;i<actions_list.size();i++)
 		{
 			actions_list[i].assigned_agents=responsibleAgents;
+			int NoAgents=responsibleAgents.size();
+			actions_list[i].isDone.resize(NoAgents,false);
 		}
 	};
 
@@ -348,11 +355,14 @@ private:
 	int optimal_state;
 	int next_action_index;
 //	int agent_update;// the agent number who arrives the latest ack.
+	int simulationVectorNumber,SimulationActionNumber;
 
 	ros::NodeHandle nh;
 	ros::Subscriber subHumanActionAck;
 	ros::Subscriber subRobotActionAck;
+	ros::Subscriber subSimulationAck;
 	ros::Publisher pubRobotCommand;
+	ros::Publisher pubSimulationCommand;
 	ros::ServiceClient knowledgeBase_client;
 
 	void CallBackHumanAck(const std_msgs::String::ConstPtr& msg);
@@ -371,142 +381,16 @@ private:
 	void FindOptimalState(void);
 	void FindNextAction(void);
 	void FindResponisibleAgent(void);
+	string ResponsibleAgentType(string agent_name); //! it returns if an agent is Human/Robot
 	void CheckStateExecution(void);
 	void EmergencyRobotStop(void);
 	void UpdateRobotEmergencyFlag(string ActionName, vector<string>AgentsName, bool success);
 
-	void SimulateOptimalState(void) {
-		/*!
-		 *	1- Find the first action that is progressed yet, in the list:
-		 *	2- Find all the parameters of the action based on state-action table (if some parameters are not assigned, we assign base on all possible parameters for that)
-		 *	3- if an action could not be performed, the progress of it should be stopped for simulation.
-		 *	3- if all the actions are simulated, rank them in ranking function
-		 *
-		 * */
-		cout << "seq_planner_class::SimulateOptimalState" << endl;
-		simulation_vector.clear();
-		vector<optimal_state_simulation> temp_simulation_vector;
-		// check for a filled parameters in actions of a state given by user-> if yes, give it to all the actions.
-		optimal_state_simulation temp_sim;
-		temp_sim.actions_list = state_action_table[optimal_state].actions_list;
-		temp_sim.actionsTime.resize(temp_sim.actions_list.size(), 0.0);
-		temp_sim.optimalStatePtr = &state_action_table[optimal_state];
-		temp_sim.state_name = state_action_table[optimal_state].state_name;
-		// check agents of the actions:
-		// if all the agents have some assigned agents do nothing with the agents
-		int agent_counter = 0;
-		for (int i = 0; i < temp_sim.actions_list.size(); i++) {
-			if (temp_sim.actions_list[i].assigned_agents[0] != "Unknown") {
-				temp_sim.responsibleAgents =
-						temp_sim.actions_list[i].assigned_agents;
-				agent_counter++;
-			}
-		}
-		if (agent_counter == temp_sim.actions_list.size()) {
-			cout << "all the actions have assigned agents to it" << endl;
-		} else if (agent_counter == 1) {
-			temp_sim.SetAgentForAllTheAction();
-		} else if (agent_counter == 0) {
-			for (int i = 0;
-					i
-							< temp_sim.actions_list[0].refActionDef.possible_agents.size();
-					i++) {
-				optimal_state_simulation temp_sim2 = temp_sim;
-				temp_sim2.responsibleAgents =
-						temp_sim.actions_list[0].refActionDef.possible_agents[i];
-				temp_sim2.SetAgentForAllTheAction();
-				temp_simulation_vector.push_back(temp_sim2);
-			}
-		} else {
-			cout
-					<< "More than one action in the state is assigned agents, please check again the state-action list"
-					<< endl;
-			exit(1);
-		}
-
-		// check other parameters of the actions
-		for (int i = 0; temp_simulation_vector[0].actions_list.size(); i++) {
-			vector<string> parameter_type =
-					temp_simulation_vector[0].actions_list[i].refActionDef.parameterTypes;
-			bool the_parameter_is_found_before;
-			for (int j = 0; j < parameter_type.size(); j++) {
-				the_parameter_is_found_before = false;
-				for (int k = 0;
-						k < temp_simulation_vector[0].parameters_type.size();
-						k++) {
-					if (parameter_type[j]
-							== temp_simulation_vector[0].parameters_type[k]) {
-						the_parameter_is_found_before = true;
-					}
-				}
-				if (the_parameter_is_found_before == false) {
-					temp_simulation_vector[0].parameters_type.push_back(
-							parameter_type[j]);
-				}
-			}
-		}
-		for (int i = 1; i < temp_simulation_vector.size(); i++) {
-			temp_simulation_vector[i].parameters_type =
-					temp_simulation_vector[0].parameters_type;
-		}
-		// the simulation vector knows how many parameter type for the actions we need, like object grasping poses, object frame, ...
-		// check for first action now how many assigned parameters it can have for each type.
-		for (int i = 0;
-				i < state_action_table[optimal_state].actions_list.size();
-				i++) {
-			for (int j = 0;
-					j
-							< state_action_table[optimal_state].actions_list[i].refActionDef.parameterTypes.size();
-					j++) {
-				string msg1 =
-						state_action_table[optimal_state].actions_list[i].assignedParameters[j];
-				string msg2 =
-						state_action_table[optimal_state].actions_list[i].refActionDef.parameterTypes[j]
-								+ "Name";
-				int parameterNo;
-				for (int h = 0;
-						h < temp_simulation_vector[0].parameters_type.size();
-						h++) {
-					if (temp_simulation_vector[0].parameters_type[h]
-							== state_action_table[optimal_state].actions_list[i].refActionDef.parameterTypes[j]) {
-						parameterNo = h;
-						break;
-					}
-				}
-				vector<string> msg1Vector;
-				boost::split(msg1Vector, msg1, boost::is_any_of("-"));
-				string MSG = msg1 + "-" + msg2;
-				knowledge_msgs::knowledgeSRV knowledge_msg;
-				knowledge_msg.request.reqType = msg1Vector[0];
-				knowledge_msg.request.Name = msg1Vector[1];
-				knowledge_msg.request.requestInfo = msg2;
-				vector<string> responsVector;
-				if (knowledgeBase_client.call(knowledge_msg)) {
-					responsVector = knowledge_msg.response.names; // here I have all the names of different grasping poses.
-				}
-				if (responsVector.size() == 0) {
-					cout << "the knowledge base returned nothing!" << endl;
-				} else {
-					for (int m = 0; m < temp_simulation_vector.size(); m++) {
-						int NoAgents =
-								temp_simulation_vector[m].responsibleAgents.size();
-						vector<string> AssignedParametersCombinations;
-						PossibileCombinations(responsVector, NoAgents,
-								AssignedParametersCombinations);
-						for (int n = 0;
-								n < AssignedParametersCombinations.size();
-								n++) {
-							temp_simulation_vector[m].actions_parameters[parameterNo] =
-									AssignedParametersCombinations[n];
-							simulation_vector.push_back(
-									temp_simulation_vector[m]);
-						}
-					}
-				}
-			}
-		}
-	}
-	void rankOptimalStateSimulation(void); // if agent could not perform the actions that was simulated, we make that state infeasible.
+	void GenerateOptimalStateSimulation(void); // here we have all the simulation vector with assigned agents or parameters.
+	void UpdateSimulation(const robot_interface_msgs::SimulationResponseMsg&  simulationResponse); // here we update the simulation results and give one by one the next command to robot simulator
+	void GiveSimulationCommand(void);
+	void RankSimulation(void); // when the simulation is done, we rank them, and we assign the agents and action parameters to the optimal state representation, and we call the FindNextAction function.
+	// if agent could not perform the actions that was simulated, we make that state infeasible.
 
 };
 
@@ -543,6 +427,38 @@ void PossibileCombinations(vector<string> input, int combination_number, vector<
 	else{
 		cout<<"Not yet implemented"<<endl;
 	}
-
-
 };
+
+bool isTwoActionsEqual(const action& action1, const action& action2){
+	bool temp_equality=true;
+	// terms of equality: action names, actions Agents, actions parameters
+
+	if(action1.name!=action2.name)
+		temp_equality=false;
+	if(action1.assigned_agents.size()!=action2.assigned_agents.size())
+		temp_equality=false;
+	if(action1.assignedParameters.size()!=action2.assignedParameters.size())
+		temp_equality=false;
+
+	if(temp_equality==true)
+	{
+		for(int i=0;i<action1.assigned_agents.size();i++)
+		{
+			if(action1.assigned_agents[i]!=action2.assigned_agents[i])
+				temp_equality=false;
+		}
+	}
+	if(temp_equality==true)
+	{
+		for(int i=0;i<action1.assignedParameters.size();i++)
+		{
+			if(action1.assignedParameters[i]!=action2.assignedParameters[i])
+				temp_equality=false;
+		}
+	}
+
+	return temp_equality;
+}
+
+
+
