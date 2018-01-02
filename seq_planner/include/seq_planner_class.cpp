@@ -1116,7 +1116,53 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 
 void seq_planner_class::RankSimulation(void){
 
+	//! check if the simulation vector is not empty:
+	if(simulation_vector.size()==0)
+	{
+		state_action_table[optimal_state].isFeasible=false;
+		state_action_table[optimal_state].isSimulated=true;
+		FindOptimalState();
+		return;
+	}
 
+
+	//! find the total cost for all of the simulation
+	for(int i=0;i<simulation_vector.size();i++)
+	{
+		for(int j=0;j<simulation_vector[i].actionsTime.size();j++)
+			simulation_vector[i].total_cost=simulation_vector[i].total_cost+simulation_vector[i].actionsTime[j];
+	}
+
+	//! Find the minimum cost and respecting index of it:
+	double minCost=100000000.0;
+	int minIndex=0;
+
+	for(int i=0;i<simulation_vector.size();i++)
+		if(simulation_vector[i].total_cost<minCost)
+		{
+			minIndex=i;
+			minCost=simulation_vector[i].total_cost;
+		}
+
+	//! give the parameters of the simulation to the optimal state and find the next action
+	state_action_table[optimal_state].isSimulated=true;
+	for(int i=0;i<state_action_table[optimal_state].actions_list.size();i++)
+	{
+		state_action_table[optimal_state].actions_list[i].assigned_agents=simulation_vector[minIndex].actions_list[i].assigned_agents;
+		state_action_table[optimal_state].actions_list[i].assignedParameters=simulation_vector[minIndex].actions_list[i].assignedParameters;
+
+		string temp_action_parameters;
+		temp_action_parameters=state_action_table[optimal_state].actions_list[i].name;
+		for(int j=0;j<state_action_table[optimal_state].actions_list[i].assignedParameters.size();j++)
+		{
+			temp_action_parameters=temp_action_parameters+"_"+state_action_table[optimal_state].actions_list[i].assignedParameters[j];
+		}
+		state_action_table[optimal_state].actions_list[i].actionAndFeatures=temp_action_parameters;
+
+	}
+
+	FindNextAction();
+	return;
 
 }
 
