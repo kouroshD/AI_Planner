@@ -46,7 +46,7 @@ int main(int argc, char **argv)
 	// planner class initialization:
 	const char* home=getenv("HOME");
 	string action_def_path(home);
-	action_def_path=action_def_path+"/catkin_ws/src/AI_PLANNER/seq_planner/files/Action_Definition_List.txt";
+	action_def_path=action_def_path+"/catkin_ws/src/AI_PLANNER/seq_planner/files/Action_Definition_List_2.txt";
 	string state_action_path(home);
 	state_action_path=state_action_path+"/catkin_ws/src/AI_PLANNER/seq_planner/files/State_Action_List.txt";
 //	state_action_path="/home/kourosh/catkin_ws/src/AI_Planner/seq_planner/files/State_Action_List.txt";

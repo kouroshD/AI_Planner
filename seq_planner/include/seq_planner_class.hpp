@@ -46,7 +46,7 @@ public:
 	};
 	~actionDef(){};
 	void Print(void){
-		cout<<"******** actionDef info *********"<<endl;
+		cout<<"**** actionDef info ****"<<endl;
 		cout<<"name: "<<name<<endl;
 		cout<<"actionType: "<<actionType<<endl;
 		cout<<"actionMode: "<<actionMode<<endl;
@@ -77,9 +77,9 @@ public:
 	vector<bool> isDone; // it is a vector, because for some joint actions (juman+robot) it needs to fill all of them in order to say an action is done;
 	string actionAndFeatures;
 
-	action(actionDef actionDefObj):refActionDef(actionDefObj){
+	action(actionDef &actionDefObj):refActionDef(actionDefObj){
 		name=refActionDef.name;
-		actionAndFeatures="";
+		actionAndFeatures="--";
 	};
 	action(const action& new_action):refActionDef(new_action.refActionDef){
 		name=new_action.name;
@@ -101,6 +101,26 @@ public:
 	~action(){};
 	void Print(void){
 		cout<<"******** action info *********"<<endl;
+		cout<<"Action Name: "<<name<<endl;
+
+		cout<<"Assigned Agents: ";
+		for(int i=0; i<assigned_agents.size();i++)
+			cout<<assigned_agents[i]<<" ";
+		cout<<endl;
+
+		cout<<"Assigned parameters: ";
+		for(int i=0; i<assignedParameters.size();i++)
+			cout<<assignedParameters[i]<<" ";
+		cout<<endl;
+
+		cout<<"Is action done? ";
+		for(int i=0; i<isDone.size();i++)
+			cout<<isDone[i]<<" ";
+		cout<<endl;
+
+
+		cout<<"action with parameters: "<< actionAndFeatures<<endl;
+
 		refActionDef.Print();
 
 
@@ -155,8 +175,9 @@ public:
 class offline_state_action{
 public:
 	string state_name;
-	vector<string> actionsList;
-	vector<vector<string>> actionsResponsible;
+//	vector<string> actionsList;
+//	vector<vector<string>> actionsResponsible;
+
 	vector<action> actions_list;
 
 
@@ -168,22 +189,22 @@ public:
 	void Print(void){
 		cout<<"******** offline_state_action info *********"<<endl;
 		cout<<"state_name: "<<state_name<<endl;
-		cout<<"actionsList: ";
-		for(int i=0;i<actionsList.size();i++)
-			cout<<actionsList[i]<<" ";
-		cout<<endl;
-		cout<<"actionsResponsible: ";
-		for(int i=0;i<actionsResponsible.size();i++)
-		{
-			for(int j=0;j<actionsResponsible[i].size();j++)
-			{
-				cout<<actionsResponsible[i][j];
-				if(actionsResponsible[i].size()>0)
-					cout<<" ";
-			}
-			cout<<" | ";
-		}
-		cout<<endl;
+//		cout<<"actionsList: ";
+//		for(int i=0;i<actionsList.size();i++)
+//			cout<<actionsList[i]<<" ";
+//		cout<<endl;
+//		cout<<"Responsible Agents: ";
+//		for(int i=0;i<actionsResponsible.size();i++)
+//		{
+//			for(int j=0;j<actionsResponsible[i].size();j++)
+//			{
+//				cout<<actionsResponsible[i][j];
+//				if(actionsResponsible[i].size()>0)
+//					cout<<" ";
+//			}
+//			cout<<" | ";
+//		}
+//		cout<<endl;
 
 		cout<<"Actions List: "<<endl;
 		for(int i=0;i<actions_list.size();i++)

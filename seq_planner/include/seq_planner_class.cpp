@@ -9,14 +9,18 @@ seq_planner_class::seq_planner_class(string actionDefinitionPath,string stateAct
 	SetActionDefinitionList(actionDefinitionPath);
 	SetAgentsList();
 	SetStateActionList( stateActionPath);
+
 	CheckStateActionList();
+	cout<<"*******************************************************************"<<endl;
 	cout<<"****************** Action Definition List *************************"<<endl;
 	for(int i=0;i<action_Definition_List.size();i++)
 		action_Definition_List[i].Print();
+	cout<<"*******************************************************************"<<endl;
 	cout<<"******************* Full State-Action List ************************"<<endl;
 	for(int i=0;i<Full_State_action_list.size();i++)
 		Full_State_action_list[i].Print();
-	cout<<"********************** Agents List*********************"<<endl;
+	cout<<"*******************************************************************"<<endl;
+	cout<<"*************************** Agents List ***************************"<<endl;
 	for(int i=0;i<agents.size();i++)
 		agents[i].Print();
 
@@ -684,8 +688,8 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 				nameFlag=true;
 				temp_obj.actions_list=Full_State_action_list[j].actions_list;
 
-				temp_obj.actionsList=Full_State_action_list[j].actionsList;
-				temp_obj.actionsResponsible=Full_State_action_list[j].actionsResponsible;
+//				temp_obj.actionsList=Full_State_action_list[j].actionsList;
+//				temp_obj.actionsResponsible=Full_State_action_list[j].actionsResponsible;
 				for (int k=0;k<temp_obj.actions_list.size();k++)
 				{
 					vector<bool> temp_actionProgress(temp_obj.actions_list[k].assigned_agents.size(),false);
@@ -1196,7 +1200,7 @@ void seq_planner_class::SetActionDefinitionList(string actionDefinitionPath){
 	std::vector<std::string> line_list;
 	string line;
 
-	cout<<file_path_ifStr.is_open()<<endl;
+//	cout<<file_path_ifStr.is_open()<<endl;
 	if (file_path_ifStr.is_open())
 	{
 		while(getline(file_path_ifStr,line))
@@ -1230,13 +1234,18 @@ void seq_planner_class::SetActionDefinitionList(string actionDefinitionPath){
 		}
 		file_path_ifStr.close();
 	}
+	else
+	{
+		cout<<"The file can not open: "<<actionDefinitionPath<<endl;
+		exit(1);
+	}
 
 	//    for (int m=0;m<actionList.size();m++){
 	//    	cout<<actionList[m].name<<" "<<actionList[m].actionType<<" "<<actionList[m].actionMode<<endl;
 	//    }
 }
 void seq_planner_class::SetAgentsList(void){
-	cout<<FRED("seq_planner_class::SetAgentsList")<<endl;
+	cout<<"seq_planner_class::SetAgentsList"<<endl;
 	//agent[0]: human
 	agent tempAgent0;
 	tempAgent0.allowToChangePath=true;
@@ -1259,6 +1268,7 @@ void seq_planner_class::SetAgentsList(void){
 
 	for(int k=0;k<agents.size();k++)
 		agents[k].Print();
+	cout<<"************************"<<endl;
 
 }
 
@@ -1266,19 +1276,19 @@ void seq_planner_class::SetStateActionList(string stateActionPath){
 	cout<<"seq_planner_class::SetStateActionList"<<endl;
 	//	cout<<stateActionPath<<endl;
 
-	cout<<"SetStateActionList"<<endl;
+//	cout<<"SetStateActionList"<<endl;
 	ifstream file_path_ifStr(stateActionPath.c_str());
 	vector<string> line_list;
 	vector<string> action_and_responsibles,action_and_parameters;
 
 	string line;
 	string delim_type=" ";
-	string responsible_delim_type="->";
+	string responsible_delim_type="?";
 	string jointAction_delim_type="+";
 	string actionParameter_delim_type="_";
 
 
-	cout<<"file_path_ifStr.is_open(): "<<file_path_ifStr.is_open()<<endl;
+//	cout<<"file_path_ifStr.is_open(): "<<file_path_ifStr.is_open()<<endl;
 	if (file_path_ifStr.is_open())
 	{
 		while(getline(file_path_ifStr,line))
@@ -1291,59 +1301,86 @@ void seq_planner_class::SetStateActionList(string stateActionPath){
 			{
 				vector<string> responsibles;
 
-				actionDef tempActionDef;
+//				actionDef tempActionDef;
 				boost::split(action_and_responsibles, line_list[i], boost::is_any_of(responsible_delim_type));
 				boost::split(action_and_parameters, action_and_responsibles[0], boost::is_any_of(actionParameter_delim_type));
 				bool actionName=false;
+				int actionRefIndex;
 				for(int j=0;j<action_Definition_List.size();j++)
 					if(action_and_parameters[0]==action_Definition_List[j].name)
 					{
 						actionName=true;
-						tempActionDef=action_Definition_List[j];
+//						tempActionDef=action_Definition_List[j];
+						actionRefIndex=j;
 						break;
 					}
 				if(actionName==false){
 					cout<<"The written action is not defined in actions definition list, please check: state: "<<line_list[0]<<", action: "<<action_and_parameters[0]<<endl;
 					exit(1);
 				}
-				action tempAction(tempActionDef);
+				action tempAction(action_Definition_List[actionRefIndex]);
+
 				tempAction.actionAndFeatures=action_and_responsibles[0];
 
 
 				for(int j=1;j<action_and_parameters.size();j++){
 					tempAction.assignedParameters.push_back(action_and_parameters[j]);
 				}
+//				cout<<"'"<<line_list[i]<<"'"<<endl;
+//				cout<<"action_and_responsibles.size() "<<action_and_responsibles.size()<<endl;
+//				for(int f=0;f<action_and_responsibles.size();f++)
+//					cout<<"'"<<action_and_responsibles[f]<<"',";
+//				cout<<endl;
 
-
-				temp_obj.actionsList.push_back(action_and_responsibles[0]);
+//				temp_obj.actionsList.push_back(action_and_responsibles[0]);
 				if(action_and_responsibles.size()==2)
 				{
 					boost::split(responsibles, action_and_responsibles[1], boost::is_any_of(jointAction_delim_type));
-					temp_obj.actionsResponsible.push_back(responsibles);
+//					temp_obj.actionsResponsible.push_back(responsibles);
 					tempAction.assigned_agents=responsibles;
 				}
 				else if(action_and_responsibles.size()==1)
 				{
 					responsibles.push_back("Unknown");
-					temp_obj.actionsResponsible.push_back(responsibles);
+//					temp_obj.actionsResponsible.push_back(responsibles);
 					tempAction.assigned_agents=responsibles;
 				}
 				else
-				{cout<<"Error in state_action text file, please check state: "<<temp_obj.state_name<<", action: "<<action_and_responsibles[0]<<endl;}
+				{
+					cout<<"Error in state_action text file, please check state: "<<temp_obj.state_name<<", action: "<<action_and_responsibles[0]<<endl;
+				}
+				tempAction.isDone.resize(responsibles.size(),false);
+				tempAction.Print();
+
 				temp_obj.actions_list.push_back(tempAction);
 			}
+			cout<<"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"<<endl;
+			temp_obj.Print();
 			Full_State_action_list.push_back(temp_obj);
 
-		}
-		file_path_ifStr.close();
-	}
+			cout<<"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"<<endl;
+			cout<<"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"<<endl;
+			cout<<"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"<<endl;
+			for (int m=0;m<Full_State_action_list.size();m++)
+				Full_State_action_list[m].Print();
 
-	//	for (int m=0;m<Full_State_action_list.size();m++){
-	//		for (int n=0;n<Full_State_action_list[m].size();n++)
-	//			cout<<Full_State_action_list[m][n]<<" ";
-	//		cout<<endl;
-	//	}
-	//	Print2dVec(Full_State_action_list);
+		}
+//		cout<<"//////////////////////////////////////////////////////////////////////////////////////////////////////"<<endl;
+//		for (int m=0;m<Full_State_action_list.size();m++)
+//			Full_State_action_list[m].Print();
+		file_path_ifStr.close();
+//		cout<<"//////////////////////////////////////////////////////////////////////////////////////////////////////"<<endl;
+//		cout<<"//////////////////////////////////////////////////////////////////////////////////////////////////////"<<endl;
+//		for (int m=0;m<Full_State_action_list.size();m++)
+//			Full_State_action_list[m].Print();
+	}
+//	cout<<"//////////////////////////////////////////////////////////////////////////////////////////////////////"<<endl;
+//	cout<<"//////////////////////////////////////////////////////////////////////////////////////////////////////"<<endl;
+//	cout<<"//////////////////////////////////////////////////////////////////////////////////////////////////////"<<endl;
+//		for (int m=0;m<Full_State_action_list.size();m++){
+//				Full_State_action_list[m].Print();
+//		}
+
 }
 
 void seq_planner_class::CheckStateActionList(){
