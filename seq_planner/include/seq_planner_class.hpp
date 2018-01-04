@@ -46,7 +46,7 @@ public:
 	};
 	~actionDef(){};
 	void Print(void){
-		cout<<"**** actionDef info ****"<<endl;
+		cout<<"-------------- actionDef info -------------"<<endl;
 		cout<<"name: "<<name<<endl;
 		cout<<"actionType: "<<actionType<<endl;
 		cout<<"actionMode: "<<actionMode<<endl;
@@ -74,18 +74,19 @@ public:
 	string name;
 	vector<string> assigned_agents;
 	vector<string> assignedParameters;
-	vector<bool> isDone; // it is a vector, because for some joint actions (juman+robot) it needs to fill all of them in order to say an action is done;
-	string actionAndFeatures;
+	vector<bool> isDone; // it is a vector, because for some joint actions (human+robot) it needs to fill all of them in order to say an action is done;
+	string actionAndParameters;
 
 	action(actionDef &actionDefObj):refActionDef(actionDefObj){
 		name=refActionDef.name;
-		actionAndFeatures="--";
+		actionAndParameters="--";
 	};
 	action(const action& new_action):refActionDef(new_action.refActionDef){
 		name=new_action.name;
 		assigned_agents=new_action.assigned_agents;
 		assignedParameters=new_action.assignedParameters;
 		isDone=new_action.isDone;
+		actionAndParameters=new_action.actionAndParameters;
 	};
 	action& operator=(const action& new_action){
 
@@ -94,13 +95,13 @@ public:
 		assigned_agents=new_action.assigned_agents;
 		assignedParameters=new_action.assignedParameters;
 		isDone=new_action.isDone;
-
+		actionAndParameters=new_action.actionAndParameters;
 		return *this;
 	};
 
 	~action(){};
 	void Print(void){
-		cout<<"******** action info *********"<<endl;
+		cout<<"++++++++++++++++++++ action info ++++++++++++++++++++++"<<endl;
 		cout<<"Action Name: "<<name<<endl;
 
 		cout<<"Assigned Agents: ";
@@ -119,7 +120,7 @@ public:
 		cout<<endl;
 
 
-		cout<<"action with parameters: "<< actionAndFeatures<<endl;
+		cout<<"action with parameters: "<< actionAndParameters<<endl;
 
 		refActionDef.Print();
 
@@ -187,7 +188,7 @@ public:
 	};
 	~offline_state_action(){};
 	void Print(void){
-		cout<<"******** offline_state_action info *********"<<endl;
+		cout<<"********************** offline_state_action info *******************"<<endl;
 		cout<<"state_name: "<<state_name<<endl;
 //		cout<<"actionsList: ";
 //		for(int i=0;i<actionsList.size();i++)
@@ -298,10 +299,7 @@ public:
 	// depending on the action, they use some of these parameters
 	vector<string> parameters_type;
 
-
-
 	vector<bool> canAgentsPerformAction;
-
 
 	vector<string> responsibleAgents;
 	feasible_state_action* optimalStatePtr;
@@ -329,13 +327,19 @@ public:
 	};
 
 	void Print(void){
-		cout<<"optimal_state_simulation::Print "<<endl;
+		cout<<BOLD(FGRN("**************** optimal_state_simulation::Print ********** "))<<endl;
 		cout<<"state name: "<<state_name<<endl;
+		cout<<"Total cost: "<<total_cost<<endl;
+
+
 
 		cout<<"actions list: ";
 		for(int i=0;i<actions_list.size();i++)
+		{
 			actions_list[i].Print();
+			cout<<"action time: "<<actionsTime[i]<<endl;
 
+		}
 	};
 
 

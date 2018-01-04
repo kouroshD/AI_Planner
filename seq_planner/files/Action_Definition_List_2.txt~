@@ -12,3 +12,4 @@ Approach_graspingPose simple LeftArm/RightArm
 Transport_objectPose_goalPose simple LeftArm/RightArm/LeftArm+RightArm
 ObstacleAvoidanceTask simple LeftArm/RightArm
 Handover simple LeftArm+RightArm+Human/LeftArm+Human/RightArm+Human
+UpdateJointValues simple LeftArm/RightArm/LeftArm+RightArm
