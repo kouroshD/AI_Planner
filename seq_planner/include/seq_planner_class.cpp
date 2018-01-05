@@ -780,7 +780,7 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 	 *	3- if all the actions are simulated, rank them in ranking function
 	 *
 	 * */
-	cout << BOLD(FBLU("seq_planner_class::SimulateOptimalState" ))<< endl;
+	cout << BOLD(FBLU("seq_planner_class::GenerateOptimalStateSimulation" ))<< endl;
 	simulation_vector.clear();
 	vector<optimal_state_simulation> temp_simulation_vector;
 	// check for a filled parameters in actions of a state given by user-> if yes, give it to all the actions.
@@ -789,12 +789,27 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 	temp_sim.actionsTime.resize(temp_sim.actions_list.size(), 0.0);
 	temp_sim.optimalStatePtr = &state_action_table[optimal_state];
 	temp_sim.state_name = state_action_table[optimal_state].state_name;
+	// add the current joint values to the simulation: in order to do it I should call the knowledge base:
+	knowledge_msgs::knowledgeSRV knowledge_msg_q;
+	knowledge_msg_q.request.reqType="JointValues";
+	knowledge_msg_q.request.requestInfo="LeftArm+RightArm";
+	if (knowledgeBase_client.call(knowledge_msg_q))
+	{
+		cout<<"801"<<knowledge_msg_q.response.region.size()<<endl;
+		for(int i=0;i<2;i++)
+			for(int j=0;j<7;j++)
+				temp_sim.simulation_q[i][j]=knowledge_msg_q.response.region[i].data[j]; // here I have the joint values
+		cout<<"802"<<endl;
+	}
+	cout<<"803"<<endl;
 
 	// check agents of the actions:
 	// if all the agents have some assigned agents do nothing with the agents
 	int agent_counter = 0;
-	for (int i = 0; i < temp_sim.actions_list.size(); i++) {
-		if (temp_sim.actions_list[i].assigned_agents[0] != "Unknown") {
+	for (int i = 0; i < temp_sim.actions_list.size(); i++)
+	{
+		if (temp_sim.actions_list[i].assigned_agents[0] != "Unknown")
+		{
 			temp_sim.responsibleAgents =temp_sim.actions_list[i].assigned_agents;
 			agent_counter++;
 		}
@@ -840,9 +855,10 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 		cout<<"We did not found any set of agents which can perform all the actions in the optimal state"<<endl;
 		state_action_table[optimal_state].isFeasible=false;
 		state_action_table[optimal_state].isSimulated=true;
-		FindOptimalState();
-		return;
+		return FindOptimalState();
 	}
+
+
 
 	cout<<"101"<<endl;
 
@@ -977,13 +993,25 @@ void seq_planner_class::GiveSimulationCommand(void){
 		if(breakFlag==true)
 			break;
 	}
+
+	if(breakFlag==false)
+		RankSimulation();
+
 	cout<<"202: "<<simulationVectorNumber<<" "<<SimulationActionNumber<<endl;
 	vector<string> emptyvec;
 	if(CanAgentPerformAction(emptyvec,"Human",simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].name,true ))
 	{
-		simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].isDone=true;
+		for(int i=0;i<simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].isDone.size();i++)
+			simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].isDone[i]= true;
+
 		simulation_vector[simulationVectorNumber].actionsTime[SimulationActionNumber]=0.0;
-		return GiveSimulationCommand();
+
+		if(simulationVectorNumber==(int)simulation_vector.size()-1
+				&& SimulationActionNumber==(int)simulation_vector[simulationVectorNumber].actions_list.size()-1 )
+			return RankSimulation();
+		else
+
+			return GiveSimulationCommand();
 	}
 
 	robot_interface_msgs::SimulationRequestMsg req_instance;
