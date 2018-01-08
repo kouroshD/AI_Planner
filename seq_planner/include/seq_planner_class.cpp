@@ -1,7 +1,7 @@
 #include "seq_planner_class.hpp"
 
 seq_planner_class::seq_planner_class(string actionDefinitionPath,string stateActionPath){
-	cout<<"seq_planner_class::seq_planner_class"<<endl;
+	cout<<BOLD(FBLU("seq_planner_class::seq_planner_class"))<<endl;
 	optimal_state=0;
 	next_action_index=0;
 	//	actionList=NULL;
@@ -48,7 +48,7 @@ seq_planner_class::~seq_planner_class(){
 }
 
 void seq_planner_class::UpdateStateActionTable(string ActionName, vector<string>AgentsName, bool success){
-	cout<<"seq_planner_class::UpdateStateActionTable"<<endl;
+	cout<<BOLD(FBLU("seq_planner_class::UpdateStateActionTable"))<<endl;
 	/*! when an acknowledgment arrive from agents:
 		 1- Search for action in state-action table
 		 2- Update the following state (take the feasible state with minimum cost)
@@ -280,7 +280,7 @@ void seq_planner_class::UpdateStateActionTable(string ActionName, vector<string>
 }
 
 void seq_planner_class::FindOptimalState(void){
-	cout<<"seq_planner_class::FindOptimalState"<<endl;
+	cout<<BOLD(FBLU("seq_planner_class::FindOptimalState"))<<endl;
 	/*!
 	 * 	1- Find next action to perform
 	 *	2- Assign an agent to perform the action
@@ -322,7 +322,7 @@ void seq_planner_class::FindOptimalState(void){
 
 
 void seq_planner_class::FindNextAction(){
-	cout<<"seq_planner_class::FindNextAction"<<endl;
+	cout<<BOLD(FBLU("seq_planner_class::FindNextAction"))<<endl;
 	/*!
 	 * 	1- Find next action to perform
 	 *
@@ -360,7 +360,7 @@ void seq_planner_class::FindNextAction(){
 	}
 }
 void seq_planner_class::FindResponisibleAgent(void){
-	cout<<"seq_planner_class::FindResponisibleAgent"<<endl;
+	cout<<BOLD(FBLU("seq_planner_class::FindResponisibleAgent"))<<endl;
 
 	//	bool isResponsibleAgentAcceptable=false;
 	//	int action_number=0;
@@ -488,7 +488,7 @@ void seq_planner_class::FindResponisibleAgent(void){
 					if(k!=i)
 						all_colleagues.push_back(state_action_table[optimal_state].actions_list[next_action_index].assigned_agents[k]);
 
-				agents[j].lastAssignedAction=state_action_table[optimal_state].actions_list[next_action_index].name;
+				agents[j].lastAssignedAction=state_action_table[optimal_state].actions_list[next_action_index].actionAndParameters;
 				agents[j].isBusy=true;
 				agents[j].responsibility_number=i;
 
@@ -510,7 +510,7 @@ void seq_planner_class::FindResponisibleAgent(void){
 		}
 		if(i==state_action_table[optimal_state].actions_list[next_action_index].assigned_agents.size()-1 && robot_agents.size()>0)
 		{
-			PublishRobotAction( state_action_table[optimal_state].actions_list[next_action_index].name, robot_agents,human_colleagues);
+			PublishRobotAction( state_action_table[optimal_state].actions_list[next_action_index].actionAndParameters, robot_agents,human_colleagues);
 		}
 	}
 
@@ -649,7 +649,7 @@ void seq_planner_class::FindResponisibleAgent(void){
 }
 
 void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feasible_state_list, vector<int> gen_Feasible_stateCost_list){
-	cout<<"seq_planner_class::GenerateStateActionTable"<<endl;
+	cout<<BOLD(FBLU("seq_planner_class::GenerateStateActionTable"))<<endl;
 	if(state_action_table.size()>0)
 		state_action_table.clear();
 
@@ -714,7 +714,7 @@ void seq_planner_class::CheckStateExecution(){
 	// if a row is empty OR if all the actions row is done (true flag):
 	//that state is solved, Delete all the vector, u
 	// if there is not update for the andor graph, find the next action for the human or robot to be solved
-	cout<<"seq_planner_class::CheckStateExecution"<<endl;
+	cout<<BOLD(FBLU("seq_planner_class::CheckStateExecution"))<<endl;
 
 	if(!Solved_node_list.empty() || !Solved_hyperarc_list.empty()){
 		cout<<FRED("The solve nodes or hyperarc lists are not empty!" )<<endl;
@@ -801,6 +801,17 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 				temp_sim.simulation_q[i][j]=knowledge_msg_q.response.region[i].data[j]; // here I have the joint values
 		cout<<"802"<<endl;
 	}
+
+	cout<<"initial q (left Arm): ";
+	for(int i=0;i<7;i++)
+		cout<<temp_sim.simulation_q[0][i]<<" ";
+	cout<<endl;
+
+	cout<<"initial q (right Arm): ";
+	for(int i=0;i<7;i++)
+		cout<<temp_sim.simulation_q[1][i]<<" ";
+	cout<<endl;
+
 	cout<<"803"<<endl;
 
 	// check agents of the actions:
@@ -814,6 +825,7 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 			agent_counter++;
 		}
 	}
+
 	if (agent_counter == temp_sim.actions_list.size())
 	{
 		cout << "all the actions have assigned agents to it" << endl;
@@ -868,7 +880,8 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 	{
 		vector<string> parameter_type = temp_simulation_vector[0].actions_list[i].refActionDef.parameterTypes;
 		bool the_parameter_is_found_before;
-		for (int j = 0; j < parameter_type.size(); j++) {
+		for (int j = 0; j < parameter_type.size(); j++)
+		{
 			the_parameter_is_found_before = false;
 			for (int k = 0; k < temp_simulation_vector[0].parameters_type.size();k++)
 			{
@@ -900,7 +913,7 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 		for (int j = 0; j< state_action_table[optimal_state].actions_list[i].refActionDef.parameterTypes.size();j++)
 		{
 			string actionParameterName = state_action_table[optimal_state].actions_list[i].assignedParameters[j];
-			string actionParameterType =state_action_table[optimal_state].actions_list[i].refActionDef.parameterTypes[j] + "Name";
+			string actionParameterType =state_action_table[optimal_state].actions_list[i].refActionDef.parameterTypes[j] +"-" +"Name";
 			//			int parameterNo;
 			//			for (int h = 0; h < temp_simulation_vector[0].parameters_type.size();h++)
 			//			{
@@ -954,7 +967,11 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 
 	if(simulation_vector.size()==0)
 	{
+		state_action_table[optimal_state].isFeasible=false;
+		state_action_table[optimal_state].isSimulated=true;
 		cout<<" Error: The Simulation Vector is Empty"<<endl;
+		return FindOptimalState();
+
 	}
 	else
 	{
@@ -1093,6 +1110,7 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 
 	for(int i=0;i<simulationResponse.ResponsibleAgents.size();i++)
 		cout<<simulationResponse.ResponsibleAgents[i]<<endl;
+
 	for(int i=0;i<simulationResponse.ColleagueAgents.size();i++)
 		cout<<simulationResponse.ColleagueAgents[i]<<endl;
 

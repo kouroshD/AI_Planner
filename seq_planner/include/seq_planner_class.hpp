@@ -333,7 +333,7 @@ public:
 
 
 
-		cout<<"actions list: ";
+		cout<<"actions list: "<<endl;
 		for(int i=0;i<actions_list.size();i++)
 		{
 			actions_list[i].Print();
