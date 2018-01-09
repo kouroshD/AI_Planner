@@ -86,10 +86,10 @@ void seq_planner_class::UpdateStateActionTable(string ActionName, vector<string>
 						{// here we know where is the first action not have been done in a state:
 							for(int n=0;n<AgentsName.size();n++)
 							{
-								cout<<"500-0: "<<state_action_table[i].actions_list[j].name<<state_action_table[i].actions_list[j].actionAndParameters<<ActionName<<endl;
-								if(state_action_table[i].actions_list[j].actionAndParameters==ActionName)
+								cout<<"500-0: "<<state_action_table[i].actions_list[j].name<<state_action_table[i].actions_list[j].Action_GeneralParameters<<ActionName<<endl;
+								if(state_action_table[i].actions_list[j].Action_GeneralParameters==ActionName)
 								{
-									cout<<"500-1: "<<state_action_table[i].actions_list[j].actionAndParameters<<ActionName<<endl;
+									cout<<"500-1: "<<state_action_table[i].actions_list[j].Action_GeneralParameters<<ActionName<<endl;
 									//&&
 									//state_action_table[i].actionsResponsible[j][k]==agents[agent_update].name
 									for (int m=0;m<state_action_table[i].actions_list[j].assigned_agents.size();m++)
@@ -871,7 +871,6 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 	}
 
 
-
 	cout<<"101"<<endl;
 
 	// check other parameters of the actions
@@ -912,6 +911,7 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 	{
 		for (int j = 0; j< state_action_table[optimal_state].actions_list[i].refActionDef.parameterTypes.size();j++)
 		{
+			cout<<"103-1"<<endl;
 			string actionParameterName = state_action_table[optimal_state].actions_list[i].assignedParameters[j];
 			string actionParameterType =state_action_table[optimal_state].actions_list[i].refActionDef.parameterTypes[j] +"-" +"Name";
 			//			int parameterNo;
@@ -926,17 +926,17 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 			vector<string> msg1Vector;
 			boost::split(msg1Vector, actionParameterName, boost::is_any_of("-"));
 			knowledge_msgs::knowledgeSRV knowledge_msg;
-			knowledge_msg.request.reqType = msg1Vector[0];// object, point
-			knowledge_msg.request.Name = msg1Vector[1]; // 1,2,3,....
+			knowledge_msg.request.reqType = msg1Vector[0];//  Point1, Point2, Object: Cylinder1, Sphere2, Cone2, Plate1
+			knowledge_msg.request.Name = ""; // graspingPose1, graspingPose2, CenterFrame1, ObjectFrame3 ,connectionFrame1, ...
 			// if msg1.size >2 ??
-			knowledge_msg.request.requestInfo = actionParameterType; // graspingPose, centerPose, ...
+			knowledge_msg.request.requestInfo = actionParameterType; // graspingPose_Name, centerPose_Name, ...
 			vector<string> responseVector;
+
 			if (knowledgeBase_client.call(knowledge_msg))
 			{
 				responseVector = knowledge_msg.response.names; // here I have all the names of different grasping poses.
 				// example: graspingPose1,graspingPose2
 			}
-
 			if (responseVector.size() == 0)
 			{
 				cout << "the knowledge base returned nothing!" << endl;
@@ -1418,6 +1418,7 @@ void seq_planner_class::SetStateActionList(string stateActionPath){
 	string responsible_delim_type="?";
 	string jointAction_delim_type="+";
 	string actionParameter_delim_type="_";
+	string firstPartOfParamter_delim_type="-";
 
 
 	if (file_path_ifStr.is_open())
@@ -1452,8 +1453,19 @@ void seq_planner_class::SetStateActionList(string stateActionPath){
 				tempAction.actionAndParameters=action_and_responsibles[0];
 
 
-				for(int j=1;j<action_and_parameters.size();j++){
+				for(int j=1;j<action_and_parameters.size();j++)
+				{
 					tempAction.assignedParameters.push_back(action_and_parameters[j]);
+
+					vector<string> firstPartofParameter;
+					boost::split(firstPartofParameter, action_and_parameters[j], boost::is_any_of(firstPartOfParamter_delim_type));
+					tempAction.GeneralParameters.push_back(firstPartofParameter[0]);
+				}
+
+				tempAction.Action_GeneralParameters=tempAction.name;
+				for(int j=0;j<tempAction.GeneralParameters.size();j++)
+				{
+					tempAction.Action_GeneralParameters+="_"+tempAction.GeneralParameters[j];
 				}
 
 				if(action_and_responsibles.size()==2)
@@ -1793,17 +1805,17 @@ void seq_planner_class::CallBackHumanAck(const std_msgs::String::ConstPtr& msg){
 void seq_planner_class::CallBackRobotAck(const std_msgs::String::ConstPtr& msg){
 	cout<<"seq_planner_class::CallBackRobotAck"<<endl;
 
-	vector<string> agentsName;
+	vector<string> agentsName, actionAndParametersVec;
 	vector<string> robot_ack_list;
 	bool success;
-	string delim_type="_", agents_delim_type="+";
-	string robot_ack, actionName;
+	string delim_type=" ", agents_delim_type="+",actionParameters_delim_type="_";
+	string robot_ack, actionAndParameters, ActionAndGeneralParameters;
 	bool arrived_msg=true;
 
 	ROS_INFO("I heard Robot Ack: [%s]", msg->data.c_str());
 
 	robot_ack=msg->data.c_str();
-
+	// msg= actionName_Parameters responsibleAgents true/false: Approach_Point-0 LeftArm true
 	boost::split(robot_ack_list, robot_ack, boost::is_any_of(delim_type));
 
 	if(robot_ack_list.size()!=3)
@@ -1811,8 +1823,17 @@ void seq_planner_class::CallBackRobotAck(const std_msgs::String::ConstPtr& msg){
 		cout<<"Error In receiving msg from robot ack , msg size error"<<endl;
 		arrived_msg=false;
 	}
-	actionName=robot_ack_list[0];
 
+	actionAndParameters=robot_ack_list[0];
+	boost::split(actionAndParametersVec, actionAndParameters, boost::is_any_of(actionParameters_delim_type));// 0: action name, 1,... : parameters name
+
+	ActionAndGeneralParameters+=actionAndParametersVec[0];
+	for(int i=1;i<actionAndParametersVec.size();i++)
+	{
+		vector<string> parameter;
+		boost::split(parameter, actionAndParametersVec[i], boost::is_any_of("-"));// Point0, Cylinder1-GraspingPose1
+		ActionAndGeneralParameters+="_"+parameter[0];
+	}
 
 	boost::split(agentsName,robot_ack_list[1], boost::is_any_of(agents_delim_type));
 
@@ -1834,14 +1855,14 @@ void seq_planner_class::CallBackRobotAck(const std_msgs::String::ConstPtr& msg){
 	}
 
 	cout<<"emergency Flag: "<<emergencyFlag<<endl;
-	if(CanAgentPerformAction(agentsName,"",actionName,false)==true && arrived_msg==true)
+	if(CanAgentPerformAction(agentsName,"",actionAndParametersVec[0],false)==true && arrived_msg==true)
 		if(emergencyFlag==false)
 		{
-			UpdateStateActionTable(actionName,agentsName,success);
+			UpdateStateActionTable(ActionAndGeneralParameters,agentsName,success);
 		}
 		else
 		{
-			UpdateRobotEmergencyFlag(actionName,agentsName,success);
+			UpdateRobotEmergencyFlag(ActionAndGeneralParameters,agentsName,success);
 		}
 	else
 		cout<<"Error In receiving msg from robot ack, the agents can not perform given action"<<endl;

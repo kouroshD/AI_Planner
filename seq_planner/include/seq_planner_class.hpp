@@ -73,9 +73,12 @@ public:
 	actionDef &refActionDef;
 	string name;
 	vector<string> assigned_agents;
-	vector<string> assignedParameters;
+	vector<string> assignedParameters; // Example: object1-graspingPose1, Point1
+	vector<string> GeneralParameters;
 	vector<bool> isDone; // it is a vector, because for some joint actions (human+robot) it needs to fill all of them in order to say an action is done;
-	string actionAndParameters;
+	string actionAndParameters; //Example:  Approach_object1-graspingPose1, Approach_Point1
+	string Action_GeneralParameters;//Example:  Appraoch_object1, Approach_Point1
+
 
 	action(actionDef &actionDefObj):refActionDef(actionDefObj){
 		name=refActionDef.name;
@@ -87,6 +90,8 @@ public:
 		assignedParameters=new_action.assignedParameters;
 		isDone=new_action.isDone;
 		actionAndParameters=new_action.actionAndParameters;
+		Action_GeneralParameters=new_action.Action_GeneralParameters;
+		GeneralParameters=new_action.GeneralParameters;
 	};
 	action& operator=(const action& new_action){
 
@@ -96,6 +101,8 @@ public:
 		assignedParameters=new_action.assignedParameters;
 		isDone=new_action.isDone;
 		actionAndParameters=new_action.actionAndParameters;
+		Action_GeneralParameters=new_action.Action_GeneralParameters;
+		GeneralParameters=new_action.GeneralParameters;
 		return *this;
 	};
 
@@ -114,18 +121,22 @@ public:
 			cout<<assignedParameters[i]<<" ";
 		cout<<endl;
 
+		cout<<"action with parameters: "<< actionAndParameters<<endl;
+
 		cout<<"Is action done? ";
 		for(int i=0; i<isDone.size();i++)
 			cout<<isDone[i]<<" ";
 		cout<<endl;
 
+		cout<<"Assigned first part of parameters: ";
+		for(int i=0; i<GeneralParameters.size();i++)
+			cout<<GeneralParameters[i]<<" ";
+		cout<<endl;
 
-		cout<<"action with parameters: "<< actionAndParameters<<endl;
+		cout<<"action with first part of parameters: "<< Action_GeneralParameters<<endl;
 
 		refActionDef.Print();
-
-
-
+		cout<<"+++++++++++++++++++++++++++++++++++++++++++++++++++++++"<<endl;
 
 	};
 };

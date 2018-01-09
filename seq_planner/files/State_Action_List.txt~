@@ -14,4 +14,4 @@ h4 PickUp Screwing
 h5 PickUp PutDown
 h6 Approach_Point-0?RightArm Approach_Point-1?RightArm Grasp?RightArm Approach_Point-2?RightArm Approach_Point-3?RightArm Approach_Point-4?LeftArm Approach_Point-5?LeftArm Grasp_LeftArm Transport_Point-11_Point-12?LeftArm+RightArm
 h7 PickUp ScrewingInitial PutDown
-h8 Approach_Point-0?LeftArm Approach_Point-1?RightArm Grasp?RightArm Approach_Point-2?RightArm Approach_Point-3?RightArm Approach_Point-4?LeftArm Approach_Point-5?LeftArm Grasp?LeftArm Transport_Point-11_Point-12?RightArm+LeftArm
+h8 Approach_Point-0?RightArm Approach_Point-1?RightArm Grasp?RightArm Approach_Point-2?RightArm Approach_Point-3?RightArm Approach_Point-4?LeftArm Approach_Point-5?LeftArm Grasp?LeftArm Transport_Point-11_Point-12?RightArm+LeftArm
