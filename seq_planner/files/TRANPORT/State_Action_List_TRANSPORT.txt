@@ -1,0 +1,7 @@
+obj_finalPose
+obj_middlePose
+obj_initialPose
+h1 UnGrasp Approach_Point0 Grasp Transport_Point0_Point1 UnGrasp Approach_Point3
+h2 UnGrasp Approach_Point0 Grasp Transport_Point0_Point2 UnGrasp Approach_Point3
+h3 UnGrasp Approach_Point2 Grasp Grasp Transport_Point2_Point1 UnGrasp Approach_Point4
+h4_human PickUp PutDown

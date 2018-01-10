@@ -789,6 +789,8 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 	temp_sim.actionsTime.resize(temp_sim.actions_list.size(), 0.0);
 	temp_sim.optimalStatePtr = &state_action_table[optimal_state];
 	temp_sim.state_name = state_action_table[optimal_state].state_name;
+	temp_sim.Print();
+
 	// add the current joint values to the simulation: in order to do it I should call the knowledge base:
 	knowledge_msgs::knowledgeSRV knowledge_msg_q;
 	knowledge_msg_q.request.reqType="JointValues";
@@ -838,6 +840,7 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 	}
 	else if (agent_counter == 0)
 	{
+		cout<<"No action has an assigned agent"<<endl;
 		for (int i = 0;	i< temp_sim.actions_list[0].refActionDef.possible_agents.size();i++)
 		{
 			optimal_state_simulation temp_sim2 = temp_sim;
@@ -997,10 +1000,12 @@ void seq_planner_class::GiveSimulationCommand(void){
 	//	find the first command it should publish, or the first action that is not solved
 	for(int i=0;i< simulation_vector[0].actions_list.size();i++)
 	{
-		for(int j=0;j< simulation_vector.size();i++)
+		for(int j=0;j< simulation_vector.size();j++)
 		{
+			cout<<"201-0-"<<j<<i<<endl;
 			if(simulation_vector[j].actions_list[i].isDone[0]==false)
 			{
+				cout<<"201-1-"<<j<<i<<endl;
 				simulationVectorNumber=j;
 				SimulationActionNumber=i;
 				breakFlag=true;
@@ -1012,7 +1017,7 @@ void seq_planner_class::GiveSimulationCommand(void){
 	}
 
 	if(breakFlag==false)
-		RankSimulation();
+		return RankSimulation();
 
 	cout<<"202: "<<simulationVectorNumber<<" "<<SimulationActionNumber<<endl;
 	vector<string> emptyvec;
@@ -1025,7 +1030,10 @@ void seq_planner_class::GiveSimulationCommand(void){
 
 		if(simulationVectorNumber==(int)simulation_vector.size()-1
 				&& SimulationActionNumber==(int)simulation_vector[simulationVectorNumber].actions_list.size()-1 )
+		{
+			simulation_vector[simulationVectorNumber].Print();
 			return RankSimulation();
+		}
 		else
 
 			return GiveSimulationCommand();
@@ -1180,9 +1188,12 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 	if(failure_Flag==true)
 	{
 		cout<<"302-1"<<endl;
+		action temp_action_for_DEL(simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber]);
 		for(vector<optimal_state_simulation>::iterator it =simulation_vector.begin(); it!= simulation_vector.end();)
 		{
-			if(isTwoActionsEqual(simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber],(*it).actions_list[SimulationActionNumber] ))
+			temp_action_for_DEL.Print();
+			(*it).actions_list[SimulationActionNumber].Print();
+			if(isTwoActionsEqual(temp_action_for_DEL,(*it).actions_list[SimulationActionNumber] ))
 			{
 				cout<<"302-2"<<endl;
 				simulation_vector.erase(it);
@@ -1195,7 +1206,7 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 	}
 	else // the simulation shows successful implementation, give the bool to all the actions with exactly the same parameters:
 	{
-		cout<<"302-3"<<simulation_vector.size()<<endl;
+		cout<<"302-3-"<<simulation_vector.size()<<endl;
 		bool actionCompletelydone=true;
 		for(int i=0; i<simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].isDone.size();i++)
 			if(simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].isDone[i]==false)
@@ -1203,12 +1214,16 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 
 		if(actionCompletelydone==true)
 		{
-			cout<<"302-4"<<simulation_vector.size()<<endl;
+			cout<<"302-4-"<<simulation_vector.size()<<endl;
 			for(vector<optimal_state_simulation>::iterator it =simulation_vector.begin(); it!= simulation_vector.end();it++)
 				if(isTwoActionsEqual(simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber],(*it).actions_list[SimulationActionNumber] ))
+				{
+					simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].Print();
+					(*it).actions_list[SimulationActionNumber].Print();
+
 					for(int j=0;j< (*it).actions_list[SimulationActionNumber].isDone.size();j++)
 					{
-						cout<<"302-5"<<j<<endl;
+						cout<<"302-5-"<<j<<endl;
 						(*it).actions_list[SimulationActionNumber].isDone[j]=true; // we are sure all of them is true
 						(*it).actionsTime[SimulationActionNumber]=simulation_vector[simulationVectorNumber].actionsTime[SimulationActionNumber];
 
@@ -1224,6 +1239,7 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 						}
 						else{}
 					}
+				}
 		}
 	}
 	cout<<"303"<<endl;
@@ -1240,7 +1256,11 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 		if(OptimalStateCompletelySimulated==false)
 			break;
 	}
-	cout<<"304"<<OptimalStateCompletelySimulated<<endl;
+
+	for(int i=0;i<simulation_vector.size();i++)
+		simulation_vector[i].Print();
+
+	cout<<"304-"<<OptimalStateCompletelySimulated<<endl;
 	if(OptimalStateCompletelySimulated==true)
 		RankSimulation();
 	else

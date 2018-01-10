@@ -46,7 +46,7 @@ public:
 	};
 	~actionDef(){};
 	void Print(void){
-		cout<<"-------------- actionDef info -------------"<<endl;
+		cout<<">>>>>>>> actionDef info"<<endl;
 		cout<<"name: "<<name<<endl;
 		cout<<"actionType: "<<actionType<<endl;
 		cout<<"actionMode: "<<actionMode<<endl;
@@ -108,7 +108,7 @@ public:
 
 	~action(){};
 	void Print(void){
-		cout<<"++++++++++++++++++++ action info ++++++++++++++++++++++"<<endl;
+		cout<<FBLU("+++++++++++++++ action info ++++++++++++++++++")<<endl;
 		cout<<"Action Name: "<<name<<endl;
 
 		cout<<"Assigned Agents: ";
@@ -136,7 +136,7 @@ public:
 		cout<<"action with first part of parameters: "<< Action_GeneralParameters<<endl;
 
 		refActionDef.Print();
-		cout<<"+++++++++++++++++++++++++++++++++++++++++++++++++++++++"<<endl;
+		cout<<"++++++++++++++++++++++++++++++++++++++++++++++"<<endl;
 
 	};
 };
@@ -172,7 +172,7 @@ public:
 	};
 	~agent(){};
 	void Print(void){
-		cout<<"******** agent info *********"<<endl;
+		cout<<FBLU("******** agent info *********")<<endl;
 		cout<<"name: "<<name<<endl;
 		cout<<"type: "<<type<<endl;
 		cout<<"lastAssignedAction: "<<lastAssignedAction<<endl;
@@ -199,7 +199,7 @@ public:
 	};
 	~offline_state_action(){};
 	void Print(void){
-		cout<<"********************** offline_state_action info *******************"<<endl;
+		cout<<FBLU("************************* offline_state_action info *********************")<<endl;
 		cout<<"state_name: "<<state_name<<endl;
 //		cout<<"actionsList: ";
 //		for(int i=0;i<actionsList.size();i++)
@@ -252,7 +252,7 @@ public:
 	};
 	~feasible_state_action(){};
 	void Print(void){
-		cout<<"******** feasible state-action table info *********"<<endl;
+		cout<<FBLU("********************** feasible state-action table info ***********************")<<endl;
 		cout<<"state_name: "<<state_name<<endl;
 		cout<<"state_type: "<<state_type<<endl;
 		cout<<"state_cost: "<<state_cost<<endl;
@@ -338,11 +338,9 @@ public:
 	};
 
 	void Print(void){
-		cout<<BOLD(FGRN("**************** optimal_state_simulation::Print ********** "))<<endl;
+		cout<<FBLU("*********************** optimal_state_simulation::Print ************************* ")<<endl;
 		cout<<"state name: "<<state_name<<endl;
 		cout<<"Total cost: "<<total_cost<<endl;
-
-
 
 		cout<<"actions list: "<<endl;
 		for(int i=0;i<actions_list.size();i++)

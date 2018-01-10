@@ -7,11 +7,11 @@ plate_screw_initialPos
 plate_initialPos Grasp?RightArm Grasp?LeftArm UnGrasp?RightArm UnGrasp?LeftArm HoldOn?LeftArm HoldOn?RightArm
 screw_initialPos
 driver_initialPos
-h1 UnGrasp?RightArm Approach_Point-6?RightArm Approach_Point-7?LeftArm Approach_Point-8?LeftArm UnGrasp?LeftArm Approach_Point-9?RightArm Approach_Point-10?LeftArm
+h1 UnGrasp?RightArm Approach_Point6?RightArm Approach_Point7?LeftArm Approach_Point8?LeftArm UnGrasp?LeftArm Approach_Point9?RightArm Approach_Point10?LeftArm
 h2 PutDown Stop?LeftArm Stop?RightArm HoldOn?LeftArm HoldOn?RightArm
 h3 PickUp Screwing
 h4 PickUp Screwing
 h5 PickUp PutDown
-h6 Approach_Point-0?RightArm Approach_Point-1?RightArm Grasp?RightArm Approach_Point-2?RightArm Approach_Point-3?RightArm Approach_Point-4?LeftArm Approach_Point-5?LeftArm Grasp_LeftArm Transport_Point-11_Point-12?LeftArm+RightArm
+h6 Approach_Point0?RightArm Approach_Point1?RightArm Grasp?RightArm Approach_Point2?RightArm Approach_Point3?RightArm Approach_Point4?LeftArm Approach_Point5?LeftArm Grasp?LeftArm Transport_Point11_Point12?LeftArm+RightArm
 h7 PickUp ScrewingInitial PutDown
-h8 Approach_Point-0?RightArm Approach_Point-1?RightArm Grasp?RightArm Approach_Point-2?RightArm Approach_Point-3?RightArm Approach_Point-4?LeftArm Approach_Point-5?LeftArm Grasp?LeftArm Transport_Point-11_Point-12?RightArm+LeftArm
+h8 Approach_Point0?RightArm Approach_Point1?RightArm Grasp?RightArm Approach_Point2?RightArm Approach_Point3?RightArm Approach_Point4?LeftArm Approach_Point5?LeftArm Grasp?LeftArm Transport_Point11_Point12?RightArm+LeftArm

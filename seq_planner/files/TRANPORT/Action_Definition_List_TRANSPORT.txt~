@@ -1,0 +1,11 @@
+PickUp simple Human 
+PutDown simple Human
+Stop simple LeftArm/RightArm
+Grasp simple LeftArm/RightArm
+UnGrasp simple LeftArm/RightArm
+HoldOn simple LeftArm/RightArm
+# Approach: 1 parameter: goal pose, in case it is just an object name, we consider all the grasping poses, and choose one among them. it should become specefied in state-action list at least partially, and uniquelly simulation 
+Approach_graspingPose simple LeftArm/RightArm
+# Transport: 2 parameters: object pose, goal pose-> they should become specified in state-action list
+Transport_objectPose_goalPose simple LeftArm/RightArm
+UpdateJointValues simple LeftArm/RightArm/LeftArm+RightArm
