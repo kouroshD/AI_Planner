@@ -175,7 +175,7 @@ void seq_planner_class::UpdateStateActionTable(string ActionName, vector<string>
 							for(int q=0;q<state_action_table[i].actions_list[j].isDone.size();q++)
 							{
 								cout<<50300070<<"****: "<<state_action_table[i].actions_list[j].name <<state_action_table[i].actions_list[j].isDone[q]	<<endl;
-								if(state_action_table[i].actions_list[j].isDone[q]==false)
+								if(state_action_table[i].actions_list[j].isDone[q]==false && temp_is_the_state_i_still_feasible==false)
 								{
 									actions_done[i]=false;
 								}
@@ -1686,7 +1686,7 @@ bool seq_planner_class::CanAgentPerformAction(vector<string> agent_name, string 
 };
 
 void seq_planner_class::EmergencyRobotStop(void){
-	cout<<"seq_planner_class::EmergencyRobotStop"<<endl;
+	cout<<BOLD(FBLU("seq_planner_class::EmergencyRobotStop"))<<endl;
 	emergencyFlag=true;
 	vector<string> agentName, coleaguesName;
 
@@ -1717,7 +1717,7 @@ void seq_planner_class::EmergencyRobotStop(void){
 };
 
 void seq_planner_class::UpdateRobotEmergencyFlag(string ActionName, vector<string>AgentsName, bool success){
-	cout<<"seq_planner_class::UpdateRobotEmergencyFlag"<<endl;
+	cout<<BOLD(FBLU("seq_planner_class::UpdateRobotEmergencyFlag"))<<endl;
 
 	for(int i=0;i<agents.size();i++)
 	{
@@ -1796,7 +1796,7 @@ void seq_planner_class::UpdateRobotEmergencyFlag(string ActionName, vector<strin
 
 
 void seq_planner_class::CallBackHumanAck(const std_msgs::String::ConstPtr& msg){
-	cout<<"seq_planner_class::CallBackHumanAck"<<endl;
+	cout<<BOLD(FBLU("seq_planner_class::CallBackHumanAck"))<<endl;
 
 	string actionName=msg-> data.c_str();
 	cout<<agents[0].name<<" action: "<< actionName<<endl;
@@ -1823,7 +1823,7 @@ void seq_planner_class::CallBackHumanAck(const std_msgs::String::ConstPtr& msg){
 }
 
 void seq_planner_class::CallBackRobotAck(const std_msgs::String::ConstPtr& msg){
-	cout<<"seq_planner_class::CallBackRobotAck"<<endl;
+	cout<<BOLD(FBLU("seq_planner_class::CallBackRobotAck"))<<endl;
 
 	vector<string> agentsName, actionAndParametersVec;
 	vector<string> robot_ack_list;
@@ -1976,7 +1976,7 @@ void seq_planner_class::CallBackRobotAck(const std_msgs::String::ConstPtr& msg){
 }
 
 void seq_planner_class::PublishHumanAction(string ActionName, string AgentName, vector<string> ColleaguesName){
-	cout<<"seq_planner_class::PublishHumanAction"<<endl;
+	cout<<BOLD(FBLU("seq_planner_class::PublishHumanAction"))<<endl;
 	cout<<AgentName<<FBLU(": Please perform Action: ")<<ActionName<<" ";
 	if(ColleaguesName.size()>0)
 	{
@@ -1990,7 +1990,7 @@ void seq_planner_class::PublishHumanAction(string ActionName, string AgentName, 
 	//	agents[0].isBusy=true;
 }
 void seq_planner_class::PublishRobotAction(string ActionName, vector<string> AgentsName, vector<string> ColleaguesName){
-	cout<<"seq_planner_class::PublishRobotAction"<<endl;
+	cout<<BOLD(FBLU("seq_planner_class::PublishRobotAction"))<<endl;
 	// publish which agent to perform an action
 
 	string responsible_agents;
