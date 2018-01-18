@@ -1,0 +1,11 @@
+Plate_initPose UnGrasp?LeftArm UnGrasp?RightArm HoldOn?LeftArm HoldOn?RightArm
+Plate_assemblyPose
+Leg1_T
+Leg1_middlePose
+Leg1_Plate_close
+h0 Approach_plane1-graspingPose1?LeftArm Approach_plane1-graspingPose2?RightArm Grasp?LeftArm Grasp?RightArm Transport_plane1-centerFrame_Point0?LeftArm+RightArm UnGrasp?LeftArm UnGrasp?RightArm Stop?LeftArm Stop?RightArm HoldOn?LeftArm HoldOn?RightArm Rest?LeftArm Rest?RightArm
+h1 Approach_cylinder1-approachingPose1 Approach_cylinder1-graspingPose1 Grasp Approach_Point1 UnGrasp Rest
+h2 Approach_cylinder1-approachingPose1 Approach_cylinder1-graspingPose1 Grasp Approach_Point2
+h3 Approach_cylinder1-approachingPose1 Approach_cylinder1-graspingPose1 Grasp Approach_Point2
+h4_human PickUp PutDown
+h5_human PickUp PutDown

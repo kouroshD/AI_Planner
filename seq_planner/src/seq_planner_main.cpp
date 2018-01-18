@@ -46,9 +46,9 @@ int main(int argc, char **argv)
 	// planner class initialization:
 	const char* home=getenv("HOME");
 	string action_def_path(home);
-	action_def_path=action_def_path+"/catkin_ws/src/AI_PLANNER/seq_planner/files/TRANPORT/Action_Definition_List_TRANSPORT.txt";
+	action_def_path=action_def_path+"/catkin_ws/src/AI_PLANNER/seq_planner/files/TableAssembly/Action_Definition_List_TableAssembly.txt";
 	string state_action_path(home);
-	state_action_path=state_action_path+"/catkin_ws/src/AI_PLANNER/seq_planner/files/TRANPORT/State_Action_List_TRANSPORT.txt";
+	state_action_path=state_action_path+"/catkin_ws/src/AI_PLANNER/seq_planner/files/TableAssembly/State_Action_List_TableAssembly.txt";
 //	state_action_path="/home/kourosh/catkin_ws/src/AI_Planner/seq_planner/files/State_Action_List.txt";
 	seq_planner_class plan_obj(action_def_path, state_action_path);
 	vector<vector<string>> gen_Feasible_state_list;
@@ -74,7 +74,7 @@ int main(int argc, char **argv)
 		if (plan_obj.updateAndor==true && count>0)
 		{
 			cout<<101<<endl;
-			andor_srv.request.graphName="TRANSPORT";
+			andor_srv.request.graphName="TableAssembly";
 			if(plan_obj.nodeSolved==true)
 			{
 				cout<<102<<endl;
