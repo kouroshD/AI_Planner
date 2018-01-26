@@ -42,6 +42,7 @@ include_directories(
 )
 
 ADD_LIBRARY(seq_planner_class include/seq_planner_class.cpp)
+ADD_LIBRARY(basic_classes include/basic_classes.cpp)
 #add_library(andor_aonode include/andor_aonode.cpp)
 #add_library(andor_aograph include/andor_aograph.cpp)
 #add_library(CallBackClass src/CallBackClass.cpp)
@@ -57,6 +58,7 @@ add_dependencies(andor baxter_core_msgs_generate_messages_cpp geometry_msgs_gene
 target_link_libraries(seq_planner
    ${catkin_LIBRARIES}
 seq_planner_class
+basic_classes
 #andor_aograph
  )
 #target_link_libraries(andor_aograph andor_aonode)

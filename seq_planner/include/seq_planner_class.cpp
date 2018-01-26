@@ -1,26 +1,28 @@
 #include "seq_planner_class.hpp"
 
-seq_planner_class::seq_planner_class(string actionDefinitionPath,string stateActionPath){
+seq_planner_class::seq_planner_class(string seqPlannerPath,string AssemblyName){
 	cout<<BOLD(FBLU("seq_planner_class::seq_planner_class"))<<endl;
 	optimal_state=0;
 	next_action_index=0;
 	//	actionList=NULL;
+    seq_planner_path=seqPlannerPath;
+    assembly_name=AssemblyName;
 
-	SetActionDefinitionList(actionDefinitionPath);
+	SetActionDefinitionList(seq_planner_path+"/ActionDefinitionList_"+assembly_name+".txt");
 	SetAgentsList();
-	SetStateActionList( stateActionPath);
+	SetStateActionList( seq_planner_path+"/StateActionList_"+assembly_name+".txt", Full_State_action_list);
 
 	CheckStateActionList();
-	cout<<"*******************************************************************"<<endl;
-	cout<<"****************** Action Definition List *************************"<<endl;
+	cout<<FBLU(BOLD("*******************************************************************"))<<endl;
+	cout<<FBLU(BOLD("****************** Action Definition List *************************"))<<endl;
 	for(int i=0;i<action_Definition_List.size();i++)
 		action_Definition_List[i].Print();
-	cout<<"*******************************************************************"<<endl;
-	cout<<"******************* Full State-Action List ************************"<<endl;
+	cout<<FBLU(BOLD("*******************************************************************"))<<endl;
+	cout<<FBLU(BOLD("******************* Full State-Action List ************************"))<<endl;
 	for(int i=0;i<Full_State_action_list.size();i++)
 		Full_State_action_list[i].Print();
-	cout<<"*******************************************************************"<<endl;
-	cout<<"*************************** Agents List ***************************"<<endl;
+	cout<<FBLU(BOLD("*******************************************************************"))<<endl;
+	cout<<FBLU(BOLD("*************************** Agents List ***************************"))<<endl;
 	for(int i=0;i<agents.size();i++)
 		agents[i].Print();
 
@@ -1371,6 +1373,18 @@ void seq_planner_class::SetActionDefinitionList(string actionDefinitionPath){
 						actionDef.parameterTypes.push_back(action_paramters[i]);
 
 				actionDef.actionType=line_list[1];
+				if(actionDef.actionType=="simple")
+					{}
+				else if(actionDef.actionType=="complex")
+				{
+					SetStateActionList(seq_planner_path+"/StateActionList_"+actionDef.name+".txt",actionDef.ComplexAction_state_action_list);
+				}
+				else
+				{
+					cout<<"Error in action type in action definition list: action name: "<<actionDef.name<<", action type"<<actionDef.actionType<<endl;
+				}
+
+
 				//			actionDef.actionMode=line_list[2];
 				int counter=0;
 				//			int Num_agents=stoi(line_list[3]);
@@ -1426,7 +1440,7 @@ void seq_planner_class::SetAgentsList(void){
 
 }
 
-void seq_planner_class::SetStateActionList(string stateActionPath){
+void seq_planner_class::SetStateActionList(string stateActionPath, vector<offline_state_action> & offline_state_action_list){
 	cout<<"seq_planner_class::SetStateActionList"<<endl;
 
 	ifstream file_path_ifStr(stateActionPath.c_str());
@@ -1508,7 +1522,7 @@ void seq_planner_class::SetStateActionList(string stateActionPath){
 				temp_state_action.actions_list.push_back(tempAction);
 
 			}
-			Full_State_action_list.push_back(temp_state_action);
+			offline_state_action_list.push_back(temp_state_action);
 
 
 		}

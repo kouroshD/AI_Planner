@@ -44,13 +44,12 @@ int main(int argc, char **argv)
 	ros::Rate loop_rate(80);
 
 	// planner class initialization:
+	string AssemblyName="TableAssembly";
 	const char* home=getenv("HOME");
-	string action_def_path(home);
-	action_def_path=action_def_path+"/catkin_ws/src/AI_PLANNER/seq_planner/files/TableAssembly/Action_Definition_List_TableAssembly.txt";
-	string state_action_path(home);
-	state_action_path=state_action_path+"/catkin_ws/src/AI_PLANNER/seq_planner/files/TableAssembly/State_Action_List_TableAssembly.txt";
-//	state_action_path="/home/kourosh/catkin_ws/src/AI_Planner/seq_planner/files/State_Action_List.txt";
-	seq_planner_class plan_obj(action_def_path, state_action_path);
+	string assemblyPath(home);
+	assemblyPath=assemblyPath+"/catkin_ws/src/AI_PLANNER/seq_planner/files/TableAssembly";
+
+	seq_planner_class plan_obj(assemblyPath, AssemblyName);
 	vector<vector<string>> gen_Feasible_state_list;
 	vector<int> gen_Feasible_stateCost_list;
 
@@ -74,7 +73,7 @@ int main(int argc, char **argv)
 		if (plan_obj.updateAndor==true && count>0)
 		{
 			cout<<101<<endl;
-			andor_srv.request.graphName="TableAssembly";
+			andor_srv.request.graphName=AssemblyName;
 			if(plan_obj.nodeSolved==true)
 			{
 				cout<<102<<endl;
