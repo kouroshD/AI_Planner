@@ -143,6 +143,7 @@ void offline_state_action::Print(void){
 feasible_state_action::feasible_state_action(void){
 	state_name="";
 	state_type="";
+	andorName="";
 	state_cost=0;
 	isFeasible=true;
 	isSimulated=false;
@@ -190,6 +191,8 @@ void feasible_state_action::Print(void){
 	for(int i=0;i<actions_list.size();i++){
 		actions_list[i].Print();
 	}
+	cout<<"The And/Or graph Name: "<<andorName<<endl;
+
 };
 
 //****************************

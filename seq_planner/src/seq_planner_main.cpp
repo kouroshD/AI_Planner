@@ -73,7 +73,7 @@ int main(int argc, char **argv)
 		if (plan_obj.updateAndor==true && count>0)
 		{
 			cout<<101<<endl;
-			andor_srv.request.graphName=AssemblyName;
+			andor_srv.request.graphName=plan_obj.AndOrUpdateName;
 			if(plan_obj.nodeSolved==true)
 			{
 				cout<<102<<endl;
@@ -99,9 +99,9 @@ int main(int argc, char **argv)
 			{
 				cout<<103<<endl;
 				isGraphSolved=andor_srv.response.graphSolved;
-				if(isGraphSolved==true)
+				if(isGraphSolved==true && plan_obj.AndOrUpdateName==AssemblyName)
 				{
-					cout<<	FGRN("The Graph is Done")<<endl;
+					cout<<	FGRN("The Assembly task is Done")<<endl;
 					return 1;
 				}
 				else
@@ -131,11 +131,9 @@ int main(int argc, char **argv)
 						gen_Feasible_state_list.push_back(Feasible_state);
 					}
 					plan_obj.updateAndor=false;
-					plan_obj.GenerateStateActionTable(gen_Feasible_state_list,gen_Feasible_stateCost_list);
+					plan_obj.GenerateStateActionTable(gen_Feasible_state_list,gen_Feasible_stateCost_list,plan_obj.AndOrUpdateName, isGraphSolved );
 					gen_Feasible_state_list.clear();
 					gen_Feasible_stateCost_list.clear();
-
-
 				}
 
 			}

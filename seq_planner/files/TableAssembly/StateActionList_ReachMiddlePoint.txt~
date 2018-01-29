@@ -1,4 +1,3 @@
 Leg1_T
 Leg1_middlePose
-h0 Approach_plane1-approachingPose1?LeftArm Approach_plane1-approachingPose2?RightArm Approach_plane1-graspingPose1?LeftArm Approach_plane1-graspingPose2?RightArm Grasp?LeftArm Grasp?RightArm Transport_plane1-centerFrame_Point4?LeftArm+RightArm Transport_Point4_Point0?LeftArm+RightArm Transport_Point0_Point3?LeftArm+RightArm UnGrasp?LeftArm UnGrasp?RightArm Stop?LeftArm Stop?RightArm HoldOn?LeftArm HoldOn?RightArm Rest?LeftArm Rest?RightArm
-
+h0 Approach_cylinder1-approachingPose1 Approach_cylinder1-graspingPose1 Grasp Approach_Point1 UnGrasp Rest

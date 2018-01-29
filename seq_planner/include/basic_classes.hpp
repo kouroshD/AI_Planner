@@ -101,7 +101,8 @@ public:
 class feasible_state_action{
 public:
 	string state_name;
-	string state_type; // node or hyperarc
+	string state_type; //! node or hyperarc
+	string andorName; //! name of the andor graph the state is belonged to!
 	int state_cost;
 	bool isFeasible;
 

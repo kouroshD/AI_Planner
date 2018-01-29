@@ -370,7 +370,7 @@ public:
 
 	seq_planner_class(string seqPlannerPath,string AssemblyName);
 	~seq_planner_class();
-	void GenerateStateActionTable(vector<vector<string>> gen_Feasible_state_list, vector<int> gen_Feasible_stateCost_list);
+	void GenerateStateActionTable(vector<vector<string>> gen_Feasible_state_list, vector<int> gen_Feasible_stateCost_list, string graphName, bool graphSolved);
 	bool updateAndor; // it is true if we want to update the andor in here, or in andor graph module.
 	bool nodeSolved;// it is true if we have a solved node, so we should update the andor graph.
 	bool haSolved;// it is true if we have a solved hyperarc, so we should update the andor graph.
@@ -378,6 +378,7 @@ public:
     vector<string> Solved_hyperarc_list;// the list of all the solved hyperarc at the current moment
     string seq_planner_path; // the path to the files of the seq_planner
     string assembly_name;//
+    string AndOrUpdateName;
 
 
 
@@ -401,6 +402,7 @@ private:
 	int next_action_index;
 //	int agent_update;// the agent number who arrives the latest ack.
 	int simulationVectorNumber,SimulationActionNumber;
+	vector<string> hierarchicalGraphList;// the list of the hierarchical and/or graphs
 
 	ros::NodeHandle nh;
 	ros::Subscriber subHumanActionAck;
@@ -422,6 +424,7 @@ private:
 	void CheckStateActionList(void);
 
 	void UpdateStateActionTable(string ActionName, vector<string>AgentsName, bool success);
+	void UpdateStateActionTable_ComplexAction(string ActionName, bool success);
 //	agent_update --> the agent number who arrives the latest ack.
 	void FindOptimalState(void);
 	void FindNextAction(void);
