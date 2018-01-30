@@ -39,7 +39,7 @@ public:
 	vector <string> parameterTypes; // what is the feature of an argument we should look for in the knowledge base,
 	// for example: if we say: approach plate, in fact we should look for the grasping pose of the plate.
 	// it should be given in order
-	vector<offline_state_action> ComplexAction_state_action_list;//
+//	vector<offline_state_action> ComplexAction_state_action_list;//
 	actionDef(void);
 	~actionDef();
 	void Print(void);
@@ -90,6 +90,7 @@ public:
 	string state_name;
 //	vector<string> actionsList;
 //	vector<vector<string>> actionsResponsible;
+	string andorName;
 	vector<action> actions_list;
 
 	offline_state_action(void);

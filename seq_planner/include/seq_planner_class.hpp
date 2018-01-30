@@ -387,11 +387,12 @@ private:
 	vector<agent> agents;
 	vector<actionDef> action_Definition_List;    // list of definition of the actions
 //    vector<vector<string>> Full_State_action_list;
-    vector<offline_state_action> Full_State_action_list;// list of all the actions for all the states, this list should be found offline by a planner
+    vector<vector<offline_state_action>> Full_State_action_list;// list of all the actions for all the states, this list should be found offline by a planner
 
     vector<feasible_state_action> state_action_table;
 
     vector<optimal_state_simulation> simulation_vector;
+    vector<string> complexAcrionsList;
     bool emergencyFlag;
 //    vector<vector<string>> Feasible_states_actions_table;     // table of the feasible state-actions names
 //    vector<vector<bool>> Feasible_states_actions_progress;     // table of the feasible state-actions done(true)/not done (false)actions
@@ -420,7 +421,7 @@ private:
 
 	void SetActionDefinitionList(string actionDefinitionPath);
 	void SetAgentsList(void);
-	void SetStateActionList(string stateActionPath, vector<offline_state_action> & offline_state_action_list);
+	void SetStateActionList(string stateActionPath, string andorGraphName, vector<offline_state_action> & offline_state_action_list);
 	void CheckStateActionList(void);
 
 	void UpdateStateActionTable(string ActionName, vector<string>AgentsName, bool success);

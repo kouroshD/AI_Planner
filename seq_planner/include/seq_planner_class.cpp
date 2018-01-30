@@ -7,13 +7,21 @@ seq_planner_class::seq_planner_class(string seqPlannerPath,string AssemblyName){
 	//	actionList=NULL;
 	seq_planner_path=seqPlannerPath;
 	assembly_name=AssemblyName;
-	AndOrUpdateName="";
+	AndOrUpdateName=assembly_name;
 	hierarchicalGraphList.push_back(assembly_name);
 
 	SetActionDefinitionList(seq_planner_path+"/ActionDefinitionList_"+assembly_name+".txt");
 	SetAgentsList();
-	SetStateActionList( seq_planner_path+"/StateActionList_"+assembly_name+".txt", Full_State_action_list);
-
+	Full_State_action_list.resize(1);
+	SetStateActionList( seq_planner_path+"/StateActionList_"+assembly_name+".txt",assembly_name, Full_State_action_list[0]);
+	if(complexAcrionsList.size()>0)
+	{
+		Full_State_action_list.resize(1+complexAcrionsList.size());
+		for(int i=0;i<complexAcrionsList.size();i++)
+		{
+			SetStateActionList( seq_planner_path+"/StateActionList_"+complexAcrionsList[i]+".txt",complexAcrionsList[i] ,Full_State_action_list[i+1]);
+		}
+	}
 	CheckStateActionList();
 	cout<<FBLU(BOLD("*******************************************************************"))<<endl;
 	cout<<FBLU(BOLD("****************** Action Definition List *************************"))<<endl;
@@ -22,7 +30,8 @@ seq_planner_class::seq_planner_class(string seqPlannerPath,string AssemblyName){
 	cout<<FBLU(BOLD("*******************************************************************"))<<endl;
 	cout<<FBLU(BOLD("******************* Full State-Action List ************************"))<<endl;
 	for(int i=0;i<Full_State_action_list.size();i++)
-		Full_State_action_list[i].Print();
+		for(int j=0;j<Full_State_action_list[i].size();j++)
+		Full_State_action_list[i][j].Print();
 	cout<<FBLU(BOLD("*******************************************************************"))<<endl;
 	cout<<FBLU(BOLD("*************************** Agents List ***************************"))<<endl;
 	for(int i=0;i<agents.size();i++)
@@ -104,9 +113,9 @@ void seq_planner_class::UpdateStateActionTable(string ActionName, vector<string>
 		 	 - if an state is executed inform the andor graph, come out of here
 	 */
 
-	cout<<FBLU("before update: ")<<endl;
-	for (int i=0;i<state_action_table.size();i++)
-		state_action_table[i].Print();
+//	cout<<FBLU("before update: ")<<endl;
+//	for (int i=0;i<state_action_table.size();i++)
+//		state_action_table[i].Print();
 
 	bool is_a_state_solved=false;
 	bool is_a_state_feasible=false;
@@ -290,9 +299,9 @@ void seq_planner_class::UpdateStateActionTable(string ActionName, vector<string>
 			if(is_a_state_feasible==true)
 			{
 
-				cout<<FBLU("after update: ")<<endl;
-				for (int i=0;i<state_action_table.size();i++)
-					state_action_table[i].Print();
+//				cout<<FBLU("after update: ")<<endl;
+//				for (int i=0;i<state_action_table.size();i++)
+//					state_action_table[i].Print();
 				if(is_an_action_done==true)
 				{
 					FindOptimalState();
@@ -352,6 +361,7 @@ void seq_planner_class::FindOptimalState(void){
 	{
 		if(state_action_table[optimal_state].actions_list[i].refActionDef.actionType=="complex")
 		{
+			cout<<" 801 -------------- Call Complex action, andor"<<endl;
 			updateAndor=true;
 			AndOrUpdateName=state_action_table[optimal_state].actions_list[i].refActionDef.name;
 			hierarchicalGraphList.push_back(AndOrUpdateName);
@@ -475,26 +485,57 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 	cout<<BOLD(FBLU("seq_planner_class::GenerateStateActionTable"))<<endl;
 
 	// delete the states from state-action list which the graph name is equal to the updated graph
-	for(vector<feasible_state_action>::iterator it =state_action_table.begin(); it!= state_action_table.end();)
-	{
-		if((*it).andorName==graphName)
-		{
-			state_action_table.erase(it);
-		}
-		else
-		{it++;}
-	}
+	int aa;
+	cin>>aa;
+	cout<<FBLU("before delete: ")<<endl;
+	for (int i=0;i<state_action_table.size();i++)
+		state_action_table[i].Print();
+//	cin>>aa;
+
+	vector<feasible_state_action> temp_state_action_table=state_action_table;
+	state_action_table.clear();
+
+	for(int i=0;i<temp_state_action_table.size();i++)
+		if(temp_state_action_table[i].andorName!=graphName)
+			state_action_table.push_back(temp_state_action_table[i]);
+
+//	for(vector<feasible_state_action>::iterator it =state_action_table.begin(); it!= state_action_table.end();)
+//	{
+//		if((*it).andorName==graphName)
+//		{
+//			state_action_table.erase(it);
+//		}
+//		else
+//		{it++;}
+//	}
+
+	cout<<FBLU("after delete: ")<<endl;
+	for (int i=0;i<state_action_table.size();i++)
+		state_action_table[i].Print();
+
+//	cin>>aa;
+
+//	cout<<FBLU(BOLD("*******************************************************************"))<<endl;
+//	cout<<FBLU(BOLD("******************* Full State-Action List ************************"))<<endl;
+//	for(int i=0;i<Full_State_action_list.size();i++)
+//		for(int j=0;j<Full_State_action_list[i].size();j++)
+//		Full_State_action_list[i][j].Print();
+//	cin>>aa;
+
+
 	// surely the graph name here is not equal to the assembly graph name, it the assembly graph name is solved, the program will exit before in the main
 	if(graphSolved==true) // it is an complex action
 	{
-		vector<string>AgentsName;
+		hierarchicalGraphList.pop_back();
+		vector<string>AgentsName;AgentsName.push_back("Human");
 		return UpdateStateActionTable(graphName, AgentsName,graphSolved);
 	}
 
 	//	cout<<"100: "<<gen_Feasible_stateCost_list.size()<<endl;
-	bool nameFlag=false;
+
 	for(int i=0; i<gen_Feasible_stateCost_list.size();i++)
 	{
+		bool nameFlag=false;
 		feasible_state_action temp_obj;
 		temp_obj.state_name=gen_Feasible_state_list[i][0];
 		temp_obj.state_type=gen_Feasible_state_list[i][1];
@@ -503,29 +544,45 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 		temp_obj.isSimulated=false;
 		temp_obj.andorName=graphName;
 
+		cout<<"Full_State_action_list: "<<Full_State_action_list.size()<<endl;
 		for (int j=0;j<Full_State_action_list.size();j++)
 		{
-			if (temp_obj.state_name==Full_State_action_list[j].state_name)
+			cout<<Full_State_action_list[j][0].andorName<<", "<<graphName<<endl;
+			if (Full_State_action_list[j][0].andorName==graphName)
 			{
-				nameFlag=true;
-				temp_obj.actions_list=Full_State_action_list[j].actions_list;
-
-				for (int k=0;k<temp_obj.actions_list.size();k++)
+				for (int k=0;k<Full_State_action_list[j].size();k++)
 				{
-					vector<bool> temp_actionProgress(temp_obj.actions_list[k].assigned_agents.size(),false);
-					temp_obj.actionsProgress.push_back(temp_actionProgress); //DEL
-					temp_obj.actions_list[k].isDone=temp_actionProgress;
+					cout<<Full_State_action_list[j][k].state_name<<", "<<temp_obj.state_name<<endl;
+					if (temp_obj.state_name==Full_State_action_list[j][k].state_name)
+					{
+						nameFlag=true;
+						temp_obj.actions_list=Full_State_action_list[j][k].actions_list;
+
+						for (int l=0;l<temp_obj.actions_list.size();l++)
+						{
+							vector<bool> temp_actionProgress(temp_obj.actions_list[l].assigned_agents.size(),false);
+							temp_obj.actionsProgress.push_back(temp_actionProgress); //DEL
+							temp_obj.actions_list[l].isDone=temp_actionProgress;
+						}
+						break;
+					}
 				}
+				break;
 			}
 		}
 		state_action_table.push_back(temp_obj);
+		if(nameFlag==false)
+		{
+			cout<<"There is not any defined state or andor graph name with the name coming from AND/OR graph: "<<temp_obj.state_name<<", "<<graphName<<endl;
+			exit(1);
+		}
 	}
-	if(nameFlag==false)
-		cout<<"There is not any defined state with the name coming from AND/OR graph"<<endl;
 
 	cout<<"101: "<<state_action_table.size()<<endl;
+	cout<<FBLU("after generate new state-action table: ")<<endl;
 	for (int i=0;i<state_action_table.size();i++)
 		state_action_table[i].Print();
+	cin>>aa;
 
 	CheckStateExecution();
 
@@ -1202,7 +1259,8 @@ void seq_planner_class::SetActionDefinitionList(string actionDefinitionPath){
 				{}
 				else if(actionDef.actionType=="complex")
 				{
-					SetStateActionList(seq_planner_path+"/StateActionList_"+actionDef.name+".txt",actionDef.ComplexAction_state_action_list);
+					complexAcrionsList.push_back(actionDef.name);
+					//SetStateActionList(seq_planner_path+"/StateActionList_"+actionDef.name+".txt",actionDef.ComplexAction_state_action_list);
 				}
 				else
 				{
@@ -1265,7 +1323,7 @@ void seq_planner_class::SetAgentsList(void){
 
 }
 
-void seq_planner_class::SetStateActionList(string stateActionPath, vector<offline_state_action> & offline_state_action_list){
+void seq_planner_class::SetStateActionList(string stateActionPath, string andorGraphName, vector<offline_state_action> & offline_state_action_list){
 	cout<<"seq_planner_class::SetStateActionList"<<endl;
 
 	ifstream file_path_ifStr(stateActionPath.c_str());
@@ -1287,6 +1345,7 @@ void seq_planner_class::SetStateActionList(string stateActionPath, vector<offlin
 			offline_state_action temp_state_action;
 			boost::split(line_list, line, boost::is_any_of(delim_type));
 			temp_state_action.state_name=line_list[0];
+			temp_state_action.andorName=andorGraphName;
 			for(int i=1;i<line_list.size();i++)
 			{
 				vector<string> action_and_responsibles,action_and_parameters;
@@ -1362,57 +1421,60 @@ void seq_planner_class::CheckStateActionList(){
 
 	for(int i=0;i<Full_State_action_list.size();i++)
 	{
-		for(int j=0;j<Full_State_action_list[i].actions_list.size();j++)
+		for(int j=0;j<Full_State_action_list[i].size();j++)
 		{
-			isResponsibleAgentAcceptable=false;
-			if(Full_State_action_list[i].actions_list[j].assigned_agents[0]=="Unknown")
+			for(int k=0;k<Full_State_action_list[i][j].actions_list.size();k++)
 			{
-				isResponsibleAgentAcceptable=true;
-				// if the action have one set of agents to perfrom assign it here:
-				if(Full_State_action_list[i].actions_list[j].refActionDef.possible_agents.size()==1)
+				isResponsibleAgentAcceptable=false;
+				if(Full_State_action_list[i][j].actions_list[k].assigned_agents[0]=="Unknown")
 				{
-					Full_State_action_list[i].actions_list[j].assigned_agents=Full_State_action_list[i].actions_list[j].refActionDef.possible_agents[0];
-				}
-			}
-			else
-			{
-				isResponsibleAgentAcceptable=CanAgentPerformAction(Full_State_action_list[i].actions_list[j].assigned_agents,"",Full_State_action_list[i].actions_list[j].name, true);
-			}
-
-			if(isResponsibleAgentAcceptable==false)
-			{
-				cout<<FRED("The agent you defined in the 'Full_State_action_list' file can not perform the given action: state:")<<
-						Full_State_action_list[i].state_name<<", action:"<<Full_State_action_list[i].actions_list[j].name<<endl;
-				cout<<"Do you want to assign a new agent to it? (enter 1 if yes)";
-				bool input;
-				vector<string> temp_agent_list;
-
-				cin>>input;
-				if(input==true)
-				{
-					cout<<"Give one of the following rows as responsible:"<<endl;
-					for(int m=0;m<Full_State_action_list[i].actions_list[j].refActionDef.possible_agents.size();m++)
+					isResponsibleAgentAcceptable=true;
+					// if the action have one set of agents to perfrom assign it here:
+					if(Full_State_action_list[i][j].actions_list[k].refActionDef.possible_agents.size()==1)
 					{
-						for(int n=0;n<Full_State_action_list[i].actions_list[j].refActionDef.possible_agents[m].size();n++)
-						{
-							cout<<Full_State_action_list[i].actions_list[j].refActionDef.possible_agents[m][n];
-							if(n<Full_State_action_list[i].actions_list[j].refActionDef.possible_agents[m].size()-1)
-								cout<<"+";
-						}
-						cout<<endl;
+						Full_State_action_list[i][j].actions_list[k].assigned_agents=Full_State_action_list[i][j].actions_list[k].refActionDef.possible_agents[0];
 					}
-					string input_string;
-					cout<<"Enter the Agents: ";
-					cin>>input_string;
-					boost::split(temp_agent_list, input_string, boost::is_any_of("+"));
 				}
 				else
 				{
-					temp_agent_list.push_back("Unknown");
+					isResponsibleAgentAcceptable=CanAgentPerformAction(Full_State_action_list[i][j].actions_list[k].assigned_agents,"",Full_State_action_list[i][j].actions_list[k].name, true);
 				}
-				Full_State_action_list[i].actions_list[j].assigned_agents=temp_agent_list;
-			}
 
+				if(isResponsibleAgentAcceptable==false)
+				{
+					cout<<FRED("The agent you defined in the 'Full_State_action_list' file can not perform the given action: state:")<<
+							Full_State_action_list[i][j].state_name<<", action:"<<Full_State_action_list[i][j].actions_list[k].name<<endl;
+					cout<<"Do you want to assign a new agent to it? (enter 1 if yes)";
+					bool input;
+					vector<string> temp_agent_list;
+
+					cin>>input;
+					if(input==true)
+					{
+						cout<<"Give one of the following rows as responsible:"<<endl;
+						for(int m=0;m<Full_State_action_list[i][j].actions_list[k].refActionDef.possible_agents.size();m++)
+						{
+							for(int n=0;n<Full_State_action_list[i][j].actions_list[k].refActionDef.possible_agents[m].size();n++)
+							{
+								cout<<Full_State_action_list[i][j].actions_list[k].refActionDef.possible_agents[m][n];
+								if(n<Full_State_action_list[i][j].actions_list[k].refActionDef.possible_agents[m].size()-1)
+									cout<<"+";
+							}
+							cout<<endl;
+						}
+						string input_string;
+						cout<<"Enter the Agents: ";
+						cin>>input_string;
+						boost::split(temp_agent_list, input_string, boost::is_any_of("+"));
+					}
+					else
+					{
+						temp_agent_list.push_back("Unknown");
+					}
+					Full_State_action_list[i][j].actions_list[k].assigned_agents=temp_agent_list;
+				}
+
+			}
 		}
 	}
 

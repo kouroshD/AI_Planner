@@ -56,7 +56,7 @@ int main(int argc, char **argv)
 	// ANDOR graph service definition:
 
 	ros::ServiceClient andorSRV_client = nh.serviceClient<andor_msgs::andorSRV>("andorService");
-	andor_msgs::andorSRV andor_srv;
+
 
 	/*! 	AGENTS		*/
 	int responsibleAgent=0; //! it defines which agent is responsible at each moment, 0: human, 1: robot (in this example we have two agents)
@@ -72,7 +72,8 @@ int main(int argc, char **argv)
 //		cout<<100<<" "<<plan_obj.updateAndor<<" "<<plan_obj.nodeSolved <<" "<<plan_obj.haSolved <<endl;
 		if (plan_obj.updateAndor==true && count>0)
 		{
-			cout<<101<<endl;
+			andor_msgs::andorSRV andor_srv;
+			cout<<"101: "<<plan_obj.AndOrUpdateName<<endl;
 			andor_srv.request.graphName=plan_obj.AndOrUpdateName;
 			if(plan_obj.nodeSolved==true)
 			{

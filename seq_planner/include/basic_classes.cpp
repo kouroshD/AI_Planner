@@ -28,11 +28,6 @@ void actionDef::Print(void){
 	}
 	cout<<endl;
 
-	cout<<" complex action state-action list:"<<endl;
-	for (int i=0;i<ComplexAction_state_action_list.size();i++)
-	{
-		ComplexAction_state_action_list[i].Print();
-	}
 };
 /////////////////////////////////////////////////////////////
 
@@ -64,7 +59,7 @@ action& action::operator=(const action& new_action){
 
 action::~action(){};
 void action::Print(void){
-	cout<<FBLU("+++++++++++++++ action info ++++++++++++++++++")<<endl;
+	cout<<FBLU("++++++++++++ action info +++++++++++++++")<<endl;
 	cout<<"Action Name: "<<name<<endl;
 
 	cout<<"Assigned Agents: ";
@@ -92,7 +87,7 @@ void action::Print(void){
 	cout<<"action with first part of parameters: "<< Action_GeneralParameters<<endl;
 
 	refActionDef.Print();
-	cout<<"++++++++++++++++++++++++++++++++++++++++++++++"<<endl;
+	cout<<"+++++++++++++++++++++++++++++++++++++++++++"<<endl;
 
 };
 
@@ -127,10 +122,12 @@ void agent::Print(void){
 
 offline_state_action::offline_state_action(void){
 	state_name="";
+	andorName="";
 };
 offline_state_action::~offline_state_action(){};
 void offline_state_action::Print(void){
-	cout<<FBLU("************************* offline_state_action info *********************")<<endl;
+	cout<<FBLU("+++++++++++++++++++++++ offline_state_action info +++++++++++++++++++++++")<<endl;
+	cout<<"The And/Or graph Name: "<<andorName<<endl;
 	cout<<"state_name: "<<state_name<<endl;
 
 	cout<<"Actions List: "<<endl;
@@ -150,7 +147,8 @@ feasible_state_action::feasible_state_action(void){
 };
 feasible_state_action::~feasible_state_action(){};
 void feasible_state_action::Print(void){
-	cout<<FBLU("********************** feasible state-action table info ***********************")<<endl;
+	cout<<FBLU("*********************** Feasible State-Action Table Info ***********************")<<endl;
+	cout<<"The And/Or graph Name: "<<andorName<<endl;
 	cout<<"state_name: "<<state_name<<endl;
 	cout<<"state_type: "<<state_type<<endl;
 	cout<<"state_cost: "<<state_cost<<endl;
@@ -191,7 +189,7 @@ void feasible_state_action::Print(void){
 	for(int i=0;i<actions_list.size();i++){
 		actions_list[i].Print();
 	}
-	cout<<"The And/Or graph Name: "<<andorName<<endl;
+
 
 };
 
@@ -218,7 +216,7 @@ void optimal_state_simulation::SetAgentForAllTheAction(void){
 };
 
 void optimal_state_simulation::Print(void){
-	cout<<FBLU("*********************** optimal_state_simulation::Print ************************* ")<<endl;
+	cout<<FBLU("*********************** Optimal_state_simulation::Print ************************* ")<<endl;
 	cout<<"state name: "<<state_name<<endl;
 	cout<<"Total cost: "<<total_cost<<endl;
 
