@@ -13,13 +13,15 @@ seq_planner_class::seq_planner_class(string seqPlannerPath,string AssemblyName){
 	SetActionDefinitionList(seq_planner_path+"/ActionDefinitionList_"+assembly_name+".txt");
 	SetAgentsList();
 	Full_State_action_list.resize(1);
-	SetStateActionList( seq_planner_path+"/StateActionList_"+assembly_name+".txt",assembly_name, Full_State_action_list[0]);
-	if(complexAcrionsList.size()>0)
+	Full_State_action_list[0].graph_name=assembly_name;
+	SetStateActionList( seq_planner_path+"/StateActionList_"+assembly_name+".txt",assembly_name, Full_State_action_list[0].graph_state_action_offline_vector);
+	if(complexActionsList.size()>0)
 	{
-		Full_State_action_list.resize(1+complexAcrionsList.size());
-		for(int i=0;i<complexAcrionsList.size();i++)
+		Full_State_action_list.resize(1+complexActionsList.size());
+		for(int i=0;i<complexActionsList.size();i++)
 		{
-			SetStateActionList( seq_planner_path+"/StateActionList_"+complexAcrionsList[i]+".txt",complexAcrionsList[i] ,Full_State_action_list[i+1]);
+			Full_State_action_list[i+1].graph_name=complexActionsList[i];
+			SetStateActionList( seq_planner_path+"/StateActionList_"+complexActionsList[i]+".txt",complexActionsList[i] ,Full_State_action_list[i+1].graph_state_action_offline_vector);
 		}
 	}
 	CheckStateActionList();
@@ -30,8 +32,7 @@ seq_planner_class::seq_planner_class(string seqPlannerPath,string AssemblyName){
 	cout<<FBLU(BOLD("*******************************************************************"))<<endl;
 	cout<<FBLU(BOLD("******************* Full State-Action List ************************"))<<endl;
 	for(int i=0;i<Full_State_action_list.size();i++)
-		for(int j=0;j<Full_State_action_list[i].size();j++)
-		Full_State_action_list[i][j].Print();
+		Full_State_action_list[i].Print();
 	cout<<FBLU(BOLD("*******************************************************************"))<<endl;
 	cout<<FBLU(BOLD("*************************** Agents List ***************************"))<<endl;
 	for(int i=0;i<agents.size();i++)
@@ -547,16 +548,16 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 		cout<<"Full_State_action_list: "<<Full_State_action_list.size()<<endl;
 		for (int j=0;j<Full_State_action_list.size();j++)
 		{
-			cout<<Full_State_action_list[j][0].andorName<<", "<<graphName<<endl;
-			if (Full_State_action_list[j][0].andorName==graphName)
+			cout<<Full_State_action_list[j].graph_name<<", "<<graphName<<endl;
+			if (Full_State_action_list[j].graph_name==graphName)
 			{
-				for (int k=0;k<Full_State_action_list[j].size();k++)
+				for (int k=0;k<Full_State_action_list[j].graph_state_action_offline_vector.size();k++)
 				{
-					cout<<Full_State_action_list[j][k].state_name<<", "<<temp_obj.state_name<<endl;
-					if (temp_obj.state_name==Full_State_action_list[j][k].state_name)
+					cout<<Full_State_action_list[j].graph_state_action_offline_vector[k].state_name<<", "<<temp_obj.state_name<<endl;
+					if (temp_obj.state_name==Full_State_action_list[j].graph_state_action_offline_vector[k].state_name)
 					{
 						nameFlag=true;
-						temp_obj.actions_list=Full_State_action_list[j][k].actions_list;
+						temp_obj.actions_list=Full_State_action_list[j].graph_state_action_offline_vector[k].actions_list;
 
 						for (int l=0;l<temp_obj.actions_list.size();l++)
 						{
@@ -1259,7 +1260,7 @@ void seq_planner_class::SetActionDefinitionList(string actionDefinitionPath){
 				{}
 				else if(actionDef.actionType=="complex")
 				{
-					complexAcrionsList.push_back(actionDef.name);
+					complexActionsList.push_back(actionDef.name);
 					//SetStateActionList(seq_planner_path+"/StateActionList_"+actionDef.name+".txt",actionDef.ComplexAction_state_action_list);
 				}
 				else
@@ -1345,7 +1346,7 @@ void seq_planner_class::SetStateActionList(string stateActionPath, string andorG
 			offline_state_action temp_state_action;
 			boost::split(line_list, line, boost::is_any_of(delim_type));
 			temp_state_action.state_name=line_list[0];
-			temp_state_action.andorName=andorGraphName;
+//			temp_state_action.andorName=andorGraphName;
 			for(int i=1;i<line_list.size();i++)
 			{
 				vector<string> action_and_responsibles,action_and_parameters;
@@ -1421,29 +1422,29 @@ void seq_planner_class::CheckStateActionList(){
 
 	for(int i=0;i<Full_State_action_list.size();i++)
 	{
-		for(int j=0;j<Full_State_action_list[i].size();j++)
+		for(int j=0;j<Full_State_action_list[i].graph_state_action_offline_vector.size();j++)
 		{
-			for(int k=0;k<Full_State_action_list[i][j].actions_list.size();k++)
+			for(int k=0;k<Full_State_action_list[i].graph_state_action_offline_vector[j].actions_list.size();k++)
 			{
 				isResponsibleAgentAcceptable=false;
-				if(Full_State_action_list[i][j].actions_list[k].assigned_agents[0]=="Unknown")
+				if(Full_State_action_list[i].graph_state_action_offline_vector[j].actions_list[k].assigned_agents[0]=="Unknown")
 				{
 					isResponsibleAgentAcceptable=true;
 					// if the action have one set of agents to perfrom assign it here:
-					if(Full_State_action_list[i][j].actions_list[k].refActionDef.possible_agents.size()==1)
+					if(Full_State_action_list[i].graph_state_action_offline_vector[j].actions_list[k].refActionDef.possible_agents.size()==1)
 					{
-						Full_State_action_list[i][j].actions_list[k].assigned_agents=Full_State_action_list[i][j].actions_list[k].refActionDef.possible_agents[0];
+						Full_State_action_list[i].graph_state_action_offline_vector[j].actions_list[k].assigned_agents=Full_State_action_list[i].graph_state_action_offline_vector[j].actions_list[k].refActionDef.possible_agents[0];
 					}
 				}
 				else
 				{
-					isResponsibleAgentAcceptable=CanAgentPerformAction(Full_State_action_list[i][j].actions_list[k].assigned_agents,"",Full_State_action_list[i][j].actions_list[k].name, true);
+					isResponsibleAgentAcceptable=CanAgentPerformAction(Full_State_action_list[i].graph_state_action_offline_vector[j].actions_list[k].assigned_agents,"",Full_State_action_list[i].graph_state_action_offline_vector[j].actions_list[k].name, true);
 				}
 
 				if(isResponsibleAgentAcceptable==false)
 				{
 					cout<<FRED("The agent you defined in the 'Full_State_action_list' file can not perform the given action: state:")<<
-							Full_State_action_list[i][j].state_name<<", action:"<<Full_State_action_list[i][j].actions_list[k].name<<endl;
+							Full_State_action_list[i].graph_state_action_offline_vector[j].state_name<<", action:"<<Full_State_action_list[i].graph_state_action_offline_vector[j].actions_list[k].name<<endl;
 					cout<<"Do you want to assign a new agent to it? (enter 1 if yes)";
 					bool input;
 					vector<string> temp_agent_list;
@@ -1452,12 +1453,12 @@ void seq_planner_class::CheckStateActionList(){
 					if(input==true)
 					{
 						cout<<"Give one of the following rows as responsible:"<<endl;
-						for(int m=0;m<Full_State_action_list[i][j].actions_list[k].refActionDef.possible_agents.size();m++)
+						for(int m=0;m<Full_State_action_list[i].graph_state_action_offline_vector[j].actions_list[k].refActionDef.possible_agents.size();m++)
 						{
-							for(int n=0;n<Full_State_action_list[i][j].actions_list[k].refActionDef.possible_agents[m].size();n++)
+							for(int n=0;n<Full_State_action_list[i].graph_state_action_offline_vector[j].actions_list[k].refActionDef.possible_agents[m].size();n++)
 							{
-								cout<<Full_State_action_list[i][j].actions_list[k].refActionDef.possible_agents[m][n];
-								if(n<Full_State_action_list[i][j].actions_list[k].refActionDef.possible_agents[m].size()-1)
+								cout<<Full_State_action_list[i].graph_state_action_offline_vector[j].actions_list[k].refActionDef.possible_agents[m][n];
+								if(n<Full_State_action_list[i].graph_state_action_offline_vector[j].actions_list[k].refActionDef.possible_agents[m].size()-1)
 									cout<<"+";
 							}
 							cout<<endl;
@@ -1471,13 +1472,11 @@ void seq_planner_class::CheckStateActionList(){
 					{
 						temp_agent_list.push_back("Unknown");
 					}
-					Full_State_action_list[i][j].actions_list[k].assigned_agents=temp_agent_list;
+					Full_State_action_list[i].graph_state_action_offline_vector[j].actions_list[k].assigned_agents=temp_agent_list;
 				}
-
 			}
 		}
 	}
-
 };
 
 

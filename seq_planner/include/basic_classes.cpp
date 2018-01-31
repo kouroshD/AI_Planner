@@ -122,12 +122,10 @@ void agent::Print(void){
 
 offline_state_action::offline_state_action(void){
 	state_name="";
-	andorName="";
 };
 offline_state_action::~offline_state_action(){};
 void offline_state_action::Print(void){
 	cout<<FBLU("+++++++++++++++++++++++ offline_state_action info +++++++++++++++++++++++")<<endl;
-	cout<<"The And/Or graph Name: "<<andorName<<endl;
 	cout<<"state_name: "<<state_name<<endl;
 
 	cout<<"Actions List: "<<endl;

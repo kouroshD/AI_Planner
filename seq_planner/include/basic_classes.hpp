@@ -149,3 +149,21 @@ public:
 
 	void Print(void);
 };
+
+class offline_state_action_graph{
+public:
+	offline_state_action_graph(){};
+	~offline_state_action_graph(){};
+	vector<offline_state_action> graph_state_action_offline_vector;
+	string graph_name;
+
+	void Print(){
+		cout<<FBLU("+++++++++++++++++++++++ offline_state_action info for graph+++++++++++++++++++++++")<<endl;
+		cout<<"graph name: "<<graph_name<<endl;
+		for(int i=0;i<graph_state_action_offline_vector.size();i++)
+		{
+			graph_state_action_offline_vector[i].Print();
+		}
+	};
+
+};
