@@ -815,15 +815,15 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 			vector<string> msg1Vector;
 			boost::split(msg1Vector, actionParameterName, boost::is_any_of("-"));
 			knowledge_msgs::knowledgeSRV knowledge_msg;
-			knowledge_msg.request.reqType = msg1Vector[0];//  Point1, Point2, Object: Cylinder1, Sphere2, Cone2, Plate1
+			knowledge_msg.request.reqType =actionParameterName ;//msg1Vector[0];//  Point1, Point2, Object: Cylinder1, Sphere2, Cone2, Plate1
 			knowledge_msg.request.Name = ""; // graspingPose1, graspingPose2, CenterFrame1, ObjectFrame3 ,connectionFrame1, ...
 			// if msg1.size >2 ??
-			knowledge_msg.request.requestInfo = actionParameterType; // graspingPose_Name, centerPose_Name, ...
+			knowledge_msg.request.requestInfo = actionParameterType; // Pose-Name, centerPose-Name, ...
 			vector<string> responseVector;
 
 			if (knowledgeBase_client.call(knowledge_msg))
 			{
-				responseVector = knowledge_msg.response.names; // here I have all the names of different grasping poses.
+				responseVector = knowledge_msg.response.names; // here It returns a vector of complete names, like: Cylinder-Cylinder1-graspingPose1, Cylinder-Cylinder1-graspingPose2, Cylinder-Cylinder2-graspingPose1
 				// example: graspingPose1,graspingPose2
 			}
 			if (responseVector.size() == 0)
