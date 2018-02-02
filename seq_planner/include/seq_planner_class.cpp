@@ -114,9 +114,9 @@ void seq_planner_class::UpdateStateActionTable(string ActionName, vector<string>
 		 	 - if an state is executed inform the andor graph, come out of here
 	 */
 
-//	cout<<FBLU("before update: ")<<endl;
-//	for (int i=0;i<state_action_table.size();i++)
-//		state_action_table[i].Print();
+	//	cout<<FBLU("before update: ")<<endl;
+	//	for (int i=0;i<state_action_table.size();i++)
+	//		state_action_table[i].Print();
 
 	bool is_a_state_solved=false;
 	bool is_a_state_feasible=false;
@@ -145,10 +145,10 @@ void seq_planner_class::UpdateStateActionTable(string ActionName, vector<string>
 							// here we know where is the first action not have been done in a state:
 							for(int n=0;n<AgentsName.size();n++)
 							{
-								cout<<"500-0: "<<state_action_table[i].actions_list[j].name<<state_action_table[i].actions_list[j].Action_GeneralParameters<<ActionName<<endl;
-								if(state_action_table[i].actions_list[j].Action_GeneralParameters==ActionName)
+								cout<<"500-0: "<<state_action_table[i].actions_list[j].name<<state_action_table[i].actions_list[j].actionAndParameters<<ActionName<<endl;
+								if(state_action_table[i].actions_list[j].actionAndParameters==ActionName)
 								{
-									cout<<"500-1: "<<state_action_table[i].actions_list[j].Action_GeneralParameters<<ActionName<<endl;
+									cout<<"500-1: "<<state_action_table[i].actions_list[j].actionAndParameters<<ActionName<<endl;
 									//&&
 									//state_action_table[i].actionsResponsible[j][k]==agents[agent_update].name
 									for (int m=0;m<state_action_table[i].actions_list[j].assigned_agents.size();m++)
@@ -300,9 +300,9 @@ void seq_planner_class::UpdateStateActionTable(string ActionName, vector<string>
 			if(is_a_state_feasible==true)
 			{
 
-//				cout<<FBLU("after update: ")<<endl;
-//				for (int i=0;i<state_action_table.size();i++)
-//					state_action_table[i].Print();
+				//				cout<<FBLU("after update: ")<<endl;
+				//				for (int i=0;i<state_action_table.size();i++)
+				//					state_action_table[i].Print();
 				if(is_an_action_done==true)
 				{
 					FindOptimalState();
@@ -487,11 +487,11 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 
 	// delete the states from state-action list which the graph name is equal to the updated graph
 	int aa;
-	cin>>aa;
+//	cin>>aa;
 	cout<<FBLU("before delete: ")<<endl;
 	for (int i=0;i<state_action_table.size();i++)
 		state_action_table[i].Print();
-//	cin>>aa;
+	//	cin>>aa;
 
 	vector<feasible_state_action> temp_state_action_table=state_action_table;
 	state_action_table.clear();
@@ -500,28 +500,28 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 		if(temp_state_action_table[i].andorName!=graphName)
 			state_action_table.push_back(temp_state_action_table[i]);
 
-//	for(vector<feasible_state_action>::iterator it =state_action_table.begin(); it!= state_action_table.end();)
-//	{
-//		if((*it).andorName==graphName)
-//		{
-//			state_action_table.erase(it);
-//		}
-//		else
-//		{it++;}
-//	}
+	//	for(vector<feasible_state_action>::iterator it =state_action_table.begin(); it!= state_action_table.end();)
+	//	{
+	//		if((*it).andorName==graphName)
+	//		{
+	//			state_action_table.erase(it);
+	//		}
+	//		else
+	//		{it++;}
+	//	}
 
 	cout<<FBLU("after delete: ")<<endl;
 	for (int i=0;i<state_action_table.size();i++)
 		state_action_table[i].Print();
 
-//	cin>>aa;
+	//	cin>>aa;
 
-//	cout<<FBLU(BOLD("*******************************************************************"))<<endl;
-//	cout<<FBLU(BOLD("******************* Full State-Action List ************************"))<<endl;
-//	for(int i=0;i<Full_State_action_list.size();i++)
-//		for(int j=0;j<Full_State_action_list[i].size();j++)
-//		Full_State_action_list[i][j].Print();
-//	cin>>aa;
+	//	cout<<FBLU(BOLD("*******************************************************************"))<<endl;
+	//	cout<<FBLU(BOLD("******************* Full State-Action List ************************"))<<endl;
+	//	for(int i=0;i<Full_State_action_list.size();i++)
+	//		for(int j=0;j<Full_State_action_list[i].size();j++)
+	//		Full_State_action_list[i][j].Print();
+	//	cin>>aa;
 
 
 	// surely the graph name here is not equal to the assembly graph name, it the assembly graph name is solved, the program will exit before in the main
@@ -583,7 +583,7 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 	cout<<FBLU("after generate new state-action table: ")<<endl;
 	for (int i=0;i<state_action_table.size();i++)
 		state_action_table[i].Print();
-	cin>>aa;
+//	cin>>aa;
 
 	CheckStateExecution();
 
@@ -679,16 +679,23 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 
 	// add the current joint values to the simulation: in order to do it I should call the knowledge base:
 	knowledge_msgs::knowledgeSRV knowledge_msg_q;
-	knowledge_msg_q.request.reqType="JointValues";
-	knowledge_msg_q.request.requestInfo="LeftArm+RightArm";
+	knowledge_msg_q.request.reqType="LeftArm_q";
+	knowledge_msg_q.request.requestInfo="Pose";
 	if (knowledgeBase_client.call(knowledge_msg_q))
 	{
-		cout<<"801"<<knowledge_msg_q.response.region.size()<<endl;
-		for(int i=0;i<2;i++)
+		cout<<"801"<<knowledge_msg_q.response.pose.size()<<endl;
 			for(int j=0;j<7;j++)
-				temp_sim.simulation_q[i][j]=knowledge_msg_q.response.region[i].data[j]; // here I have the joint values
-		cout<<"802"<<endl;
+				temp_sim.simulation_q[0][j]=knowledge_msg_q.response.pose[j]; // here I have the joint values
 	}
+	knowledge_msg_q.request.reqType="RightArm_q";
+	knowledge_msg_q.request.requestInfo="Pose";
+	if (knowledgeBase_client.call(knowledge_msg_q))
+	{
+		cout<<"802"<<knowledge_msg_q.response.pose.size()<<endl;
+		for(int j=0;j<7;j++)
+			temp_sim.simulation_q[1][j]=knowledge_msg_q.response.pose[j]; // here I have the joint values
+	}
+
 
 	cout<<"initial q (left Arm): ";
 	for(int i=0;i<7;i++)
@@ -815,11 +822,12 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 			vector<string> msg1Vector;
 			boost::split(msg1Vector, actionParameterName, boost::is_any_of("-"));
 			knowledge_msgs::knowledgeSRV knowledge_msg;
-			knowledge_msg.request.reqType =actionParameterName ;//msg1Vector[0];//  Point1, Point2, Object: Cylinder1, Sphere2, Cone2, Plate1
+			knowledge_msg.request.reqType =actionParameterName ;//msg1Vector[0];//  Point1, Point2, Object: Cylinder1, Sphere2, Cone2, Plate1, connectionFrame1
 			knowledge_msg.request.Name = ""; // graspingPose1, graspingPose2, CenterFrame1, ObjectFrame3 ,connectionFrame1, ...
 			// if msg1.size >2 ??
-			knowledge_msg.request.requestInfo = actionParameterType; // Pose-Name, centerPose-Name, ...
+			knowledge_msg.request.requestInfo = actionParameterType; // Pose, Pose-Name, centerPose-Name, ...
 			vector<string> responseVector;
+
 
 			if (knowledgeBase_client.call(knowledge_msg))
 			{
@@ -840,7 +848,8 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 					PossibileCombinations(responseVector, NoAgents,	AssignedParametersCombinations);
 					for (int n = 0; n < AssignedParametersCombinations.size(); 	n++)
 					{
-						temp_simulation_vector[m].actions_list[i].assignedParameters[j]= actionParameterName+"-"+AssignedParametersCombinations[n];
+						cout<<AssignedParametersCombinations[n]<<endl;
+						temp_simulation_vector[m].actions_list[i].UpdateActionParamters(AssignedParametersCombinations[n],j);
 						temp2_simulation_vector.push_back(temp_simulation_vector[m]);
 					}
 				}
@@ -877,8 +886,8 @@ void seq_planner_class::GiveSimulationCommand(void){
 	// 2- Fill the msg for giving the command
 	// 3- publish the command
 	cout<<BOLD(FBLU("seq_planner_class::GiveSimulationCommand"))<<endl;
-	for(int i=0;i<simulation_vector.size();i++)
-		simulation_vector[i].Print();
+//	for(int i=0;i<simulation_vector.size();i++)
+//		simulation_vector[i].Print();
 
 
 	bool breakFlag=false;
@@ -1077,8 +1086,8 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 		action temp_action_for_DEL(simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber]);
 		for(vector<optimal_state_simulation>::iterator it =simulation_vector.begin(); it!= simulation_vector.end();)
 		{
-			temp_action_for_DEL.Print();
-			(*it).actions_list[SimulationActionNumber].Print();
+//			temp_action_for_DEL.Print();
+//			(*it).actions_list[SimulationActionNumber].Print();
 			if(isTwoActionsEqual(temp_action_for_DEL,(*it).actions_list[SimulationActionNumber] ))
 			{
 				cout<<"302-2"<<endl;
@@ -1104,8 +1113,8 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 			for(vector<optimal_state_simulation>::iterator it =simulation_vector.begin(); it!= simulation_vector.end();it++)
 				if(isTwoActionsEqual(simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber],(*it).actions_list[SimulationActionNumber] ))
 				{
-					simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].Print();
-					(*it).actions_list[SimulationActionNumber].Print();
+//					simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].Print();
+//					(*it).actions_list[SimulationActionNumber].Print();
 
 					for(int j=0;j< (*it).actions_list[SimulationActionNumber].isDone.size();j++)
 					{
@@ -1346,7 +1355,7 @@ void seq_planner_class::SetStateActionList(string stateActionPath, string andorG
 			offline_state_action temp_state_action;
 			boost::split(line_list, line, boost::is_any_of(delim_type));
 			temp_state_action.state_name=line_list[0];
-//			temp_state_action.andorName=andorGraphName;
+			//			temp_state_action.andorName=andorGraphName;
 			for(int i=1;i<line_list.size();i++)
 			{
 				vector<string> action_and_responsibles,action_and_parameters;
@@ -1778,11 +1787,11 @@ void seq_planner_class::CallBackRobotAck(const std_msgs::String::ConstPtr& msg){
 	if(CanAgentPerformAction(agentsName,"",actionAndParametersVec[0],false)==true && arrived_msg==true)
 		if(emergencyFlag==false)
 		{
-			UpdateStateActionTable(ActionAndGeneralParameters,agentsName,success);
+			UpdateStateActionTable(actionAndParameters,agentsName,success);
 		}
 		else
 		{
-			UpdateRobotEmergencyFlag(ActionAndGeneralParameters,agentsName,success);
+			UpdateRobotEmergencyFlag(actionAndParameters,agentsName,success);
 		}
 	else
 		cout<<"Error In receiving msg from robot ack, the agents can not perform given action"<<endl;

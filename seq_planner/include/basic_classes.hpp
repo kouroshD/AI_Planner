@@ -53,13 +53,14 @@ public:
 	vector<string> assignedParameters; // Example: object1-graspingPose1, Point1
 	vector<string> GeneralParameters;
 	vector<bool> isDone; // it is a vector, because for some joint actions (human+robot) it needs to fill all of them in order to say an action is done;
-	string actionAndParameters; //Example:  Approach_object1-graspingPose1, Approach_Point1
+	string actionAndParameters; //Example:  Approach_object1-graspingPose1, Approach_Point1, Transport_object1_point1
 	string Action_GeneralParameters;//Example:  Appraoch_object1, Approach_Point1
 
 
 	action(actionDef &actionDefObj);
 	action(const action& new_action);
 	action& operator=(const action& new_action);
+	void UpdateActionParamters(string assignedParametersIn, int paramterIndex);
 
 	~action();
 	void Print(void);

@@ -58,6 +58,24 @@ action& action::operator=(const action& new_action){
 };
 
 action::~action(){};
+void action::UpdateActionParamters(string assignedParametersIn, int paramterIndex){
+
+	assignedParameters[paramterIndex]=assignedParametersIn;
+	vector<string> parameterVec;
+	boost::split(parameterVec, assignedParametersIn, boost::is_any_of("-"));
+	if(parameterVec.size()>0)
+		GeneralParameters[paramterIndex]=parameterVec[0];
+
+	actionAndParameters=name;
+	Action_GeneralParameters=name;
+	for(int i=0;i<assignedParameters.size();i++)
+	{
+		actionAndParameters+="_"+assignedParameters[i];
+		Action_GeneralParameters+="_"+assignedParameters[i];
+	}
+
+};
+
 void action::Print(void){
 	cout<<FBLU("++++++++++++ action info +++++++++++++++")<<endl;
 	cout<<"Action Name: "<<name<<endl;
