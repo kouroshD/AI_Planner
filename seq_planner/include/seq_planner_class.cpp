@@ -1184,6 +1184,10 @@ void seq_planner_class::RankSimulation(void){
 		for(int j=0;j<simulation_vector[i].actionsTime.size();j++)
 			simulation_vector[i].total_cost=simulation_vector[i].total_cost+simulation_vector[i].actionsTime[j];
 	}
+	cout<<"total simulation costs: ";
+	for(int i=0;i<simulation_vector.size();i++)
+		cout<<simulation_vector[i].total_cost<<" ";
+	cout<<endl;
 
 	//! Find the minimum cost and respecting index of it:
 	double minCost=100000000.0;
