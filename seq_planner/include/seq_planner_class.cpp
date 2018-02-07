@@ -845,21 +845,22 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 				{
 					int NoAgents =temp_simulation_vector[m].responsibleAgents.size();
 					vector<string> AssignedParametersCombinations;
-					PossibileCombinations(responseVector, NoAgents,	AssignedParametersCombinations);
-					for (int n = 0; n < AssignedParametersCombinations.size(); 	n++)
+					//PossibileCombinations(responseVector, NoAgents,	AssignedParametersCombinations);
+					for (int n = 0; n < responseVector.size(); 	n++)
 					{
-						cout<<AssignedParametersCombinations[n]<<endl;
-						temp_simulation_vector[m].actions_list[i].UpdateActionParamters(AssignedParametersCombinations[n],j);
+						cout<<"103-2: "<<responseVector[n]<<endl;
+						temp_simulation_vector[m].actions_list[i].UpdateActionParamters(responseVector[n],j);
 						temp2_simulation_vector.push_back(temp_simulation_vector[m]);
 					}
 				}
 				temp_simulation_vector.clear();
 				temp_simulation_vector=temp2_simulation_vector;
+				cout<<"103-3: "<<temp_simulation_vector.size()<<", "<<temp2_simulation_vector.size()<<endl;
 			}
 		}
 	}
 
-	cout<<"104"<<endl;
+	cout<<"104:"<<temp_simulation_vector.size()<<endl;
 	simulation_vector=temp_simulation_vector;
 	cout<<"105 "<<simulation_vector.size()<<endl;
 
