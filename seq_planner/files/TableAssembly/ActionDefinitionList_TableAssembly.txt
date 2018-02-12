@@ -7,7 +7,7 @@ HoldOn simple LeftArm/RightArm
 # Approach: 1 parameter: goal pose, in case it is just an object name, we consider all the grasping poses, and choose one among them. it should become specefied in state-action list at least partially, and uniquelly simulation
 Approach_Pose simple LeftArm/RightArm
 # Transport: 2 parameters: object pose, goal pose-> they should become specified in state-action list
-Transport_Pose_Pose simple LeftArm+RightArm
+Transport_Pose_Pose simple LeftArm+RightArm/LeftArm/RightArm
 UpdateJointValues simple LeftArm/RightArm/LeftArm+RightArm
 Rest simple LeftArm/RightArm
 ReachMiddlePoint complex LeftArm/RightArm/LeftArm+RightArm/Human
