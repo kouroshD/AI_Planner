@@ -1,0 +1,42 @@
+Plate_initPose  UnGrasp?LeftArm UnGrasp?RightArm HoldOn?LeftArm HoldOn?RightArm
+Plate_assemblyPose
+Leg1_T
+Leg2_T
+Leg3_T
+Leg4_T
+Leg1_middlePose
+Leg2_middlePose
+Leg3_middlePose
+Leg4_middlePose
+Leg1_Plate_connected
+Leg2_Plate_connected
+Leg3_Plate_connected
+Leg4_Plate_connected
+Table_FinalPose
+
+h0 Approach_plane1-approachingPose1?LeftArm Approach_plane1-approachingPose2?RightArm Approach_plane1-graspingPose1?LeftArm Approach_plane1-graspingPose2?RightArm Grasp?LeftArm Grasp?RightArm Transport_plane1-centerFramePose_Point4?LeftArm+RightArm Transport_Point4_Point0?LeftArm+RightArm Transport_Point0_Point3?LeftArm+RightArm UnGrasp?LeftArm UnGrasp?RightArm Stop?LeftArm Stop?RightArm HoldOn?LeftArm HoldOn?RightArm Rest?LeftArm Rest?RightArm
+
+h1 Approach_cylinder-approachingPose1 Approach_cylinder-graspingPose1 Grasp Transport_cylinder-screwFramePose_Point1 UnGrasp Rest
+h2 Approach_cylinder-approachingPose1 Approach_cylinder-graspingPose1 Grasp Transport_cylinder-screwFramePose_plane1-approachScrewPose1 Transport_plane1-approachScrewPose1_plane1-screwPose2 Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw Rest
+h3 Approach_cylinder-approachingPose1 Approach_cylinder-graspingPose1 Grasp Grasp Transport_cylinder-screwFramePose_plane1-approachScrewPose1 Transport_plane1-approachScrewPose1_plane1-screwPose2 Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw Rest
+h4_human PickUp Screwing PutDown 
+h5_human PickUp Screwing PutDown
+
+h6 Approach_cylinder-approachingPose1 Approach_cylinder-graspingPose1 Grasp Transport_cylinder-screwFramePose_Point1 UnGrasp Rest
+h7 Approach_cylinder-approachingPose1 Approach_cylinder-graspingPose1 Grasp Transport_cylinder-screwFramePose_plane1-approachScrewPose1 Transport_plane1-approachScrewPose1_plane1-screwPose2 Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw Rest
+h8 Approach_cylinder-approachingPose1 Approach_cylinder-graspingPose1 Grasp Grasp Transport_cylinder-screwFramePose_plane1-approachScrewPose1 Transport_plane1-approachScrewPose1_plane1-screwPose2 Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw Rest
+h9_human PickUp Screwing PutDown 
+h10_human PickUp Screwing PutDown
+
+h11 Approach_cylinder-approachingPose1 Approach_cylinder-graspingPose1 Grasp Transport_cylinder-screwFramePose_Point1 UnGrasp Rest
+h12 Approach_cylinder-approachingPose1 Approach_cylinder-graspingPose1 Grasp Transport_cylinder-screwFramePose_plane1-approachScrewPose1 Transport_plane1-approachScrewPose1_plane1-screwPose2 Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw Rest
+h13 Approach_cylinder-approachingPose1 Approach_cylinder-graspingPose1 Grasp Grasp Transport_cylinder-screwFramePose_plane1-approachScrewPose1 Transport_plane1-approachScrewPose1_plane1-screwPose2 Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw Rest
+h14_human PickUp Screwing PutDown 
+h15_human PickUp Screwing PutDown
+
+h16 Approach_cylinder-approachingPose1 Approach_cylinder-graspingPose1 Grasp Transport_cylinder-screwFramePose_Point1 UnGrasp Rest
+h17 Approach_cylinder-approachingPose1 Approach_cylinder-graspingPose1 Grasp Transport_cylinder-screwFramePose_plane1-approachScrewPose1 Transport_plane1-approachScrewPose1_plane1-screwPose2 Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw Rest
+h18 Approach_cylinder-approachingPose1 Approach_cylinder-graspingPose1 Grasp Grasp Transport_cylinder-screwFramePose_plane1-approachScrewPose1 Transport_plane1-approachScrewPose1_plane1-screwPose2 Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw Rest
+h19_human PickUp Screwing PutDown 
+h20_human PickUp Screwing PutDown
+h21
