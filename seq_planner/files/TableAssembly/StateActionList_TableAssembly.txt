@@ -1,4 +1,4 @@
-Plate_initPose UnGrasp?LeftArm UnGrasp?RightArm HoldOn?LeftArm HoldOn?RightArm
+Plate_initPose UnGrasp?LeftArm UnGrasp?RightArm HoldOn?LeftArm HoldOn?RightArm Reduce?LeftArm
 Plate_assemblyPose
 Leg1_T Approach_cylinder1-approachingPose1 Approach_cylinder1-graspingPose1 Grasp Transport_cylinder1-screwFramePose_plane1-approachScrewPose2 Transport_plane1-approachScrewPose2_plane1-screwPose2 Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw
 Leg1_middlePose

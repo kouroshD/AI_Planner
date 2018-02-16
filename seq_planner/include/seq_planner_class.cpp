@@ -1619,11 +1619,27 @@ void seq_planner_class::EmergencyRobotStop(void){
 			{
 				agents[i].lastAssignedAction="HoldOn";
 				PublishRobotAction("HoldOn", agentName, coleaguesName);
+
+//				agents[i].lastAssignedAction="UnGrasp";
+//				PublishRobotAction("UnGrasp", agentName, coleaguesName);
 			}
+//			else if(agents[i].lastAssignedAction=="UnGrasp")
+//			{
+//				agents[i].lastAssignedAction="Rest";
+//				PublishRobotAction("Rest", agentName, coleaguesName);
+//			}
+//			else if(agents[i].lastAssignedAction=="Rest")
+//			{
+//				agents[i].lastAssignedAction="HoldOn";
+//				PublishRobotAction("HoldOn", agentName, coleaguesName);
+//			}
 			else
 			{
 				agents[i].lastAssignedAction="Stop";
 				PublishRobotAction("Stop", agentName, coleaguesName);
+				PublishRobotAction("UnGrasp", agentName, coleaguesName);
+//				usleep(0.5e6);
+				PublishRobotAction("Rest", agentName, coleaguesName);
 			}
 		}
 
