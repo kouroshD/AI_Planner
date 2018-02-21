@@ -1,0 +1,9 @@
+Leg3_Plate_connected
+Leg4_T
+Leg4_middlePose
+Leg4_Plate_connected
+h16 Approach_cylinder-approachingPose1 Approach_cylinder-graspingPose1 Grasp Transport_cylinder-screwFramePose_Point1 UnGrasp Rest
+h17 Approach_cylinder-approachingPose1 Approach_cylinder-graspingPose1 Grasp Transport_cylinder-screwFramePose_plane1-approachScrewPose1 Transport_plane1-approachScrewPose1_plane1-screwPose2 Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw Rest
+h18 Approach_cylinder-approachingPose1 Approach_cylinder-graspingPose1 Grasp Grasp Transport_cylinder-screwFramePose_plane1-approachScrewPose1 Transport_plane1-approachScrewPose1_plane1-screwPose2 Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw Rest
+h19_human PickUp Screwing PutDown
+h20_human PickUp Screwing PutDown

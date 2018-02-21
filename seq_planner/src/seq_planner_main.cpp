@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 	string AssemblyName="TableAssembly";
 	const char* home=getenv("HOME");
 	string assemblyPath(home);
-	assemblyPath=assemblyPath+"/catkin_ws/src/AI_PLANNER/seq_planner/files/TableAssembly";
+	assemblyPath=assemblyPath+"/catkin_ws/src/AI_PLANNER/seq_planner/files/iros2018/normal";
 
 	seq_planner_class plan_obj(assemblyPath, AssemblyName);
 	vector<vector<string>> gen_Feasible_state_list;

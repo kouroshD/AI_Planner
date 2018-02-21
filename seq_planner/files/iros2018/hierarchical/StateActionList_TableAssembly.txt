@@ -1,0 +1,17 @@
+Plate_initPose  HoldOn?LeftArm HoldOn?RightArm
+Plate_assemblyPose
+Leg1_T
+Leg2_T
+Leg3_T
+Leg4_T
+Leg1_Plate_connected
+Leg2_Plate_connected
+Leg3_Plate_connected
+Leg4_Plate_connected
+Table_FinalPose
+h0 Approach_plane1-approachingPose1?LeftArm Approach_plane1-approachingPose2?RightArm Approach_plane1-graspingPose1?LeftArm Approach_plane1-graspingPose2?RightArm Grasp?LeftArm Grasp?RightArm Transport_plane1-centerFramePose_Point4?LeftArm+RightArm Transport_Point4_Point0?LeftArm+RightArm Transport_Point0_Point3?LeftArm+RightArm UnGrasp?LeftArm UnGrasp?RightArm Stop?LeftArm Stop?RightArm HoldOn?LeftArm HoldOn?RightArm Rest?LeftArm Rest?RightArm
+h1 ConnectLeg1
+h2 ConnectLeg2
+h3 ConnectLeg3
+h4 ConnectLeg4
+h5
