@@ -120,6 +120,7 @@ public:
 	feasible_state_action(void);
 	~feasible_state_action();
 	void Print(void);
+	void PrintSummary(void);
 };
 
 //****************************
@@ -149,6 +150,8 @@ public:
 	void SetAgentForAllTheAction(void);
 
 	void Print(void);
+	void PrintSummary(void);
+
 };
 
 class offline_state_action_graph{

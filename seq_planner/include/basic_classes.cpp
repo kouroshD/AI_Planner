@@ -209,6 +209,37 @@ void feasible_state_action::Print(void){
 
 };
 
+void feasible_state_action::PrintSummary(void){
+	cout<<FBLU("*********************** Feasible State-Action Table Info Summary ***********************")<<endl;
+	cout<<"The And/Or graph Name: "<<andorName<<", "<<"state_name: "<<state_name<<", "<<"state_type: "
+			<<state_type<<", "<<"state_cost: "<<state_cost<<", "<<"isFeasible: "<<isFeasible<<endl;
+
+	cout<<"actions list:       ";
+	for(int i=0;i<actions_list.size();i++)
+		cout<<i<<": "<<actions_list[i].actionAndParameters<<" | ";
+	cout<<endl;
+	cout<<"actions progress:   ";
+	for(int i=0;i<actions_list.size();i++)
+	{
+		cout<<i<<": ";
+		for(int j=0;j<actions_list[i].isDone.size();j++)
+			cout<<actions_list[i].isDone[j]<<" ";
+		cout<<" | ";
+	}
+	cout<<endl;
+
+	cout<<"actions Agents:     ";
+	for(int i=0;i<actions_list.size();i++)
+	{
+		cout<<i<<": ";
+		for(int j=0;j<actions_list[i].assigned_agents.size();j++)
+			cout<<actions_list[i].assigned_agents[j]<<" ";
+		cout<<" | ";
+	}
+	cout<<endl;
+
+};
+
 //****************************
 optimal_state_simulation::optimal_state_simulation(){
 	state_name="";
@@ -246,3 +277,50 @@ void optimal_state_simulation::Print(void){
 };
 
 
+void optimal_state_simulation::PrintSummary(void){
+	cout<<FGRN("*********************** Optimal_state_simulation::Print Summary ************************* ")<<endl;
+	cout<<"state name: "<<state_name<<", "<<"Total cost: "<<total_cost<<endl;
+
+	cout<<"actions list:    ";
+	for(int i=0;i<actions_list.size();i++)
+		cout<<i<<": "<<actions_list[i].actionAndParameters<<" | ";
+	cout<<endl;
+	cout<<"actions progress:";
+	for(int i=0;i<actions_list.size();i++)
+	{
+		cout<<i<<": ";
+		for(int j=0;j<actions_list[i].isDone.size();j++)
+			cout<<actions_list[i].isDone[j]<<" ";
+		cout<<" | ";
+	}
+	cout<<endl;
+
+	cout<<"actions Agents:  ";
+	for(int i=0;i<actions_list.size();i++)
+	{
+		cout<<i<<": ";
+		for(int j=0;j<actions_list[i].assigned_agents.size();j++)
+			cout<<actions_list[i].assigned_agents[j]<<" ";
+		cout<<" | ";
+	}
+	cout<<endl;
+
+
+	cout<<"action time:     "<<endl;
+	for(int i=0;i<actionsTime.size();i++)
+	{
+		cout<<i<<": "<<actionsTime[i]<<" | "<<endl;
+	}
+	cout<<endl;
+
+	cout<<"simulation q Left: "<<endl;
+	for(int i=0;i<7;i++)
+		cout<<i<<": "<<simulation_q[0][i]<<" ";
+	cout<<endl;
+
+	cout<<"simulation q Right: "<<endl;
+	for(int i=0;i<7;i++)
+		cout<<i<<": "<<simulation_q[1][i]<<" ";
+	cout<<endl;
+
+};
