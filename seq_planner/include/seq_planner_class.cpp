@@ -488,9 +488,9 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 	// delete the states from state-action list which the graph name is equal to the updated graph
 	int aa;
 //	cin>>aa;
-	cout<<FBLU("before delete: ")<<endl;
-	for (int i=0;i<state_action_table.size();i++)
-		state_action_table[i].PrintSummary()();
+//	cout<<FBLU("before delete: ")<<endl;
+//	for (int i=0;i<state_action_table.size();i++)
+//		state_action_table[i].PrintSummary();
 	//	cin>>aa;
 
 	vector<feasible_state_action> temp_state_action_table=state_action_table;
@@ -548,12 +548,12 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 //		cout<<"Full_State_action_list: "<<Full_State_action_list.size()<<endl;
 		for (int j=0;j<Full_State_action_list.size();j++)
 		{
-			cout<<Full_State_action_list[j].graph_name<<", "<<graphName<<endl;
+//			cout<<Full_State_action_list[j].graph_name<<", "<<graphName<<endl;
 			if (Full_State_action_list[j].graph_name==graphName)
 			{
 				for (int k=0;k<Full_State_action_list[j].graph_state_action_offline_vector.size();k++)
 				{
-					cout<<Full_State_action_list[j].graph_state_action_offline_vector[k].state_name<<", "<<temp_obj.state_name<<endl;
+//					cout<<Full_State_action_list[j].graph_state_action_offline_vector[k].state_name<<", "<<temp_obj.state_name<<endl;
 					if (temp_obj.state_name==Full_State_action_list[j].graph_state_action_offline_vector[k].state_name)
 					{
 						nameFlag=true;
@@ -582,7 +582,7 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 //	cout<<"101: "<<state_action_table.size()<<endl;
 	cout<<FBLU("after generate new state-action table: ")<<endl;
 	for (int i=0;i<state_action_table.size();i++)
-		state_action_table[i].PrintSummary()();
+		state_action_table[i].PrintSummary();
 //	cin>>aa;
 
 	CheckStateExecution();
@@ -675,7 +675,7 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 	temp_sim.actionsTime.resize(temp_sim.actions_list.size(), 0.0);
 	temp_sim.optimalStatePtr = &state_action_table[optimal_state];
 	temp_sim.state_name = state_action_table[optimal_state].state_name;
-	temp_sim.PrintSummary()();
+	temp_sim.PrintSummary();
 
 	// add the current joint values to the simulation: in order to do it I should call the knowledge base:
 	knowledge_msgs::knowledgeSRV knowledge_msg_q;
@@ -973,22 +973,21 @@ void seq_planner_class::GiveSimulationCommand(void){
 //	cout<<"205"<<endl;
 
 	pubSimulationCommand.publish(req_instance);
-	cout<<req_instance.ActionName<<endl;
+	cout<<req_instance.ActionName<<", ";
 	for(int i=0;i<req_instance.ActionParametersName.size();i++)
-		cout<<req_instance.ActionParametersName[i]<<endl;
-
-	for(int i=0;i<req_instance.ActionParameterInfo.size();i++)
-		cout<<req_instance.ActionParameterInfo[i]<<endl;
+		cout<<req_instance.ActionParametersName[i]<<" , ";
 
 	for(int i=0;i<req_instance.ResponsibleAgents.size();i++)
-		cout<<req_instance.ResponsibleAgents[i]<<endl;
-	for(int i=0;i<req_instance.ColleagueAgents.size();i++)
-		cout<<req_instance.ColleagueAgents[i]<<endl;
+		cout<<req_instance.ResponsibleAgents[i]<<", ";
 
+	for(int i=0;i<req_instance.ColleagueAgents.size();i++)
+		cout<<"("<<req_instance.ColleagueAgents[i]<<"), ";
+	cout<<endl;
+	cout<<"q Left: ";
 	for(int i=0;i<req_instance.ArmsJoint[0].values.size();i++)
 		cout<<req_instance.ArmsJoint[0].values[i]<<" ";
 	cout<<endl;
-
+	cout<<"q Right: ";
 	for(int i=0;i<req_instance.ArmsJoint[1].values.size();i++)
 		cout<<req_instance.ArmsJoint[1].values[i]<<" ";
 	cout<<endl;
@@ -1002,26 +1001,25 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 	// 3- if all the actions in all the simulation vectors is done, go to the RankSimulation Functions, otherwise go to the GiveCommand Function
 	cout<<BOLD(FBLU("seq_planner_class::UpdateSimulation"))<<endl;
 
-	cout<<simulationResponse.ActionName<<endl;
-	cout<<simulationResponse.time<<endl;
-	cout<< (bool)simulationResponse.success <<endl;
 
+	cout<<"time: "<<simulationResponse.time<<", ";
+	cout<<"success: "<<(bool)simulationResponse.success <<": ";
+
+	cout<<simulationResponse.ActionName<<", ";
 	for(int i=0;i<simulationResponse.ActionParametersName.size();i++)
-		cout<<simulationResponse.ActionParametersName[i]<<endl;
-
-	for(int i=0;i<simulationResponse.ActionParameterInfo.size();i++)
-		cout<<simulationResponse.ActionParameterInfo[i]<<endl;
+		cout<<simulationResponse.ActionParametersName[i]<<", ";
 
 	for(int i=0;i<simulationResponse.ResponsibleAgents.size();i++)
-		cout<<simulationResponse.ResponsibleAgents[i]<<endl;
+		cout<<simulationResponse.ResponsibleAgents[i]<<", ";
 
 	for(int i=0;i<simulationResponse.ColleagueAgents.size();i++)
-		cout<<simulationResponse.ColleagueAgents[i]<<endl;
-
+		cout<<"("<<simulationResponse.ColleagueAgents[i]<<"), ";
+	cout<<endl;
+	cout<<"q Left: ";
 	for(int i=0;i<simulationResponse.ArmsJoint[0].values.size();i++)
 		cout<<simulationResponse.ArmsJoint[0].values[i]<<" ";
 	cout<<endl;
-
+	cout<<"q Right: ";
 	for(int i=0;i<simulationResponse.ArmsJoint[1].values.size();i++)
 		cout<<simulationResponse.ArmsJoint[1].values[i]<<" ";
 	cout<<endl;
@@ -1154,7 +1152,7 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 	}
 
 	for(int i=0;i<simulation_vector.size();i++)
-		simulation_vector[i].PrintSummary()();
+		simulation_vector[i].PrintSummary();
 
 //	cout<<"304-"<<OptimalStateCompletelySimulated<<endl;
 	if(OptimalStateCompletelySimulated==true)
@@ -1496,11 +1494,11 @@ void seq_planner_class::CheckStateActionList(){
 
 
 bool seq_planner_class::CanAgentPerformAction(vector<string> agent_name, string agent_type, string action_name, bool sufficiency){
-	cout<<"seq_planner_class::CanAgentPerformAction"<<endl;
-	cout<<"actions_name: "<<action_name<<", agent_type: "<<agent_type<<", agent_name: ";
-	for (int i=0;i<agent_name.size();i++)
-		cout<<agent_name[i]<<" ";
-	cout<<endl;
+//	cout<<"seq_planner_class::CanAgentPerformAction"<<endl;
+//	cout<<"actions_name: "<<action_name<<", agent_type: "<<agent_type<<", agent_name: ";
+//	for (int i=0;i<agent_name.size();i++)
+//		cout<<agent_name[i]<<" ";
+//	cout<<endl;
 
 	bool temp=false;
 	int action_number=1000;
@@ -1593,7 +1591,7 @@ bool seq_planner_class::CanAgentPerformAction(vector<string> agent_name, string 
 		cout<<FRED("Error, agent_name or agent_type one of them should be empty: ")<<endl;
 	}
 
-	cout<<" Can agent perform the action? "<<temp<<endl;
+//	cout<<" Can agent perform the action? "<<temp<<endl;
 	return temp;
 };
 

@@ -73,11 +73,11 @@ int main(int argc, char **argv)
 		if (plan_obj.updateAndor==true && count>0)
 		{
 			andor_msgs::andorSRV andor_srv;
-			cout<<"101: "<<plan_obj.AndOrUpdateName<<endl;
+//			cout<<"101: "<<plan_obj.AndOrUpdateName<<endl;
 			andor_srv.request.graphName=plan_obj.AndOrUpdateName;
 			if(plan_obj.nodeSolved==true)
 			{
-				cout<<102<<endl;
+//				cout<<102<<endl;
 				for(int i=0; i<plan_obj.Solved_node_list.size(); i++)
 				{
 					andor_srv.request.solvedNodes.push_back(plan_obj.Solved_node_list[i]);
@@ -98,7 +98,7 @@ int main(int argc, char **argv)
 
 			if (andorSRV_client.call(andor_srv))
 			{
-				cout<<103<<endl;
+//				cout<<103<<endl;
 				isGraphSolved=andor_srv.response.graphSolved;
 				if(isGraphSolved==true && plan_obj.AndOrUpdateName==AssemblyName)
 				{
@@ -107,11 +107,11 @@ int main(int argc, char **argv)
 				}
 				else
 				{
-					cout<<104<<endl;
+//					cout<<104<<endl;
 
 					for (int i=0;i<andor_srv.response.feasibleNodes.size();i++)
 					{
-						cout<<105<<endl;
+//						cout<<105<<endl;
 						vector<string>Feasible_state;
 						string feasbible_state_name=andor_srv.response.feasibleNodes[i].nodeName;
 						Feasible_state.push_back(feasbible_state_name);
@@ -122,7 +122,7 @@ int main(int argc, char **argv)
 					}
 					for (int i=0;i<andor_srv.response.feasibleHyperarcs.size();i++)
 					{
-						cout<<106<<endl;
+//						cout<<106<<endl;
 						vector<string>Feasible_state;
 						string feasbible_state_name=andor_srv.response.feasibleHyperarcs[i].hyperarcName;
 						Feasible_state.push_back(feasbible_state_name);
