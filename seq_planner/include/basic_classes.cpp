@@ -231,6 +231,7 @@ void feasible_state_action::PrintSummary(void){
 		cout<<" | ";
 	}
 	cout<<endl;
+	cout<<"**********************************************"<<endl;
 
 };
 
@@ -327,5 +328,6 @@ void optimal_state_simulation::PrintSummary(void){
 	for(int i=0;i<7;i++)
 		cout<<simulation_q[1][i]<<" ";
 	cout<<endl;
+	cout<<"**********************************************"<<endl;
 
 };
