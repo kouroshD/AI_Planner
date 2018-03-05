@@ -6,8 +6,10 @@
 #include <std_msgs/String.h>
 #include <string>
 //#include <iterator>
-//#include <sstream>
 #include <fstream>
+
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <andor_msgs/andorSRV.h>
 #include <andor_msgs/Hyperarc.h>
 #include <andor_msgs/Node.h>
@@ -53,6 +55,14 @@ private:
 	vector<actionDef> action_Definition_List;    // list of definition of the actions
     vector<offline_state_action_graph>  Full_State_action_list;// list of all the actions for all the states, this list should be found offline by a planner
     vector<feasible_state_action> state_action_table;
+
+    ofstream fileLog;
+    double timeNow;
+//    	const char* DataLogPath	="/home/nasa/Datalog/Mechatronics/user1/1";
+//    	string DataLogPath2		="/home/nasa/Datalog/Mechatronics/user1/1";
+//    	mkdir(DataLogPath, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+//    	Myfile1.open ((DataLogPath2+"/Assembly_Timing.txt").c_str(),ios::app);
+
 
     vector<optimal_state_simulation> simulation_vector;
     vector<string> complexActionsList;

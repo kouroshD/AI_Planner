@@ -2,6 +2,15 @@
 
 seq_planner_class::seq_planner_class(string seqPlannerPath,string AssemblyName){
 	cout<<BOLD(FBLU("seq_planner_class::seq_planner_class"))<<endl;
+	const char* DataLogPath	="/home/nasa/Datalog/IROS/Test";
+	string DataLogPathStr (DataLogPath);
+	mkdir(DataLogPath , S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	fileLog.open((DataLogPathStr+"/1_Assembly_Timing.txt").c_str(),ios::app);
+	timeNow=ros::Time::now().toSec();
+
+	fileLog<< to_string(timeNow)<<" cooperation started"<<"\n";
+	fileLog<< to_string(timeNow)<<" offline started"<<"\n";
+
 	optimal_state=0;
 	next_action_index=0;
 	//	actionList=NULL;
@@ -55,6 +64,12 @@ seq_planner_class::seq_planner_class(string seqPlannerPath,string AssemblyName){
 	knowledgeBase_client=nh.serviceClient<knowledge_msgs::knowledgeSRV>("knowledgeService");
 
 	emergencyFlag=false;
+
+	timeNow=ros::Time::now().toSec();
+	fileLog<< to_string(timeNow)<<" offline ended"<<"\n";
+	fileLog<< to_string(timeNow)<<" online started"<<"\n";
+	fileLog<< to_string(timeNow)<<" andor started"<<"\n";
+
 
 }
 seq_planner_class::~seq_planner_class(){
@@ -310,6 +325,12 @@ void seq_planner_class::UpdateStateActionTable(string ActionName, vector<string>
 			}
 			else
 			{
+				timeNow=ros::Time::now().toSec();
+				fileLog<< to_string(timeNow)<<" planning ended"<<"\n";
+				fileLog<< to_string(timeNow)<<" online ended"<<"\n";
+				fileLog<< to_string(timeNow)<<" cooperation ended"<<"\n";
+				fileLog.close();
+
 				cout<<FRED("Error, There is no Feasible state now")<<endl;
 				exit(1);
 			}
@@ -366,6 +387,11 @@ void seq_planner_class::FindOptimalState(void){
 			updateAndor=true;
 			AndOrUpdateName=state_action_table[optimal_state].actions_list[i].refActionDef.name;
 			hierarchicalGraphList.push_back(AndOrUpdateName);
+
+			timeNow=ros::Time::now().toSec();
+			fileLog<< to_string(timeNow)<<" planning ended"<<"\n";
+			fileLog<< to_string(timeNow)<<" andor started"<<"\n";
+
 			return;
 		}
 	}
@@ -385,6 +411,12 @@ void seq_planner_class::FindOptimalState(void){
 	}
 	else
 	{
+		timeNow=ros::Time::now().toSec();
+		fileLog<< to_string(timeNow)<<" planning ended"<<"\n";
+		fileLog<< to_string(timeNow)<<" online ended"<<"\n";
+		fileLog<< to_string(timeNow)<<" cooperation ended"<<"\n";
+		fileLog.close();
+
 		cout<<FRED("Error, There is no Feasible state now")<<endl;
 		exit(1);
 	}
@@ -484,6 +516,10 @@ void seq_planner_class::FindResponisibleAgent(void){
 
 void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feasible_state_list, vector<int> gen_Feasible_stateCost_list, string graphName, bool graphSolved){
 	cout<<BOLD(FBLU("seq_planner_class::GenerateStateActionTable"))<<endl;
+	timeNow=ros::Time::now().toSec();
+	fileLog<< to_string(timeNow)<<" andor ended"<<"\n";
+	fileLog<< to_string(timeNow)<<" planning started"<<"\n";
+
 
 	// delete the states from state-action list which the graph name is equal to the updated graph
 	int aa;
@@ -527,9 +563,23 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 	// surely the graph name here is not equal to the assembly graph name, it the assembly graph name is solved, the program will exit before in the main
 	if(graphSolved==true) // it is an complex action
 	{
+		//The cooperation is done
+		if(graphName==assembly_name)
+		{
+			cout<<BOLD(FGRN("The Assembly task is Done"))<<endl;
+
+			timeNow=ros::Time::now().toSec();
+			fileLog<< to_string(timeNow)<<" online ended"<<"\n";
+			fileLog<< to_string(timeNow)<<" cooperation ended"<<"\n";
+			fileLog.close();
+			exit(1);
+		}
+		else
+		{
 		hierarchicalGraphList.pop_back();
 		vector<string>AgentsName;AgentsName.push_back("Human");
 		return UpdateStateActionTable(graphName, AgentsName,graphSolved);
+		}
 	}
 
 	//	cout<<"100: "<<gen_Feasible_stateCost_list.size()<<endl;
@@ -585,7 +635,9 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 		state_action_table[i].PrintSummary();
 //	cin>>aa;
 
-	CheckStateExecution();
+
+
+	return CheckStateExecution();
 
 }
 void seq_planner_class::CheckStateExecution(){
@@ -654,7 +706,13 @@ void seq_planner_class::CheckStateExecution(){
 	}
 	if(updateAndor==false)
 	{
-		FindOptimalState();
+		return FindOptimalState();
+	}
+	else
+	{
+		timeNow=ros::Time::now().toSec();
+		fileLog<< to_string(timeNow)<<" planning ended"<<"\n";
+		fileLog<< to_string(timeNow)<<" andor started"<<"\n";
 	}
 }
 
@@ -667,6 +725,11 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 	 *
 	 * */
 	cout << BOLD(FBLU("seq_planner_class::GenerateOptimalStateSimulation" ))<< endl;
+	timeNow=ros::Time::now().toSec();
+	fileLog<< to_string(timeNow)<<" planning ended"<<"\n";
+	fileLog<< to_string(timeNow)<<" simulation started"<<"\n";
+
+
 	simulation_vector.clear();
 	vector<optimal_state_simulation> temp_simulation_vector;
 	// check for a filled parameters in actions of a state given by user-> if yes, give it to all the actions.
@@ -763,6 +826,11 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 		cout<<"We did not found any set of agents which can perform all the actions in the optimal state"<<endl;
 		state_action_table[optimal_state].isFeasible=false;
 		state_action_table[optimal_state].isSimulated=true;
+
+		timeNow=ros::Time::now().toSec();
+		fileLog<< to_string(timeNow)<<" simulation ended"<<"\n";
+		fileLog<< to_string(timeNow)<<" planning started"<<"\n";
+
 		return FindOptimalState();
 	}
 
@@ -869,12 +937,17 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 		state_action_table[optimal_state].isFeasible=false;
 		state_action_table[optimal_state].isSimulated=true;
 		cout<<" Error: The Simulation Vector is Empty"<<endl;
+
+		timeNow=ros::Time::now().toSec();
+		fileLog<< to_string(timeNow)<<" simulation ended"<<"\n";
+		fileLog<< to_string(timeNow)<<" planning started"<<"\n";
+
 		return FindOptimalState();
 
 	}
 	else
 	{
-		GiveSimulationCommand();
+		return GiveSimulationCommand();
 	}
 
 
@@ -1156,9 +1229,9 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 
 //	cout<<"304-"<<OptimalStateCompletelySimulated<<endl;
 	if(OptimalStateCompletelySimulated==true)
-		RankSimulation();
+		return RankSimulation();
 	else
-		GiveSimulationCommand();
+		return GiveSimulationCommand();
 
 }
 
@@ -1172,6 +1245,11 @@ void seq_planner_class::RankSimulation(void){
 //		cout<<"401-1"<<endl;
 		state_action_table[optimal_state].isFeasible=false;
 		state_action_table[optimal_state].isSimulated=true;
+
+		timeNow=ros::Time::now().toSec();
+		fileLog<< to_string(timeNow)<<"simulation ended"<<"\n";
+		fileLog<< to_string(timeNow)<<"planning started"<<"\n";
+
 		return FindOptimalState();
 	}
 
@@ -1218,8 +1296,11 @@ void seq_planner_class::RankSimulation(void){
 		state_action_table[optimal_state].actions_list[i].actionAndParameters=temp_action_parameters;
 
 	}
+	timeNow=ros::Time::now().toSec();
+	fileLog<< to_string(timeNow)<<" simulation ended"<<"\n";
+	fileLog<< to_string(timeNow)<<" planning started"<<"\n";
 
-	FindNextAction();
+	return FindNextAction();
 }
 
 
@@ -1729,9 +1810,16 @@ void seq_planner_class::CallBackHumanAck(const std_msgs::String::ConstPtr& msg){
 	if(agents[0].isBusy==false)
 	{
 		// it means that, beforehand no action is assigned to human action
-		EmergencyRobotStop();
+		timeNow=ros::Time::now().toSec();
+		fileLog<< to_string(timeNow)<<"planning ended"<<"\n";
+		fileLog<< to_string(timeNow)<<"HumanActionEmergency started"<<"\n";
 
+		EmergencyRobotStop();
 	}
+	timeNow=ros::Time::now().toSec();
+	fileLog<< to_string(timeNow)<<"HumanAction ended"<<"\n";
+	fileLog<< to_string(timeNow)<<"planning started"<<"\n";
+
 
 	agents[0].isBusy=false;
 	agents[0].lastActionAck=actionName;
@@ -1750,6 +1838,12 @@ void seq_planner_class::CallBackHumanAck(const std_msgs::String::ConstPtr& msg){
 
 void seq_planner_class::CallBackRobotAck(const std_msgs::String::ConstPtr& msg){
 	cout<<BOLD(FBLU("seq_planner_class::CallBackRobotAck"))<<endl;
+	if(emergencyFlag==false)
+	{
+		timeNow=ros::Time::now().toSec();
+		fileLog<< to_string(timeNow)<<" RobotAction ended"<<"\n";
+		fileLog<< to_string(timeNow)<<" planning started"<<"\n";
+	}
 
 	vector<string> agentsName, actionAndParametersVec;
 	vector<string> robot_ack_list;
@@ -1904,6 +1998,11 @@ void seq_planner_class::CallBackRobotAck(const std_msgs::String::ConstPtr& msg){
 void seq_planner_class::PublishHumanAction(string ActionName, string AgentName, vector<string> ColleaguesName){
 	cout<<BOLD(FBLU("seq_planner_class::PublishHumanAction"))<<endl;
 	cout<<AgentName<<FBLU(": Please perform Action: ")<<ActionName<<" ";
+
+	timeNow=ros::Time::now().toSec();
+	fileLog<< to_string(timeNow)<<"planning ended"<<"\n";
+	fileLog<< to_string(timeNow)<<"HumanAction started"<<"\n";
+
 	if(ColleaguesName.size()>0)
 	{
 		cout<<" , with: ";
@@ -1918,6 +2017,10 @@ void seq_planner_class::PublishHumanAction(string ActionName, string AgentName, 
 void seq_planner_class::PublishRobotAction(string ActionName, vector<string> AgentsName, vector<string> ColleaguesName){
 	cout<<BOLD(FBLU("seq_planner_class::PublishRobotAction"))<<endl;
 	// publish which agent to perform an action
+
+	timeNow=ros::Time::now().toSec();
+	fileLog<< to_string(timeNow)<<" planning ended"<<"\n";
+	fileLog<< to_string(timeNow)<<" RobotAction started"<<"\n";
 
 	string responsible_agents;
 	for(int i=0;i<AgentsName.size();i++)

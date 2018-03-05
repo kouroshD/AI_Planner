@@ -22,6 +22,10 @@
 #include <andor_msgs/Node.h>
 #include <boost/shared_ptr.hpp>
 #include "seq_planner_class.hpp"
+#include <fstream>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <string>
 
 #define RST  "\x1B[0m"
 #define KBLU  "\x1B[34m"
@@ -100,13 +104,13 @@ int main(int argc, char **argv)
 			{
 //				cout<<103<<endl;
 				isGraphSolved=andor_srv.response.graphSolved;
-				if(isGraphSolved==true && plan_obj.AndOrUpdateName==AssemblyName)
-				{
-					cout<<	FGRN("The Assembly task is Done")<<endl;
-					return 1;
-				}
-				else
-				{
+//				if(isGraphSolved==true && plan_obj.AndOrUpdateName==AssemblyName)
+//				{
+//					cout<<	FGRN("The Assembly task is Done")<<endl;
+//					return 1;
+//				}
+//				else
+//				{
 //					cout<<104<<endl;
 
 					for (int i=0;i<andor_srv.response.feasibleNodes.size();i++)
@@ -135,7 +139,7 @@ int main(int argc, char **argv)
 					plan_obj.GenerateStateActionTable(gen_Feasible_state_list,gen_Feasible_stateCost_list,plan_obj.AndOrUpdateName, isGraphSolved );
 					gen_Feasible_state_list.clear();
 					gen_Feasible_stateCost_list.clear();
-				}
+//				}
 
 			}
 
