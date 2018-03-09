@@ -49,12 +49,14 @@ public:
 
 
 
+
 private:
 	//! the length of the vector is equal to number of agents, if the agent[i] is responsible is true, otherwise it is false;
 	vector<agent> agents;
 	vector<actionDef> action_Definition_List;    // list of definition of the actions
     vector<offline_state_action_graph>  Full_State_action_list;// list of all the actions for all the states, this list should be found offline by a planner
     vector<feasible_state_action> state_action_table;
+    vector<string> objectTypeVector; // list of object type in the world to be instantiated
 
     ofstream fileLog;
     double timeNow;
@@ -91,6 +93,7 @@ private:
 	void SetAgentsList(void);
 	void SetStateActionList(string stateActionPath, string andorGraphName, vector<offline_state_action> & offline_state_action_list);
 	void CheckStateActionList(void);
+	void ReadObjectsType(string objTypePath);
 
 	void UpdateStateActionTable(string ActionName, vector<string>AgentsName, bool success);
 	void UpdateStateActionTable_ComplexAction(string ActionName, bool success);

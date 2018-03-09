@@ -1,5 +1,5 @@
 Plate_initPose HoldOn?LeftArm HoldOn?RightArm
-Plate_assemblyPose
+Plate_assemblyPose Reduce?LeftArm
 Leg1_T
 Leg2_T
 Leg3_T
@@ -13,7 +13,7 @@ Leg2_Plate_connected
 Leg3_Plate_connected
 Leg4_Plate_connected
 Table_FinalPose
-h0 Approach_plane1-approachingPose1?LeftArm Approach_plane1-approachingPose2?RightArm Approach_plane1-graspingPose1?LeftArm Approach_plane1-graspingPose2?RightArm Grasp?LeftArm Grasp?RightArm Transport_plane1-centerFramePose_Point4?LeftArm+RightArm Transport_Point4_Point0?LeftArm+RightArm Transport_Point0_Point3?LeftArm+RightArm UnGrasp?LeftArm UnGrasp?RightArm Stop?LeftArm Stop?RightArm HoldOn?LeftArm HoldOn?RightArm Rest?LeftArm Rest?RightArm Reduce?LeftArm
+h0 Approach_plane1-approachingPose1?LeftArm Approach_plane1-approachingPose2?RightArm Approach_plane1-graspingPose1?LeftArm Approach_plane1-graspingPose2?RightArm Grasp?LeftArm Grasp?RightArm Transport_plane1-centerFramePose_Point4?LeftArm+RightArm Transport_Point4_Point0?LeftArm+RightArm Transport_Point0_Point3?LeftArm+RightArm UnGrasp?LeftArm UnGrasp?RightArm Stop?LeftArm Stop?RightArm HoldOn?LeftArm HoldOn?RightArm Rest?LeftArm Rest?RightArm
 h1 Approach_cylinder-approachingPose1 Approach_cylinder-graspingPose1 Grasp Transport_cylinder-screwFramePose_Point1 UnGrasp Rest
 h2 Approach_cylinder-approachingPose1 Approach_cylinder-graspingPose1 Grasp Transport_cylinder-screwFramePose_plane1-approachScrewPose3 Transport_plane1-approachScrewPose3_plane1-screwPose3 Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw Rest
 h3 Approach_cylinder-approachingPose1 Approach_cylinder-graspingPose1 Grasp Transport_cylinder-screwFramePose_plane1-approachScrewPose3 Transport_plane1-approachScrewPose3_plane1-screwPose3 Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw UnGrasp Unscrew Grasp Screw Rest

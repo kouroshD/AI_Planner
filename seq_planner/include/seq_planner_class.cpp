@@ -19,6 +19,7 @@ seq_planner_class::seq_planner_class(string seqPlannerPath,string AssemblyName){
 	AndOrUpdateName=assembly_name;
 	hierarchicalGraphList.push_back(assembly_name);
 
+	ReadObjectsType(seq_planner_path+"/objectTypes.txt");
 	SetActionDefinitionList(seq_planner_path+"/ActionDefinitionList_"+assembly_name+".txt");
 	SetAgentsList();
 	Full_State_action_list.resize(1);
@@ -46,6 +47,13 @@ seq_planner_class::seq_planner_class(string seqPlannerPath,string AssemblyName){
 	cout<<FBLU(BOLD("*************************** Agents List ***************************"))<<endl;
 	for(int i=0;i<agents.size();i++)
 		agents[i].Print();
+
+	cout<<FBLU(BOLD("*******************************************************************"))<<endl;
+	cout<<FBLU(BOLD("*************************** Object Type List ***************************"))<<endl;
+	for(int i=0;i<objectTypeVector.size();i++)
+		cout<<objectTypeVector[i]<<" ";
+	cout<<endl;
+
 
 	simulationVectorNumber=0;
 	SimulationActionNumber=0;
@@ -176,10 +184,10 @@ void seq_planner_class::UpdateStateActionTable(string ActionName, vector<string>
 
 											if(success==true)
 											{
-												cout<<501<<" "<<temp_is_the_state_i_still_feasible<<endl;
+//												cout<<501<<" "<<temp_is_the_state_i_still_feasible<<endl;
 												state_action_table[i].actions_list[j].isDone[m]=true;
 												temp_is_the_state_i_still_feasible=true;
-												cout<<502<<" "<<temp_is_the_state_i_still_feasible<<endl;
+//												cout<<502<<" "<<temp_is_the_state_i_still_feasible<<endl;
 												break;
 											}
 										}
@@ -834,6 +842,35 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 		return FindOptimalState();
 	}
 
+	//! *********************************
+	/*
+	 * ! Find Object types and create simulation tree branches base on that
+	 */
+	//! first, we find what are the object types are used in the simulation vector
+	vector<string> sim_parameter_type;
+	for (int i = 0; i<temp_simulation_vector[0].actions_list.size(); i++)
+	{
+		for (int j = 0; j<temp_simulation_vector[0].actions_list[i].GeneralParameters.size(); j++)
+		{
+			bool the_parameter_is_found_before=false;
+			if(sim_parameter_type.size()==0)
+				sim_parameter_type.push_back(temp_simulation_vector[0].actions_list[i].GeneralParameters[j]);
+			else
+			{
+				for (int k = 0; k<sim_parameter_type.size(); k++)
+					if(sim_parameter_type[k]==temp_simulation_vector[0].actions_list[i].GeneralParameters[j])
+					{
+						the_parameter_is_found_before=true;
+						break;
+					}
+			}
+			if(the_parameter_is_found_before==false)
+				sim_parameter_type.push_back(temp_simulation_vector[0].actions_list[i].GeneralParameters[j]);
+		}
+	}
+
+
+
 
 //	cout<<"101"<<endl;
 
@@ -861,7 +898,6 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 	}
 
 
-//	cout<<"102"<<endl;
 
 	for (int i = 1; i < temp_simulation_vector.size(); i++)
 	{
@@ -930,7 +966,7 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 
 //	cout<<"104:"<<temp_simulation_vector.size()<<endl;
 	simulation_vector=temp_simulation_vector;
-//	cout<<"105 "<<simulation_vector.size()<<endl;
+	cout<<"simulation vector size: "<<simulation_vector.size()<<endl;
 
 	if(simulation_vector.size()==0)
 	{
@@ -959,7 +995,7 @@ void seq_planner_class::GiveSimulationCommand(void){
 	// 1- find the first command it should publish
 	// 2- Fill the msg for giving the command
 	// 3- publish the command
-	cout<<BOLD(FBLU("seq_planner_class::GiveSimulationCommand"))<<endl;
+	cout<<(FBLU("seq_planner_class::GiveSimulationCommand"))<<endl;
 //	for(int i=0;i<simulation_vector.size();i++)
 //		simulation_vector[i].Print();
 
@@ -1072,7 +1108,7 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 	// 1- Fill the necessary data inside the simulation vector
 	// 2- if an action is done completely, fill also all the consequential action from other simulation vector
 	// 3- if all the actions in all the simulation vectors is done, go to the RankSimulation Functions, otherwise go to the GiveCommand Function
-	cout<<BOLD(FBLU("seq_planner_class::UpdateSimulation"))<<endl;
+	cout<<(FBLU("seq_planner_class::UpdateSimulation"))<<endl;
 
 
 	cout<<"time: "<<simulationResponse.time<<", ";
@@ -1224,6 +1260,8 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 			break;
 	}
 
+	cout<<"simulation vector size: "<<simulation_vector.size()<<endl;
+
 	for(int i=0;i<simulation_vector.size();i++)
 		simulation_vector[i].PrintSummary();
 
@@ -1239,7 +1277,11 @@ void seq_planner_class::RankSimulation(void){
 
 	//! check if the simulation vector is not empty:
 	cout<<BOLD(FBLU("seq_planner_class::RankSimulation"))<<endl;
-//	cout<<"401"<<endl;
+
+	cout<<"simulation vector size: "<<simulation_vector.size()<<endl;
+	for(int i=0;i<simulation_vector.size();i++)
+		simulation_vector[i].PrintSummary();
+
 	if(simulation_vector.size()==0)
 	{
 //		cout<<"401-1"<<endl;
@@ -1471,7 +1513,13 @@ void seq_planner_class::SetStateActionList(string stateActionPath, string andorG
 
 					vector<string> firstPartofParameter;
 					boost::split(firstPartofParameter, action_and_parameters[j], boost::is_any_of(firstPartOfParamter_delim_type));
-					tempAction.GeneralParameters.push_back(firstPartofParameter[0]);
+					for(int k=0;k<firstPartofParameter.size();k++)
+						for(int m=0;m<objectTypeVector.size();m++)
+							if(firstPartofParameter[k]==objectTypeVector[m])
+							{
+								tempAction.GeneralParameters.push_back(firstPartofParameter[k]);
+								break;
+							}
 				}
 
 				tempAction.Action_GeneralParameters=tempAction.name;
@@ -1508,6 +1556,25 @@ void seq_planner_class::SetStateActionList(string stateActionPath, string andorG
 	}
 
 }
+
+void seq_planner_class::ReadObjectsType(string objTypePath){
+	cout<<"seq_planner_class::ReadObjectsType"<<endl;
+
+
+
+	ifstream file_path_ifStr(objTypePath.c_str());
+
+	string line;
+
+	//	cout<<file_path_ifStr.is_open()<<endl;
+	if (file_path_ifStr.is_open())
+	{
+		while(getline(file_path_ifStr,line))
+		{
+			objectTypeVector.push_back(line);
+		}
+	}
+};
 
 void seq_planner_class::CheckStateActionList(){
 	cout<<"seq_planner_class::CheckStateActionList"<<endl;
