@@ -45,22 +45,45 @@ public:
 	void Print(void);
 };
 //
+enum eParamType{predicate=0,instantiation=1};
+class paramter{
+public:
+	paramter(vector<string> parameterIn,vector<eParamType> parameterInType);
+	paramter();
+	~paramter();
+	vector<string> paramVec;
+	vector<eParamType> parameterType; //!!predicate=0,instantiation=1
+	void UpdateParameter(string predicateName, string InstantiationName);
+	bool ExistPredicateInParameter(string predicateName);
+	bool ExistInstantiantionInParameter(string InstantiationName);
+	string getParameters(void);
+	string getGeneralParameters(void);
+	void Print();
+	paramter(const paramter& new_paramter);
+	paramter& operator=(const paramter& new_paramter);
+
+};
+
+
 class action{
 public:
 	actionDef &refActionDef;
 	string name;
 	vector<string> assigned_agents;
-	vector<string> assignedParameters; // Example: object1-graspingPose1, Point1
+	vector<string> assignedParameters; // complete paramter name: Example: object1-graspingPose1, Point1, cylinder-cylinder1-appraochingPose1
 	vector<string> GeneralParameters;
 	vector<bool> isDone; // it is a vector, because for some joint actions (human+robot) it needs to fill all of them in order to say an action is done;
 	string actionAndParameters; //Example:  Approach_object1-graspingPose1, Approach_Point1, Transport_object1_point1
 	string Action_GeneralParameters;//Example:  Appraoch_object1, Approach_Point1
 
+	vector<paramter> parameterVector; // vector of data structure for action parameter
 
 	action(actionDef &actionDefObj);
 	action(const action& new_action);
 	action& operator=(const action& new_action);
-	void UpdateActionParamters(string assignedParametersIn, int paramterIndex);
+	void UpdateActionParamters(string assignedParametersIn, int paramterIndex);//! the complete vector of parameter should be provided
+	void UpdateActionAllParamters(string predicateParamter,string instantiatedParameter);//! with a preicate name and instantiated name the actions paramters will be updtaed
+
 
 	~action();
 	void Print(void);

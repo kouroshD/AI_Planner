@@ -29,6 +29,118 @@ void actionDef::Print(void){
 	cout<<endl;
 
 };
+
+/////////////////////////////////////////////////////////////
+
+paramter::paramter(vector<string> parameterIn, vector<eParamType> parameterInType){
+
+//	vector<string> paramVec;
+//	vector<eParam> parameterType;
+	for(int i=0;i<parameterIn.size();i++)
+		paramVec.push_back(parameterIn[i]);
+
+	for(int i=0;i<parameterInType.size();i++)
+		parameterType.push_back(parameterInType[i]);
+};
+
+paramter::~paramter(){};
+paramter::paramter(){};
+
+paramter::paramter(const paramter& new_paramter){
+	paramVec=new_paramter.paramVec;
+	parameterType=new_paramter.parameterType;
+
+
+};
+paramter& paramter::operator=(const paramter& new_paramter){
+	paramVec=new_paramter.paramVec;
+	parameterType=new_paramter.parameterType;
+
+	return *this;
+};
+
+
+void paramter::UpdateParameter(string predicateName, string InstantiationName){
+
+	int predicateIndex=0, paramVecSize;
+	bool predicateFound=false;
+
+	paramVecSize=paramVec.size();
+	for(int i=0; i<paramVec.size();i++)
+	{
+		if(paramVec[i]==predicateName)
+		{
+			predicateFound=true;
+			predicateIndex=i;
+			break;
+		}
+	}
+	if(predicateFound==true)
+	{
+		paramVec.insert(paramVec.begin()+predicateIndex+1, InstantiationName);
+		parameterType.insert(parameterType.begin()+predicateIndex+1, eParamType::instantiation);
+	}
+	else
+		cout<<"Predicate: "<<predicateName<<" not found. No Update"<<endl;
+
+
+
+};
+bool paramter::ExistPredicateInParameter(string predicateName){
+
+	bool tempResponse=false;
+	for(int i=0;i<paramVec.size();i++)
+		if(predicateName==paramVec[i] && parameterType[i]==0)
+			tempResponse=true;
+
+	return tempResponse;
+};
+bool paramter::ExistInstantiantionInParameter(string InstantiationName){
+	bool tempResponse=false;
+	for(int i=0;i<paramVec.size();i++)
+		if(InstantiationName==paramVec[i] && parameterType[i]==1)
+			tempResponse=true;
+
+	return tempResponse;
+
+};
+void paramter::Print(){
+	cout<<"paramter::Print"<<endl;
+
+	for(int i=0;i<paramVec.size();i++)
+		cout<<paramVec[i]<<"("<<parameterType[i]<<"), ";
+	cout<<endl;
+
+};
+
+string paramter::getParameters(void){
+
+	string returnVal;
+	for(int i=0;i<paramVec.size();i++)
+	{
+		returnVal+=paramVec[i];
+		if(i<paramVec.size()-1)
+			returnVal+="-";
+	}
+	return returnVal;
+
+};
+string paramter::getGeneralParameters(void){
+
+	string returnVal;
+	for(int i=0;i<paramVec.size();i++)
+	{
+		if(parameterType[i]==eParamType::predicate)
+		{
+			returnVal+=paramVec[i];
+			if(i<paramVec.size()-1)
+				returnVal+="-";
+		}
+	}
+	return returnVal;
+};
+
+
 /////////////////////////////////////////////////////////////
 
 action::action(actionDef &actionDefObj):refActionDef(actionDefObj){
@@ -43,6 +155,8 @@ action::action(const action& new_action):refActionDef(new_action.refActionDef){
 	actionAndParameters=new_action.actionAndParameters;
 	Action_GeneralParameters=new_action.Action_GeneralParameters;
 	GeneralParameters=new_action.GeneralParameters;
+	parameterVector=new_action.parameterVector;
+
 };
 action& action::operator=(const action& new_action){
 
@@ -54,10 +168,13 @@ action& action::operator=(const action& new_action){
 	actionAndParameters=new_action.actionAndParameters;
 	Action_GeneralParameters=new_action.Action_GeneralParameters;
 	GeneralParameters=new_action.GeneralParameters;
+	parameterVector=new_action.parameterVector;
+
 	return *this;
 };
 
 action::~action(){};
+
 void action::UpdateActionParamters(string assignedParametersIn, int paramterIndex){
 
 	assignedParameters[paramterIndex]=assignedParametersIn;
@@ -73,6 +190,20 @@ void action::UpdateActionParamters(string assignedParametersIn, int paramterInde
 		actionAndParameters+="_"+assignedParameters[i];
 		Action_GeneralParameters+="_"+assignedParameters[i];
 	}
+
+};
+
+void action::UpdateActionAllParamters(string predicateParamter,string instantiatedParameter){
+
+	for(int i=0;i<parameterVector.size();i++)
+	{
+		if(parameterVector[i].ExistPredicateInParameter(predicateParamter)==true)
+		{
+			parameterVector[i].UpdateParameter(predicateParamter,instantiatedParameter);
+			UpdateActionParamters(parameterVector[i].getParameters(), i);
+		}
+	}
+
 
 };
 

@@ -846,127 +846,293 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 	/*
 	 * ! Find Object types and create simulation tree branches base on that
 	 */
-	//! first, we find what are the object types are used in the simulation vector
-	vector<string> sim_parameter_type;
+
+	//! first, we find what are the predicates that we used in the simulation vector
+	vector<string> sim_predicate_vec;
 	for (int i = 0; i<temp_simulation_vector[0].actions_list.size(); i++)
 	{
 		for (int j = 0; j<temp_simulation_vector[0].actions_list[i].GeneralParameters.size(); j++)
 		{
 			bool the_parameter_is_found_before=false;
-			if(sim_parameter_type.size()==0)
-				sim_parameter_type.push_back(temp_simulation_vector[0].actions_list[i].GeneralParameters[j]);
+			if(sim_predicate_vec.size()==0)
+				sim_predicate_vec.push_back(temp_simulation_vector[0].actions_list[i].GeneralParameters[j]);
 			else
 			{
-				for (int k = 0; k<sim_parameter_type.size(); k++)
-					if(sim_parameter_type[k]==temp_simulation_vector[0].actions_list[i].GeneralParameters[j])
+				for (int k = 0; k<sim_predicate_vec.size(); k++)
+					if(sim_predicate_vec[k]==temp_simulation_vector[0].actions_list[i].GeneralParameters[j])
 					{
 						the_parameter_is_found_before=true;
 						break;
 					}
+				if(the_parameter_is_found_before==false)
+					sim_predicate_vec.push_back(temp_simulation_vector[0].actions_list[i].GeneralParameters[j]);
 			}
-			if(the_parameter_is_found_before==false)
-				sim_parameter_type.push_back(temp_simulation_vector[0].actions_list[i].GeneralParameters[j]);
+
 		}
 	}
+	cout<< "sim_predicate_vec: "<<endl;
+	for(int i=0;i<sim_predicate_vec.size();i++)
+		cout<< sim_predicate_vec[i]<<", ";
+		cout<<endl;
 
-
-
-
-//	cout<<"101"<<endl;
-
-	// check other parameters of the actions
-	// I am not sure about this part: ????
-	for (int i = 0; i<temp_simulation_vector[0].actions_list.size(); i++)
+	for(int h=0;h<sim_predicate_vec.size();h++)
 	{
-		vector<string> parameter_type = temp_simulation_vector[0].actions_list[i].refActionDef.parameterTypes;
-		bool the_parameter_is_found_before;
-		for (int j = 0; j < parameter_type.size(); j++)
+
+		//! Second, Check for instantiation of the parameter types:
+		knowledge_msgs::knowledgeSRV knowledge_msg;
+		knowledge_msg.request.reqType =sim_predicate_vec[h] ;//msg1Vector[0];//  Point1, Point2, Object: Cylinder1, Sphere2, Cone2, Plate1, connectionFrame1
+		knowledge_msg.request.Name = ""; // graspingPose1, graspingPose2, CenterFrame1, ObjectFrame3 ,connectionFrame1, ...
+		// if msg1.size >2 ??
+		knowledge_msg.request.requestInfo = "Pose-Name"; // Pose, Pose-Name, centerPose-Name, ...
+		vector<string> responseVector;
+
+
+		if (knowledgeBase_client.call(knowledge_msg))
 		{
-			the_parameter_is_found_before = false;
-			for (int k = 0; k < temp_simulation_vector[0].parameters_type.size();k++)
+			responseVector = knowledge_msg.response.names; // here It returns a vector of complete names, like: Cylinder-Cylinder1-graspingPose1, Cylinder-Cylinder1-graspingPose2, Cylinder-Cylinder2-graspingPose1
+		}
+
+		if (responseVector.size() == 0)
+		{
+			cout << "the knowledge base returned nothing!" << endl;
+			exit(1);
+		}
+		else
+		{
+			vector<string> parameterInstantiation; // for one parameterType all the possible instantiations of it
+			for (int i = 0; i < responseVector.size(); i++)// here It returns a vector of complete names, like: Cylinder-Cylinder1-graspingPose1, Cylinder-Cylinder1-graspingPose2, Cylinder-Cylinder2-graspingPose1
 			{
-				if (parameter_type[j] == temp_simulation_vector[0].parameters_type[k])
+				vector<string> parameterVector;
+				boost::split(parameterVector, responseVector[i], boost::is_any_of("-"));
+
+				for(int j = 0; j < parameterVector.size(); j++)
 				{
-					the_parameter_is_found_before = true;
+					if(sim_predicate_vec[h]==parameterVector[j])// after the parameter type should be the parameter instantiation
+					{
+						if(parameterInstantiation.size()==0)
+						{
+							parameterInstantiation.push_back(parameterVector[j+1]);
+						}
+						else
+						{
+							bool instantiationFound=false;
+							for(int k=0;k<parameterInstantiation.size();k++)
+							{
+								if(parameterInstantiation[k]==parameterVector[j+1])
+								{
+									instantiationFound=true;
+									break;
+								}
+							}
+							if(instantiationFound==false)
+								parameterInstantiation.push_back(parameterVector[j+1]);
+						}
+					}
 				}
 			}
-			if (the_parameter_is_found_before == false)
+			cout<< "parameterInstantiation:( "<<sim_predicate_vec[h]<<")"<<endl;
+			for(int i=0;i<parameterInstantiation.size();i++)
+				cout<< parameterInstantiation[i]<<", ";
+				cout<<endl;
+
+			//! Third, Check each instantiation exist before in the parameter list of all the actions or not
+			vector<string> usedParamterInstantiation;
+			for(int l=0; l<parameterInstantiation.size();l++)
 			{
-				temp_simulation_vector[0].parameters_type.push_back(parameter_type[j]);
-			}
-		}
-	}
-
-
-
-	for (int i = 1; i < temp_simulation_vector.size(); i++)
-	{
-		temp_simulation_vector[i].parameters_type =	temp_simulation_vector[0].parameters_type;
-	}
-//	cout<<"103"<<endl;
-
-	// the simulation vector knows how many parameter type for the actions we need, like object grasping poses, object frame, ...
-	// check for first action now how many assigned parameters it can have for each type.
-	for (int i = 0; i < state_action_table[optimal_state].actions_list.size(); 	i++)
-	{
-		for (int j = 0; j< state_action_table[optimal_state].actions_list[i].refActionDef.parameterTypes.size();j++)
-		{
-//			cout<<"103-1"<<endl;
-			string actionParameterName = state_action_table[optimal_state].actions_list[i].assignedParameters[j];
-			string actionParameterType =state_action_table[optimal_state].actions_list[i].refActionDef.parameterTypes[j] +"-" +"Name";
-			//			int parameterNo;
-			//			for (int h = 0; h < temp_simulation_vector[0].parameters_type.size();h++)
-			//			{
-			//				if (temp_simulation_vector[0].parameters_type[h]== state_action_table[optimal_state].actions_list[i].refActionDef.parameterTypes[j])
-			//				{
-			//					parameterNo = h;
-			//					break;
-			//				}
-			//			}
-			vector<string> msg1Vector;
-			boost::split(msg1Vector, actionParameterName, boost::is_any_of("-"));
-			knowledge_msgs::knowledgeSRV knowledge_msg;
-			knowledge_msg.request.reqType =actionParameterName ;//msg1Vector[0];//  Point1, Point2, Object: Cylinder1, Sphere2, Cone2, Plate1, connectionFrame1
-			knowledge_msg.request.Name = ""; // graspingPose1, graspingPose2, CenterFrame1, ObjectFrame3 ,connectionFrame1, ...
-			// if msg1.size >2 ??
-			knowledge_msg.request.requestInfo = actionParameterType; // Pose, Pose-Name, centerPose-Name, ...
-			vector<string> responseVector;
-
-
-			if (knowledgeBase_client.call(knowledge_msg))
-			{
-				responseVector = knowledge_msg.response.names; // here It returns a vector of complete names, like: Cylinder-Cylinder1-graspingPose1, Cylinder-Cylinder1-graspingPose2, Cylinder-Cylinder2-graspingPose1
-				// example: graspingPose1,graspingPose2
-			}
-			if (responseVector.size() == 0)
-			{
-				cout << "the knowledge base returned nothing!" << endl;
-			}
-			else
-			{
-				vector<optimal_state_simulation> temp2_simulation_vector;
-				for (int m = 0; m < temp_simulation_vector.size(); m++)
+				for (int i = 0; i<temp_simulation_vector[0].actions_list.size(); i++)
 				{
-					int NoAgents =temp_simulation_vector[m].responsibleAgents.size();
-					vector<string> AssignedParametersCombinations;
-					//PossibileCombinations(responseVector, NoAgents,	AssignedParametersCombinations);
-					for (int n = 0; n < responseVector.size(); 	n++)
+					bool breakFlag=false;
+					for(int j = 0; j<temp_simulation_vector[0].actions_list[i].parameterVector.size(); j++)
 					{
-//						cout<<"103-2: "<<responseVector[n]<<endl;
-						temp_simulation_vector[m].actions_list[i].UpdateActionParamters(responseVector[n],j);
+						if(temp_simulation_vector[0].actions_list[i].parameterVector[j].ExistInstantiantionInParameter(parameterInstantiation[l])==true)
+						{
+							usedParamterInstantiation.push_back(parameterInstantiation[l]);
+							breakFlag=true;
+							break;
+						}
+					}
+					if(breakFlag==true)
+						break;
+				}
+			}
+
+
+			cout<< "usedParamterInstantiation:( "<<sim_predicate_vec[h]<<")"<<endl;
+			for(int i=0;i<usedParamterInstantiation.size();i++)
+				cout<< usedParamterInstantiation[i]<<", ";
+				cout<<endl;
+
+
+			//! if there is not exist create branches
+			//! if there exist one, give that one to all the parameters
+			//! if there exit more than one do not touch them!
+
+
+			if(usedParamterInstantiation.size()==0)
+			{// create branches:
+
+				vector<optimal_state_simulation> temp2_simulation_vector;
+				int vecCounter=0;
+				for(int l=0; l<parameterInstantiation.size();l++)
+				{
+					for (int m = 0; m < temp_simulation_vector.size(); m++)
+					{
 						temp2_simulation_vector.push_back(temp_simulation_vector[m]);
+						for(int j=0;j<temp_simulation_vector[m].actions_list.size();j++)
+						{
+							temp2_simulation_vector[vecCounter].actions_list[j].UpdateActionAllParamters(sim_predicate_vec[h],parameterInstantiation[l]);
+						}
+						vecCounter++;
 					}
 				}
 				temp_simulation_vector.clear();
 				temp_simulation_vector=temp2_simulation_vector;
-//				cout<<"103-3: "<<temp_simulation_vector.size()<<", "<<temp2_simulation_vector.size()<<endl;
 			}
+			else if(usedParamterInstantiation.size()==1)
+			{// one branch, all with the same instantiations:
+				for(int i=0;i<temp_simulation_vector.size();i++)
+				{
+					for(int j=0;j<temp_simulation_vector[i].actions_list.size();j++)
+					{
+						temp_simulation_vector[i].actions_list[j].UpdateActionAllParamters(sim_predicate_vec[h],usedParamterInstantiation[0]);
+					}
+				}
+			}
+			else
+			{// one branch, with different instantiations:
+				cout<<"The parameter type ["<<sim_predicate_vec[h]<<"] is used with following instantiations: ";
+				for(int i=0;i<usedParamterInstantiation.size();i++)
+					cout<<usedParamterInstantiation[i]<<", ";
+				cout<<endl;
+			}
+
 		}
 	}
+//
+//
+//		vector<optimal_state_simulation> temp2_simulation_vector;
+//		for (int m = 0; m < temp_simulation_vector.size(); m++)
+//		{
+//			int NoAgents =temp_simulation_vector[m].responsibleAgents.size();
+//			vector<string> AssignedParametersCombinations;
+//			//PossibileCombinations(responseVector, NoAgents,	AssignedParametersCombinations);
+//			for (int n = 0; n < responseVector.size(); 	n++)
+//			{
+////						cout<<"103-2: "<<responseVector[n]<<endl;
+//				temp_simulation_vector[m].actions_list[i].UpdateActionParamters(responseVector[n],j);
+//				temp2_simulation_vector.push_back(temp_simulation_vector[m]);
+//			}
+//		}
+//		temp_simulation_vector.clear();
+//		temp_simulation_vector=temp2_simulation_vector;
+////				cout<<"103-3: "<<temp_simulation_vector.size()<<", "<<temp2_simulation_vector.size()<<endl;
+//	}
+//
+//
+//
+//
+//
+//
+////	cout<<"101"<<endl;
+//
+//	// check other parameters of the actions
+//	// I am not sure about this part: ????
+//	for (int i = 0; i<temp_simulation_vector[0].actions_list.size(); i++)
+//	{
+//		vector<string> parameter_type = temp_simulation_vector[0].actions_list[i].refActionDef.parameterTypes;
+//		bool the_parameter_is_found_before;
+//		for (int j = 0; j < parameter_type.size(); j++)
+//		{
+//			the_parameter_is_found_before = false;
+//			for (int k = 0; k < temp_simulation_vector[0].parameters_type.size();k++)
+//			{
+//				if (parameter_type[j] == temp_simulation_vector[0].parameters_type[k])
+//				{
+//					the_parameter_is_found_before = true;
+//				}
+//			}
+//			if (the_parameter_is_found_before == false)
+//			{
+//				temp_simulation_vector[0].parameters_type.push_back(parameter_type[j]);
+//			}
+//		}
+//	}
+//
+//
+//
+//	for (int i = 1; i < temp_simulation_vector.size(); i++)
+//	{
+//		temp_simulation_vector[i].parameters_type =	temp_simulation_vector[0].parameters_type;
+//	}
+////	cout<<"103"<<endl;
+//
+//	// the simulation vector knows how many parameter type for the actions we need, like object grasping poses, object frame, ...
+	// check for first action now how many assigned parameters it can have for each type.
+//	for (int i = 0; i < state_action_table[optimal_state].actions_list.size(); 	i++)
+//	{
+//		for (int j = 0; j< state_action_table[optimal_state].actions_list[i].refActionDef.parameterTypes.size();j++)
+//		{
+////			cout<<"103-1"<<endl;
+//			string actionParameterName = state_action_table[optimal_state].actions_list[i].assignedParameters[j];
+//			string actionParameterType =state_action_table[optimal_state].actions_list[i].refActionDef.parameterTypes[j] +"-" +"Name";
+//			//			int parameterNo;
+//			//			for (int h = 0; h < temp_simulation_vector[0].parameters_type.size();h++)
+//			//			{
+//			//				if (temp_simulation_vector[0].parameters_type[h]== state_action_table[optimal_state].actions_list[i].refActionDef.parameterTypes[j])
+//			//				{
+//			//					parameterNo = h;
+//			//					break;
+//			//				}
+//			//			}
+//			vector<string> msg1Vector;
+//			boost::split(msg1Vector, actionParameterName, boost::is_any_of("-"));
+//			knowledge_msgs::knowledgeSRV knowledge_msg;
+//			knowledge_msg.request.reqType =actionParameterName ;//msg1Vector[0];//  Point1, Point2, Object: Cylinder1, Sphere2, Cone2, Plate1, connectionFrame1
+//			knowledge_msg.request.Name = ""; // graspingPose1, graspingPose2, CenterFrame1, ObjectFrame3 ,connectionFrame1, ...
+//			// if msg1.size >2 ??
+//			knowledge_msg.request.requestInfo = actionParameterType; // Pose, Pose-Name, centerPose-Name, ...
+//			vector<string> responseVector;
+//
+//
+//			if (knowledgeBase_client.call(knowledge_msg))
+//			{
+//				responseVector = knowledge_msg.response.names; // here It returns a vector of complete names, like: Cylinder-Cylinder1-graspingPose1, Cylinder-Cylinder1-graspingPose2, Cylinder-Cylinder2-graspingPose1
+//				// example: graspingPose1,graspingPose2
+//			}
+//			if (responseVector.size() == 0)
+//			{
+//				cout << "the knowledge base returned nothing!" << endl;
+//			}
+//			else
+//			{
+//				vector<optimal_state_simulation> temp2_simulation_vector;
+//				for (int m = 0; m < temp_simulation_vector.size(); m++)
+//				{
+//					int NoAgents =temp_simulation_vector[m].responsibleAgents.size();
+//					vector<string> AssignedParametersCombinations;
+//					//PossibileCombinations(responseVector, NoAgents,	AssignedParametersCombinations);
+//					for (int n = 0; n < responseVector.size(); 	n++)
+//					{
+////						cout<<"103-2: "<<responseVector[n]<<endl;
+//						temp_simulation_vector[m].actions_list[i].UpdateActionParamters(responseVector[n],j);
+//						temp2_simulation_vector.push_back(temp_simulation_vector[m]);
+//					}
+//				}
+//				temp_simulation_vector.clear();
+//				temp_simulation_vector=temp2_simulation_vector;
+////				cout<<"103-3: "<<temp_simulation_vector.size()<<", "<<temp2_simulation_vector.size()<<endl;
+//			}
+//		}
+//	}
 
-//	cout<<"104:"<<temp_simulation_vector.size()<<endl;
+
 	simulation_vector=temp_simulation_vector;
-	cout<<"simulation vector size: "<<simulation_vector.size()<<endl;
+	cout<<"simulation vector: (size: "<<simulation_vector.size()<<")"<<endl;
+
+	for(int i=0;i<simulation_vector.size();i++)
+		simulation_vector[i].PrintSummary();
+
+
 
 	if(simulation_vector.size()==0)
 	{
@@ -1513,13 +1679,31 @@ void seq_planner_class::SetStateActionList(string stateActionPath, string andorG
 
 					vector<string> firstPartofParameter;
 					boost::split(firstPartofParameter, action_and_parameters[j], boost::is_any_of(firstPartOfParamter_delim_type));
+					paramter tempParameter;
+
 					for(int k=0;k<firstPartofParameter.size();k++)
+					{
+						;
+						bool paramIsPredicate=false;
 						for(int m=0;m<objectTypeVector.size();m++)
 							if(firstPartofParameter[k]==objectTypeVector[m])
 							{
+								paramIsPredicate=true;
 								tempAction.GeneralParameters.push_back(firstPartofParameter[k]);
 								break;
 							}
+
+						tempParameter.paramVec.push_back(firstPartofParameter[k]);
+						if(paramIsPredicate==true)
+						{
+							tempParameter.parameterType.push_back(eParamType::predicate);
+						}
+						else
+						{
+							tempParameter.parameterType.push_back(eParamType::instantiation);
+						}
+					}
+					tempAction.parameterVector.push_back(tempParameter);
 				}
 
 				tempAction.Action_GeneralParameters=tempAction.name;
