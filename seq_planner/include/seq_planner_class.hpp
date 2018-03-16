@@ -111,6 +111,7 @@ private:
 	void GiveSimulationCommand(void);
 	void RankSimulation(void); // when the simulation is done, we rank them, and we assign the agents and action parameters to the optimal state representation, and we call the FindNextAction function.
 	// if agent could not perform the actions that was simulated, we make that state infeasible.
+	bool ActionChangesRobot_q(vector<double> &q_old, vector<double> &q_new );
 
 };
 

@@ -1300,6 +1300,8 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 	cout<<endl;
 
 	cout<<"*******************"<<endl;
+	vector<bool> qChangeByAction={false, false};
+	vector<double> q_old(7,0.0),q_new(7,0.0);
 	bool failure_Flag=false;
 	for(int i=0;i< simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].assigned_agents.size();i++)
 	{
@@ -1317,6 +1319,20 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 					// fill the simulation timing:
 					if((double)simulationResponse.time>simulation_vector[simulationVectorNumber].actionsTime[SimulationActionNumber])
 						simulation_vector[simulationVectorNumber].actionsTime[SimulationActionNumber]=simulationResponse.time;
+
+					for(int k=0;k<7;k++)
+					{
+						q_old[i]=simulation_vector[simulationVectorNumber].simulation_q[0][k];
+						q_new[i]=simulationResponse.ArmsJoint[0].values[k];
+					}
+					qChangeByAction[0]=ActionChangesRobot_q(q_old,q_new);
+
+					for(int k=0;k<7;k++)
+					{
+						q_old[i]=simulation_vector[simulationVectorNumber].simulation_q[1][k];
+						q_new[i]=simulationResponse.ArmsJoint[1].values[k];
+					}
+					qChangeByAction[1]=ActionChangesRobot_q(q_old,q_new);
 
 					// Fill the simulation joint values:
 					if((string)simulationResponse.ResponsibleAgents[j]=="LeftArm")
@@ -1396,12 +1412,12 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 						(*it).actions_list[SimulationActionNumber].isDone[j]=true; // we are sure all of them is true
 						(*it).actionsTime[SimulationActionNumber]=simulation_vector[simulationVectorNumber].actionsTime[SimulationActionNumber];
 
-						if((*it).actions_list[SimulationActionNumber].assigned_agents[j]=="LeftArm")
+						if((*it).actions_list[SimulationActionNumber].assigned_agents[j]=="LeftArm" && qChangeByAction[0]==true)
 						{
 							for(int k=0;k<7;k++)
 								(*it).simulation_q[0][k]=simulation_vector[simulationVectorNumber].simulation_q[0][k];
 						}
-						else if((*it).actions_list[SimulationActionNumber].assigned_agents[j]=="RightArm")
+						else if((*it).actions_list[SimulationActionNumber].assigned_agents[j]=="RightArm" && qChangeByAction[1]==true)
 						{
 							for(int k=0;k<7;k++)
 								(*it).simulation_q[1][k]=simulation_vector[simulationVectorNumber].simulation_q[1][k];
@@ -1428,8 +1444,8 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 
 	cout<<"simulation vector size: "<<simulation_vector.size()<<endl;
 
-	for(int i=0;i<simulation_vector.size();i++)
-		simulation_vector[i].PrintSummary();
+//	for(int i=0;i<simulation_vector.size();i++)
+//		simulation_vector[i].PrintSummary();
 
 //	cout<<"304-"<<OptimalStateCompletelySimulated<<endl;
 	if(OptimalStateCompletelySimulated==true)
@@ -2299,3 +2315,16 @@ void seq_planner_class::PublishRobotAction(string ActionName, vector<string> Age
 
 	ROS_INFO("publish robot command : %s ",robotMsg.data.c_str() );
 }
+
+bool seq_planner_class::ActionChangesRobot_q(vector<double> &q_old, vector<double> &q_new ){
+	double distanceThreshold=0.1, distance=0.0;
+
+	for(int i=0;i<q_old.size();i++)
+		distance+=abs(q_old[i]-q_new[i]);
+
+	if(distance<distanceThreshold)
+		return true;
+	else
+		return false;
+
+};
