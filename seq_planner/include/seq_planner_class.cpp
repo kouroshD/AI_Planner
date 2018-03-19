@@ -82,6 +82,8 @@ seq_planner_class::seq_planner_class(string seqPlannerPath,string AssemblyName){
 }
 seq_planner_class::~seq_planner_class(){
 	cout<<"seq_planner_class::~seq_planner_class"<<endl;
+	fileLog.close();
+
 }
 
 void seq_planner_class::UpdateStateActionTable_ComplexAction(string ActionName, bool success){
@@ -1372,7 +1374,14 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 	// give a new simulation command to the robot
 	if(failure_Flag==true)
 	{
-//		cout<<"302-1"<<endl;
+		vector<optimal_state_simulation>::iterator it = (simulation_vector.begin()+simulationVectorNumber);
+		cout<<"*** vector to Delete: *** "<<endl;
+		(*it).PrintSummary();
+		simulation_vector.erase(it);
+
+
+		/*
+
 		action temp_action_for_DEL(simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber]);
 		for(vector<optimal_state_simulation>::iterator it =simulation_vector.begin(); it!= simulation_vector.end();)
 		{
@@ -1388,9 +1397,11 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 		}
 		//GiveSimulationCommand(); // should be given later not here
 
+		*/
 	}
 	else // the simulation shows successful implementation, give the bool to all the actions with exactly the same parameters:
 	{
+	/*
 //		cout<<"302-3-"<<simulation_vector.size()<<endl;
 		bool actionCompletelydone=true;
 		for(int i=0; i<simulation_vector[simulationVectorNumber].actions_list[SimulationActionNumber].isDone.size();i++)
@@ -1426,6 +1437,7 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 					}
 				}
 		}
+		*/
 	}
 //	cout<<"303"<<endl;
 	bool OptimalStateCompletelySimulated=true;
