@@ -53,7 +53,10 @@ ADD_LIBRARY(basic_classes include/basic_classes.cpp)
 # name  name.cpp
 add_executable(seq_planner src/seq_planner_main.cpp )
 
-add_dependencies(andor baxter_core_msgs_generate_messages_cpp geometry_msgs_generate_messages_cpp andor_msgs_generate_messages_cpp robot_interface_msgs_generate_messages_cpp)
+add_dependencies(seq_planner baxter_core_msgs_generate_messages_cpp geometry_msgs_generate_messages_cpp andor_msgs_generate_messages_cpp robot_interface_msgs_generate_messages_cpp)
+
+add_dependencies(seq_planner_class baxter_core_msgs_generate_messages_cpp geometry_msgs_generate_messages_cpp andor_msgs_generate_messages_cpp robot_interface_msgs_generate_messages_cpp)
+
 ## Specify libraries to link a library or executable target against
 target_link_libraries(seq_planner
    ${catkin_LIBRARIES}

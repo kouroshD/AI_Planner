@@ -8,6 +8,7 @@
 //#include <iterator>
 //#include <sstream>
 #include <fstream>
+/*
 #include <andor_msgs/andorSRV.h>
 #include <andor_msgs/Hyperarc.h>
 #include <andor_msgs/Node.h>
@@ -15,6 +16,7 @@
 #include "robot_interface_msgs/Joints.h"
 #include "robot_interface_msgs/SimulationRequestMsg.h"
 #include "robot_interface_msgs/SimulationResponseMsg.h"
+*/
 
 
 
