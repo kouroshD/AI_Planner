@@ -70,6 +70,7 @@ seq_planner_class::seq_planner_class(string seqPlannerPath,string AssemblyName){
 	pubSimulationCommand=nh.advertise<robot_interface_msgs::SimulationRequestMsg>("simulation_command",10);
 
 	knowledgeBase_client=nh.serviceClient<knowledge_msgs::knowledgeSRV>("knowledgeService");
+	pubToRobotDisplay=nh.advertise<std_msgs::String>("robotDisplayText",10);
 
 	emergencyFlag=false;
 
@@ -2278,6 +2279,10 @@ void seq_planner_class::PublishHumanAction(string ActionName, string AgentName, 
 	cout<<BOLD(FBLU("seq_planner_class::PublishHumanAction"))<<endl;
 	cout<<AgentName<<FBLU(": Please perform Action: ")<<ActionName<<" ";
 
+	std_msgs::String msgToDisplay;
+	msgToDisplay.data=(ActionName+" Human").c_str();
+	pubToRobotDisplay.publish(msgToDisplay);
+
 	timeNow=ros::Time::now().toSec();
 	fileLog<< to_string(timeNow)<<"planning ended"<<"\n";
 	fileLog<< to_string(timeNow)<<"HumanAction started"<<"\n";
@@ -2324,6 +2329,9 @@ void seq_planner_class::PublishRobotAction(string ActionName, vector<string> Age
 		robotMsg.data +=" "+colleagues_agents;
 
 	pubRobotCommand.publish(robotMsg);
+
+	pubToRobotDisplay.publish(robotMsg);
+
 
 	ROS_INFO("publish robot command : %s ",robotMsg.data.c_str() );
 }

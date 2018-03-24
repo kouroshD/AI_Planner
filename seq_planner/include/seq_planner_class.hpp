@@ -81,6 +81,7 @@ private:
 	ros::Subscriber subSimulationAck;
 	ros::Publisher pubRobotCommand;
 	ros::Publisher pubSimulationCommand;
+	ros::Publisher pubToRobotDisplay;
 	ros::ServiceClient knowledgeBase_client;
 
 	void CallBackHumanAck(const std_msgs::String::ConstPtr& msg);
