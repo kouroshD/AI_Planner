@@ -2,10 +2,11 @@
 
 seq_planner_class::seq_planner_class(string seqPlannerPath,string AssemblyName){
 	cout<<BOLD(FBLU("seq_planner_class::seq_planner_class"))<<endl;
-	const char* DataLogPath	="/home/nasa/Datalog/IROS/Test";
+	const char* DataLogPath	="/home/nasa/Datalog/ROMAN2018/0";
 	string DataLogPathStr (DataLogPath);
 	mkdir(DataLogPath , S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	fileLog.open((DataLogPathStr+"/1_Assembly_Timing.txt").c_str(),ios::app);
+//	simFileLog.open((DataLogPathStr+"/1_SimulationFileLog.txt").c_str(),ios::app);
 	timeNow=ros::Time::now().toSec();
 
 	fileLog<< to_string(timeNow)<<" cooperation started"<<"\n";
@@ -84,6 +85,7 @@ seq_planner_class::seq_planner_class(string seqPlannerPath,string AssemblyName){
 seq_planner_class::~seq_planner_class(){
 	cout<<"seq_planner_class::~seq_planner_class"<<endl;
 	fileLog.close();
+//	simFileLog.close();
 
 }
 
@@ -583,6 +585,11 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 			fileLog<< to_string(timeNow)<<" online ended"<<"\n";
 			fileLog<< to_string(timeNow)<<" cooperation ended"<<"\n";
 			fileLog.close();
+			std_msgs::String msgToDisplay;
+			msgToDisplay.data="Cooperation_Done Human";
+			pubToRobotDisplay.publish(msgToDisplay);
+
+			usleep(0.5e6);
 			exit(1);
 		}
 		else
@@ -642,6 +649,8 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 
 //	cout<<"101: "<<state_action_table.size()<<endl;
 	cout<<FBLU("after generate new state-action table: ")<<endl;
+	cout<<FBLU("Time: ")<<to_string(ros::Time::now().toSec())<<endl;
+
 	for (int i=0;i<state_action_table.size();i++)
 		state_action_table[i].PrintSummary();
 //	cin>>aa;
@@ -749,6 +758,7 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 	temp_sim.actionsTime.resize(temp_sim.actions_list.size(), 0.0);
 	temp_sim.optimalStatePtr = &state_action_table[optimal_state];
 	temp_sim.state_name = state_action_table[optimal_state].state_name;
+	cout<<FBLU("Time: ")<<to_string(ros::Time::now().toSec())<<endl;
 	temp_sim.PrintSummary();
 
 	// add the current joint values to the simulation: in order to do it I should call the knowledge base:
@@ -1131,7 +1141,7 @@ void seq_planner_class::GenerateOptimalStateSimulation(void) {
 
 	simulation_vector=temp_simulation_vector;
 	cout<<"simulation vector: (size: "<<simulation_vector.size()<<")"<<endl;
-
+	cout<<FBLU("Time: ")<<to_string(ros::Time::now().toSec())<<endl;
 	for(int i=0;i<simulation_vector.size();i++)
 		simulation_vector[i].PrintSummary();
 
@@ -1205,6 +1215,7 @@ void seq_planner_class::GiveSimulationCommand(void){
 		if(simulationVectorNumber==(int)simulation_vector.size()-1
 				&& SimulationActionNumber==(int)simulation_vector[simulationVectorNumber].actions_list.size()-1 )
 		{
+			cout<<FBLU("Time: ")<<to_string(ros::Time::now().toSec())<<endl;
 			simulation_vector[simulationVectorNumber].PrintSummary();
 			return RankSimulation();
 		}
@@ -1251,6 +1262,7 @@ void seq_planner_class::GiveSimulationCommand(void){
 //	cout<<"205"<<endl;
 
 	pubSimulationCommand.publish(req_instance);
+	cout<<FBLU("Time: ")<<to_string(ros::Time::now().toSec())<<endl;
 	cout<<req_instance.ActionName<<", ";
 	for(int i=0;i<req_instance.ActionParametersName.size();i++)
 		cout<<req_instance.ActionParametersName[i]<<" , ";
@@ -1279,7 +1291,7 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 	// 3- if all the actions in all the simulation vectors is done, go to the RankSimulation Functions, otherwise go to the GiveCommand Function
 	cout<<(FBLU("seq_planner_class::UpdateSimulation"))<<endl;
 
-
+	cout<<FBLU("Time: ")<<to_string(ros::Time::now().toSec())<<endl;
 	cout<<"time: "<<simulationResponse.time<<", ";
 	cout<<"success: "<<(bool)simulationResponse.success <<": ";
 
@@ -1377,6 +1389,7 @@ void seq_planner_class::UpdateSimulation(const robot_interface_msgs::SimulationR
 	{
 		vector<optimal_state_simulation>::iterator it = (simulation_vector.begin()+simulationVectorNumber);
 		cout<<"*** vector to Delete: *** "<<endl;
+		cout<<FBLU("Time: ")<<to_string(ros::Time::now().toSec())<<endl;
 		(*it).PrintSummary();
 		simulation_vector.erase(it);
 
@@ -1474,6 +1487,7 @@ void seq_planner_class::RankSimulation(void){
 	cout<<BOLD(FBLU("seq_planner_class::RankSimulation"))<<endl;
 
 	cout<<"simulation vector size: "<<simulation_vector.size()<<endl;
+	cout<<FBLU("Time: ")<<to_string(ros::Time::now().toSec())<<endl;
 	for(int i=0;i<simulation_vector.size();i++)
 		simulation_vector[i].PrintSummary();
 
@@ -1484,8 +1498,8 @@ void seq_planner_class::RankSimulation(void){
 		state_action_table[optimal_state].isSimulated=true;
 
 		timeNow=ros::Time::now().toSec();
-		fileLog<< to_string(timeNow)<<"simulation ended"<<"\n";
-		fileLog<< to_string(timeNow)<<"planning started"<<"\n";
+		fileLog<< to_string(timeNow)<<" simulation ended"<<"\n";
+		fileLog<< to_string(timeNow)<<" planning started"<<"\n";
 
 		return FindOptimalState();
 	}
@@ -2091,14 +2105,14 @@ void seq_planner_class::CallBackHumanAck(const std_msgs::String::ConstPtr& msg){
 	{
 		// it means that, beforehand no action is assigned to human action
 		timeNow=ros::Time::now().toSec();
-		fileLog<< to_string(timeNow)<<"planning ended"<<"\n";
-		fileLog<< to_string(timeNow)<<"HumanActionEmergency started"<<"\n";
+		fileLog<< to_string(timeNow)<<" planning ended"<<"\n";
+		fileLog<< to_string(timeNow)<<" HumanActionEmergency started"<<"\n";
 
 		EmergencyRobotStop();
 	}
 	timeNow=ros::Time::now().toSec();
-	fileLog<< to_string(timeNow)<<"HumanAction ended"<<"\n";
-	fileLog<< to_string(timeNow)<<"planning started"<<"\n";
+	fileLog<< to_string(timeNow)<<" HumanAction ended"<<"\n";
+	fileLog<< to_string(timeNow)<<" planning started"<<"\n";
 
 
 	agents[0].isBusy=false;
@@ -2284,8 +2298,8 @@ void seq_planner_class::PublishHumanAction(string ActionName, string AgentName, 
 	pubToRobotDisplay.publish(msgToDisplay);
 
 	timeNow=ros::Time::now().toSec();
-	fileLog<< to_string(timeNow)<<"planning ended"<<"\n";
-	fileLog<< to_string(timeNow)<<"HumanAction started"<<"\n";
+	fileLog<< to_string(timeNow)<<" planning ended"<<"\n";
+	fileLog<< to_string(timeNow)<<" HumanAction started"<<"\n";
 
 	if(ColleaguesName.size()>0)
 	{

@@ -59,6 +59,8 @@ private:
     vector<string> objectTypeVector; // list of object type in the world to be instantiated
 
     ofstream fileLog;
+//    ofstream simFileLog;
+
     double timeNow;
 //    	const char* DataLogPath	="/home/nasa/Datalog/Mechatronics/user1/1";
 //    	string DataLogPath2		="/home/nasa/Datalog/Mechatronics/user1/1";
