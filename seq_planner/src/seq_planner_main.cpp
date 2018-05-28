@@ -84,7 +84,11 @@ int main(int argc, char **argv)
 //				cout<<102<<endl;
 				for(int i=0; i<plan_obj.Solved_node_list.size(); i++)
 				{
-					andor_srv.request.solvedNodes.push_back(plan_obj.Solved_node_list[i]);
+					andor_msgs::Node solvedNode;
+					solvedNode.nodeName=plan_obj.Solved_node_list[i][0];
+					solvedNode.graphName=plan_obj.Solved_node_list[i][1];
+
+					andor_srv.request.solvedNodes.push_back(solvedNode);
 				}
 				plan_obj.Solved_node_list.clear();
 				plan_obj.nodeSolved=false;
@@ -94,7 +98,10 @@ int main(int argc, char **argv)
 			{
 				for(int i=0; i<plan_obj.Solved_hyperarc_list.size(); i++)
 				{
-					andor_srv.request.solvedHyperarc.push_back(plan_obj.Solved_hyperarc_list[i]);
+					andor_msgs::Hyperarc solvedHA;
+					solvedHA.hyperarcName=plan_obj.Solved_hyperarc_list[i][0];
+					solvedHA.graphName=plan_obj.Solved_hyperarc_list[i][1];
+					andor_srv.request.solvedHyperarc.push_back(solvedHA);
 				}
 				plan_obj.Solved_hyperarc_list.clear();
 				plan_obj.haSolved=false;
@@ -118,8 +125,12 @@ int main(int argc, char **argv)
 //						cout<<105<<endl;
 						vector<string>Feasible_state;
 						string feasbible_state_name=andor_srv.response.feasibleNodes[i].nodeName;
+						string andorNameHierarchy=andor_srv.response.feasibleNodes[i].graphName;
+
 						Feasible_state.push_back(feasbible_state_name);
 						Feasible_state.push_back("Node");
+						Feasible_state.push_back(andorNameHierarchy);
+
 						int cost=andor_srv.response.feasibleNodes[i].nodeCost;
 						gen_Feasible_stateCost_list.push_back(cost);
 						gen_Feasible_state_list.push_back(Feasible_state);
@@ -129,8 +140,12 @@ int main(int argc, char **argv)
 //						cout<<106<<endl;
 						vector<string>Feasible_state;
 						string feasbible_state_name=andor_srv.response.feasibleHyperarcs[i].hyperarcName;
+						string andorNameHierarchy=andor_srv.response.feasibleHyperarcs[i].graphName;
+
 						Feasible_state.push_back(feasbible_state_name);
 						Feasible_state.push_back("Hyperarc");
+						Feasible_state.push_back(andorNameHierarchy);
+
 						int cost=andor_srv.response.feasibleHyperarcs[i].hyperarcCost;
 						gen_Feasible_stateCost_list.push_back(cost);
 						gen_Feasible_state_list.push_back(Feasible_state);

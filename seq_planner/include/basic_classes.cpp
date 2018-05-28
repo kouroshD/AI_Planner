@@ -287,7 +287,8 @@ void offline_state_action::Print(void){
 feasible_state_action::feasible_state_action(void){
 	state_name="";
 	state_type="";
-	andorName="";
+	andorNameMain="";
+	andorNameHierarchical="";
 	state_cost=0;
 	isFeasible=true;
 	isSimulated=false;
@@ -295,7 +296,9 @@ feasible_state_action::feasible_state_action(void){
 feasible_state_action::~feasible_state_action(){};
 void feasible_state_action::Print(void){
 	cout<<FBLU("*********************** Feasible State-Action Table Info ***********************")<<endl;
-	cout<<"The And/Or graph Name: "<<andorName<<endl;
+	cout<<"The Main And/Or graph Name: "<<andorNameMain<<endl;
+	cout<<"The hierarchical And/Or graph Name: "<<andorNameHierarchical<<endl;
+
 	cout<<"state_name: "<<state_name<<endl;
 	cout<<"state_type: "<<state_type<<endl;
 	cout<<"state_cost: "<<state_cost<<endl;
@@ -342,7 +345,7 @@ void feasible_state_action::Print(void){
 
 void feasible_state_action::PrintSummary(void){
 	cout<<FBLU("*********************** Feasible State-Action Table Info Summary ***********************")<<endl;
-	cout<<"The And/Or graph Name: "<<andorName<<", "<<"state_name: "<<state_name<<", "<<"state_type: "
+	cout<<"The And/Or graph Name: ("<<andorNameMain<<", "<<andorNameHierarchical<<"), "<<"state_name: "<<state_name<<", "<<"state_type: "
 			<<state_type<<", "<<"state_cost: "<<state_cost<<", "<<"isFeasible: "<<isFeasible<<endl;
 
 	cout<<"actions list:: ";

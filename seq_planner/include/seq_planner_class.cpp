@@ -380,7 +380,7 @@ void seq_planner_class::FindOptimalState(void){
 	}
 	for(int i=0;i<state_action_table.size();i++)
 	{
-		if(state_action_table[i].isFeasible==true && state_action_table[i].andorName==hierarchicalGraphList.back())
+		if(state_action_table[i].isFeasible==true && state_action_table[i].andorNameMain==hierarchicalGraphList.back())
 		{
 			number_feasible_state++;
 			if (state_action_table[i].state_cost<state_min_cost)
@@ -534,7 +534,7 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 	fileLog<< to_string(timeNow)<<" planning started"<<"\n";
 
 
-	// delete the states from state-action list which the graph name is equal to the updated graph
+
 	int aa;
 //	cin>>aa;
 //	cout<<FBLU("before delete: ")<<endl;
@@ -542,12 +542,14 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 //		state_action_table[i].PrintSummary();
 	//	cin>>aa;
 
+	// delete the states from state-action list which the graph name is equal to the updated graph
 	vector<feasible_state_action> temp_state_action_table=state_action_table;
 	state_action_table.clear();
 
 	for(int i=0;i<temp_state_action_table.size();i++)
-		if(temp_state_action_table[i].andorName!=graphName)
+		if(temp_state_action_table[i].andorNameMain!=graphName)
 			state_action_table.push_back(temp_state_action_table[i]);
+
 
 	//	for(vector<feasible_state_action>::iterator it =state_action_table.begin(); it!= state_action_table.end();)
 	//	{
@@ -573,7 +575,7 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 	//	cin>>aa;
 
 
-	// surely the graph name here is not equal to the assembly graph name, it the assembly graph name is solved, the program will exit before in the main
+	// surely the graph name here is not equal to the assembly graph name, if the assembly graph name is solved, the program will exit before in the main
 	if(graphSolved==true) // it is an complex action
 	{
 		//The cooperation is done
@@ -611,7 +613,9 @@ void seq_planner_class::GenerateStateActionTable(vector<vector<string>> gen_Feas
 		temp_obj.state_cost=gen_Feasible_stateCost_list[i];
 		temp_obj.isFeasible=true;
 		temp_obj.isSimulated=false;
-		temp_obj.andorName=graphName;
+		temp_obj.andorNameMain=graphName;
+		temp_obj.andorNameHierarchical=gen_Feasible_state_list[i][2];
+
 
 //		cout<<"Full_State_action_list: "<<Full_State_action_list.size()<<endl;
 		for (int j=0;j<Full_State_action_list.size();j++)
@@ -683,15 +687,23 @@ void seq_planner_class::CheckStateExecution(){
 		if (state_action_table[i].actions_list.size()==0)
 		{
 			updateAndor=true;
-			AndOrUpdateName=state_action_table[i].andorName;
+			AndOrUpdateName=state_action_table[i].andorNameMain;
 			if (state_action_table[i].state_type=="Node")
 			{
-				Solved_node_list.push_back(state_action_table[i].state_name);
+				vector<string> solved_node;
+				solved_node.push_back(state_action_table[i].state_name);
+				solved_node.push_back(state_action_table[i].andorNameHierarchical);
+
+				Solved_node_list.push_back(solved_node);
 				nodeSolved=true;
 			}
 			if (state_action_table[i].state_type=="Hyperarc")
 			{
-				Solved_hyperarc_list.push_back(state_action_table[i].state_name);
+				vector<string> solved_hyperarc;
+				solved_hyperarc.push_back(state_action_table[i].state_name);
+				solved_hyperarc.push_back(state_action_table[i].andorNameHierarchical);
+
+				Solved_hyperarc_list.push_back(solved_hyperarc);
 				haSolved=true;
 			}
 		}
@@ -710,15 +722,23 @@ void seq_planner_class::CheckStateExecution(){
 			if (last_action_progress==true)
 			{
 				updateAndor=true;
-				AndOrUpdateName=state_action_table[i].andorName;
+				AndOrUpdateName=state_action_table[i].andorNameMain;
 				if (state_action_table[i].state_type=="Node")
 				{
-					Solved_node_list.push_back(state_action_table[i].state_name);
+					vector<string> solved_node;
+					solved_node.push_back(state_action_table[i].state_name);
+					solved_node.push_back(state_action_table[i].andorNameHierarchical);
+
+					Solved_node_list.push_back(solved_node);
 					nodeSolved=true;
 				}
 				if (state_action_table[i].state_type=="Hyperarc")
 				{
-					Solved_hyperarc_list.push_back(state_action_table[i].state_name);
+					vector<string> solved_hyperarc;
+					solved_hyperarc.push_back(state_action_table[i].state_name);
+					solved_hyperarc.push_back(state_action_table[i].andorNameHierarchical);
+
+					Solved_hyperarc_list.push_back(solved_hyperarc);
 					haSolved=true;
 				}
 			}

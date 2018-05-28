@@ -41,8 +41,8 @@ public:
 	bool updateAndor; // it is true if we want to update the andor in here, or in andor graph module.
 	bool nodeSolved;// it is true if we have a solved node, so we should update the andor graph.
 	bool haSolved;// it is true if we have a solved hyperarc, so we should update the andor graph.
-    vector<string> Solved_node_list; // the list of all the solved node at the current moment
-    vector<string> Solved_hyperarc_list;// the list of all the solved hyperarc at the current moment
+    vector<vector<string>> Solved_node_list; // the list of all the solved node at the current moment
+    vector<vector<string>> Solved_hyperarc_list;// the list of all the solved hyperarc at the current moment
     string seq_planner_path; // the path to the files of the seq_planner
     string assembly_name;//
     string AndOrUpdateName;
