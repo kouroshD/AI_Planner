@@ -1,4 +1,4 @@
-# Planning modules:
+# Planning Module:
 This is a task manager module. This module maps cooperation states, in a collaboration process, as represented in the [AND/OR graph](https://github.com/TheEngineRoom-UniGe/ANDOR.git) structure to either human or robot actions. The module plans for suggested states receiving appropriate information from the [AND/OR graph](https://github.com/TheEngineRoom-UniGe/ANDOR.git), it grounds action parameters to actual values, and it performs action assignments on the basis of incoming perceptual information 
 
 # References
